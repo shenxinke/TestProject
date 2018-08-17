@@ -1,0 +1,109 @@
+package com.yst.onecity.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.bean.ServerOnLineBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.utils.ConstUtils;
+
+import java.text.DecimalFormat;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 服务专员订单适配器
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class ServiceOrderAdapter extends BaseAdapter {
+
+    private Context context;
+    private List<ServerOnLineBean.ContentBean> data;
+    private DecimalFormat format=new DecimalFormat("#0.00");
+
+    public ServiceOrderAdapter(Context context, List<ServerOnLineBean.ContentBean> data) {
+        this.context = context;
+        this.data = data;
+    }
+
+    public void setData(List<ServerOnLineBean.ContentBean> data) {
+        if (data != null) {
+            this.data = data;
+            this.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return data.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return data.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View view, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if (view == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.item_service_online, null);
+            holder = new ViewHolder(view);
+            view.setTag(holder);
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+        ConstUtils.setTextString(data.get(position).getPhone(), holder.tvPhone);
+        ConstUtils.setTextString(data.get(position).getOrderNo(), holder.tvOrderNumber);
+        ConstUtils.setTextString(data.get(position).getCreated_time(), holder.tvOrderTime);
+        ConstUtils.setTextString("¥"+format.format(data.get(position).getTotalScore()), holder.tvGetMoney);
+        int status = data.get(position).getStatus();
+        // 	订单状态码0待付款 1已支付 2待发货 3待收货 4已评价 5待评价 6已撤销 7已收货
+        if (status == 0) {
+            holder.tvState.setText("待付款");
+        } else if (status == Const.INTEGER_2) {
+            holder.tvState.setText("待发货");
+        } else if (status == Const.INTEGER_3) {
+            holder.tvState.setText("待收货");
+        } else if (status == Const.INTEGER_4) {
+            holder.tvState.setText("已完成");
+        }else if (status == Const.INTEGER_6) {
+            holder.tvState.setText("已撤销");
+        } else if (status == Const.INTEGER_7) {
+            holder.tvState.setText("待评价");
+        }
+        return view;
+    }
+
+    class ViewHolder {
+        @BindView(R.id.tv_phone)
+        TextView tvPhone;
+        @BindView(R.id.tv_state)
+        TextView tvState;
+        @BindView(R.id.tv_order_number)
+        TextView tvOrderNumber;
+        @BindView(R.id.tv_order_time)
+        TextView tvOrderTime;
+        @BindView(R.id.tv_get_money)
+        TextView tvGetMoney;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

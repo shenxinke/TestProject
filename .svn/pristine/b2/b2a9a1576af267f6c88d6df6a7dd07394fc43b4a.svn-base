@@ -1,0 +1,198 @@
+package com.yst.onecity.fragment.commissoner;
+
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.onecity.R;
+import com.yst.onecity.adapter.commissoner.CustomerAdapter;
+import com.yst.onecity.base.BaseFragment;
+import com.yst.onecity.bean.commissioner.CustomerBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.SpaceItemDecoration;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.Unbinder;
+import okhttp3.Call;
+
+/**
+ * 客户页面
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/1
+ */
+
+public class CustomerFragment extends BaseFragment implements OnRefreshListener, OnRefreshLoadmoreListener {
+    @BindView(R.id.recycler)
+    RecyclerView recycler;
+    @BindView(R.id.refreshlayout)
+    SmartRefreshLayout refreshlayout;
+    @BindView(R.id.iv_empty)
+    ImageView ivEmpty;
+    Unbinder unbinder;
+    private boolean isVisiable;
+    private boolean isPrepared;
+    private boolean isFirst = true;
+    private int page = Const.INTEGER_1;
+    private CustomerAdapter adapter;
+    private List<CustomerBean.ContentBean> customerList = new ArrayList<>();
+    private String hid;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_goods;
+    }
+
+    @Override
+    public void initData() {
+        isPrepared = true;
+        init();
+        lazyLoad();
+    }
+
+    public static CustomerFragment newInstance(String hid) {
+        CustomerFragment fragment = new CustomerFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("hid", hid);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+
+    /**
+     * 懒加载
+     */
+    public void lazyLoad() {
+        MyLog.e("sss", "isFirst: " + isFirst + "-isRepared: " + isPrepared + "_isVisible: " + isVisiable);
+        if (!isPrepared || !isVisiable || !isFirst) {
+            return;
+        }
+        getCustomerList();
+        isFirst = false;
+    }
+
+    /**
+     * 初始化
+     */
+    private void init() {
+        refreshlayout.setOnRefreshLoadmoreListener(this);
+        adapter = new CustomerAdapter(getActivity());
+        recycler.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        recycler.addItemDecoration(new SpaceItemDecoration(0, 20));
+        recycler.setAdapter(adapter);
+        Bundle arguments = getArguments();
+        if (null != arguments) {
+            hid = arguments.getString("hid");
+        }
+    }
+
+    /**
+     * 获取客户列表
+     */
+    private void getCustomerList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "hunterId", hid,
+                "page", String.valueOf(page),
+                "rows", String.valueOf(Const.INTEGER_10),
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GET_COMMISSONER_CUSTOMER_LIST)
+                .addParams("hunterId", hid)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .addParams("page", String.valueOf(page))
+                .addParams("rows", String.valueOf(Const.INTEGER_10))
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(e.getMessage());
+                List<CustomerBean.ContentBean> emptyList = new ArrayList<>();
+                setVisiableGone(emptyList);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                if (null != response) {
+                    CustomerBean customerBean = new Gson().fromJson(response, CustomerBean.class);
+                    if (null != customerBean) {
+                        if (customerBean.getCode() == Const.INTEGER_1 && null != customerBean.getContent()) {
+                            if (page == Const.INTEGER_1) {
+                                customerList.clear();
+                            } else {
+                                if (customerBean.getContent().isEmpty()) {
+                                    ToastUtils.show("已加载全部");
+                                }
+                            }
+                            customerList.addAll(customerBean.getContent());
+                            adapter.addData(customerList);
+                            setVisiableGone(customerList);
+                        } else {
+                            ToastUtils.show(customerBean.getMsg());
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            isVisiable = true;
+            lazyLoad();
+        } else {
+            isVisiable = false;
+        }
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = Const.INTEGER_1;
+        getCustomerList();
+        refreshlayout.finishRefresh(500);
+
+    }
+
+    /**
+     * 设置数据和图片的展示
+     *
+     * @param list 集合
+     */
+    public void setVisiableGone(List<CustomerBean.ContentBean> list) {
+        if (null != list) {
+            if (list.isEmpty()) {
+                ivEmpty.setVisibility(View.VISIBLE);
+            } else {
+                ivEmpty.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        getCustomerList();
+        refreshlayout.finishLoadmore(500);
+    }
+}
+

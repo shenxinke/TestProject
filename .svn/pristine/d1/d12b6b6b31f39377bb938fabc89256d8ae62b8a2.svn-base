@@ -1,0 +1,335 @@
+package com.yst.onecity.fragment.popfragment;
+
+import android.app.DialogFragment;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareAPI;
+import com.umeng.socialize.UMShareListener;
+import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMImage;
+import com.umeng.socialize.media.UMVideo;
+import com.umeng.socialize.utils.Log;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.RxCode;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.utils.WindowUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
+import gorden.rxbus2.RxBus;
+
+/**
+ * 自定义分享面板Dialog
+ *
+ * @author WangJingWei
+ * @version 4.1.0
+ * @date 2018/5/29.
+ */
+public class ShareCommonDialog extends DialogFragment {
+
+    @BindView(R.id.share_wechat)
+    RelativeLayout shareWechat;
+    @BindView(R.id.share_wechat_circle1)
+    RelativeLayout shareWechatCircle1;
+    @BindView(R.id.share_qq)
+    RelativeLayout shareQq;
+    @BindView(R.id.share_qzone)
+    RelativeLayout shareQzone;
+    @BindView(R.id.dis_pop)
+    RelativeLayout disPop;
+    @BindView(R.id.rl_contact_list)
+    RelativeLayout rlContactList;
+    @BindView(R.id.share_sina)
+    RelativeLayout shareSina;
+    @BindView(R.id.tv_cancle)
+    TextView tvCancle;
+    private Unbinder unbinder;
+
+
+    private final static String PACKAGE_QQ = "com.tencent.mobileqq";
+    private final static String PACKAGE_WECHAT = "com.tencent.mm";
+    private final static String WEIXIN_FAVORITE = "WEIXIN_FAVORITE";
+
+    /**
+     * mPageType 分享页面类型
+     * mShareType 分享内容类型(文本、图片、视频)
+     */
+    private int mPageType;
+    private int mShareContentType;
+
+    private String title;
+    private String content;
+    private String url;
+    private String imagePath;
+    private int resId;
+    private boolean isNetImage = false;
+    private String invitateDtr = Constants.SHARE_CONSULT+"zhuce.html?phone=" + TianyiApplication.appCommonBean.getPhone() + "&uuid=" + TianyiApplication.appCommonBean.getUuid();
+
+    @OnClick(R.id.dis_pop)
+    public void disPop() {
+        dismiss();
+    }
+
+    @OnClick(R.id.share_wechat)
+    public void shareWechat() {
+        if (!Utils.isAvilible(getActivity(), PACKAGE_WECHAT)) {
+            ToastUtils.show("还没有安装微信");
+            return;
+        }
+        share(SHARE_MEDIA.WEIXIN, isNetImage);
+    }
+
+    @OnClick(R.id.share_wechat_circle1)
+    public void shareWechatCircle1() {
+        if (!Utils.isAvilible(getActivity(), PACKAGE_WECHAT)) {
+            ToastUtils.show("还没有安装微信");
+            return;
+        }
+        share(SHARE_MEDIA.WEIXIN_CIRCLE, isNetImage);
+    }
+
+    @OnClick(R.id.share_qq)
+    public void shareQq() {
+        if (!Utils.isAvilible(getActivity(), PACKAGE_QQ)) {
+            ToastUtils.show("还没有安装QQ");
+            return;
+        }
+        share(SHARE_MEDIA.QQ, isNetImage);
+    }
+
+    @OnClick(R.id.share_qzone)
+    public void shareQzone() {
+        if (!Utils.isAvilible(getActivity(), PACKAGE_QQ)) {
+            ToastUtils.show("还没有安装QQ");
+            return;
+        }
+        share(SHARE_MEDIA.QZONE, isNetImage);
+    }
+
+    @OnClick(R.id.rl_contact_list)
+    public void toConstantList() {
+        Intent it = new Intent(Intent.ACTION_VIEW);
+        it.putExtra("sms_body", "您好，您的好友" + TianyiApplication.appCommonBean.getNickname() + "正在普济一城买商品，快来围观\n" + invitateDtr);
+        it.setType("vnd.android-dir/mms-sms");
+        startActivity(it);
+    }
+
+    /**
+     * 跳转分享页面
+     */
+    public static ShareCommonDialog openShareDialog(Context context, String title, String content, String url, String imagePath) {
+        ShareCommonDialog mShareCommonDialog = new ShareCommonDialog();
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        bundle.putString("content", content);
+        bundle.putString("url", url);
+        bundle.putString("imagePath", imagePath);
+        mShareCommonDialog.setArguments(bundle);
+        return mShareCommonDialog;
+    }
+
+    /**
+     * 跳转分享页面 是否显示通讯录
+     */
+    public static ShareCommonDialog openShareDialog(Context context, String title, String content, String url, String imagePath, boolean isShowContantList) {
+        ShareCommonDialog mShareCommonDialog = new ShareCommonDialog();
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        bundle.putString("content", content);
+        bundle.putString("url", url);
+        bundle.putString("imagePath", imagePath);
+        bundle.putBoolean("isShowContant", isShowContantList);
+        mShareCommonDialog.setArguments(bundle);
+        return mShareCommonDialog;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        Window window = getDialog().getWindow();
+        getDialog().setCanceledOnTouchOutside(true);
+        View view = inflater.inflate(R.layout.activity_my_share, ((ViewGroup) window.findViewById(android.R.id.content)), false);
+        window.setBackgroundDrawableResource(R.color.transparent);
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        wlp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        wlp.height = (int) (WindowUtils.getScreenHeight(getActivity()) * 0.3);
+        window.setAttributes(wlp);
+        window.setWindowAnimations(R.style.add_cart_pop_anim_style);
+        unbinder = ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            title = bundle.getString("title");
+            content = bundle.getString("content");
+            url = bundle.getString("url");
+            imagePath = bundle.getString("imagePath");
+            boolean isShowContant = bundle.getBoolean("isShowContant");
+            if (isShowContant) {
+                rlContactList.setVisibility(View.VISIBLE);
+            } else {
+                rlContactList.setVisibility(View.GONE);
+            }
+            if (TextUtils.isEmpty(imagePath)) {
+                isNetImage = false;
+            } else {
+                isNetImage = true;
+            }
+        }
+
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    private void share(SHARE_MEDIA platform, Boolean isNetImg) {
+        Const.ISSHAREING = true;
+        switch (mShareContentType) {
+            case Const.SHARE_CONTENTTYPE_VIDEO:
+                new ShareAction(getActivity())
+                        .setPlatform(platform)
+                        .setCallback(umShareListener)
+                        .withMedia(getUMVideo())
+                        .share();
+
+                break;
+            case Const.SHARE_CONTENTTYPE_TEXTIMAGE:
+            default:
+                new ShareAction(getActivity())
+                        .setPlatform(platform)
+                        .setCallback(umShareListener)
+                        .withTitle(title)
+                        .withText(content)
+                        .withTargetUrl(url)
+                        .withMedia(isNetImg ? getImageUrl() : getImageResource())
+                        .share();
+                break;
+        }
+
+    }
+
+    /**
+     * 网络视频
+     *
+     * @return
+     */
+    private UMVideo getUMVideo() {
+        UMVideo video = new UMVideo(url);
+        video.setTitle(title);//视频的标题
+        video.setThumb(isNetImage ? getImageUrl() : getImageResource());//视频的缩略图
+        video.setDescription(content);//视频的描述
+        return video;
+    }
+
+
+    /**
+     * 网络图片
+     *
+     * @return
+     */
+    private UMImage getImageUrl() {
+        UMImage image = new UMImage(getActivity(), imagePath);
+        return image;
+    }
+
+    /**
+     * 本地资源图片
+     *
+     * @return
+     */
+    private UMImage getImageResource() {
+        UMImage image = new UMImage(getActivity(), R.drawable.icon_logo);
+        return image;
+    }
+
+    private UMShareListener umShareListener = new UMShareListener() {
+
+        @Override
+        public void onResult(SHARE_MEDIA platform) {
+
+            RxBus.get().send(RxCode.CODE_SHARE_SUCCESS);
+
+            if (WEIXIN_FAVORITE.equals(platform.name())) {
+                ToastUtils.show(platform + " 收藏成功啦");
+            } else {
+                ToastUtils.show(platform + " 分享成功啦");
+                if (mPageType == Const.SHARE_PAGETYPE_PX) {
+                    RxBus.get().send(RxCode.CODE_PX_SHARESUCCESS);
+                }
+            }
+        }
+
+        @Override
+        public void onError(SHARE_MEDIA platform, Throwable t) {
+            ToastUtils.show(platform + " 分享失败啦");
+            if (t != null) {
+                Log.d("throw", "throw:" + t.getMessage());
+            }
+        }
+
+        @Override
+        public void onCancel(SHARE_MEDIA platform) {
+            ToastUtils.show(platform + " 分享取消了");
+        }
+    };
+
+
+    /**
+     * 设置分享页面类型
+     *
+     * @param type
+     */
+    public void setSharePageType(int type) {
+        this.mPageType = type;
+    }
+
+    /**
+     * 设置分享内容类型
+     *
+     * @param type
+     */
+    public void setShareContentType(int type) {
+        this.mShareContentType = type;
+    }
+
+    /**
+     * 此处无效，提醒需要放在activity里
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        UMShareAPI.get(getActivity()).onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+}

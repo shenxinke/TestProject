@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:id="@+id/activity_my_focus"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/activity_title_layout_white"/>
+
+    <include layout="@layout/activity_empty_content"/>
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/smartRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:srlAccentColor="@android:color/black"
+        app:srlEnablePreviewInEditMode="true"
+        app:srlPrimaryColor="@color/white">
+        <com.scwang.smartrefresh.layout.header.ClassicsHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <com.yst.onecity.view.xlistview.XListView
+            android:id="@+id/xlist_focus_data"
+            android:layout_width="match_parent"
+            android:divider="@color/color_my_focus_list_divider"
+            android:dividerHeight="@dimen/xd5"
+            android:layout_height="match_parent">
+        </com.yst.onecity.view.xlistview.XListView>
+        <com.scwang.smartrefresh.layout.footer.ClassicsFooter
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+
+</LinearLayout>

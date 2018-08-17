@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    >
+    <include layout="@layout/main_title"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="14dp"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:src="@mipmap/square_yellow"
+                android:layout_marginTop="3dp"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1、发票金额含第三方（微信、支付宝）、普济一城余额、积分所有支付部分，邮费部分不包含在内。"
+                android:textColor="@color/color_3E3E3E"
+                android:textSize="15sp"
+                android:layout_marginLeft="12dp"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            >
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:src="@mipmap/square_yellow"
+                android:layout_marginTop="3dp"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2、电子普通发票是税局认可的有效收付款凭证，其法律效力、基本用途及使用规定同纸质发票，如需纸质发票可自行下载打印。"
+                android:textColor="@color/color_3E3E3E"
+                android:textSize="15sp"
+                android:layout_marginLeft="12dp"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            >
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:src="@mipmap/square_yellow"
+                android:layout_marginTop="3dp"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3、旗舰店销售的商品的发票由旗舰店自行出具、提供，发票类型和内容由旗舰店根据实际商品决定。"
+                android:textColor="@color/color_3E3E3E"
+                android:textSize="15sp"
+                android:layout_marginLeft="12dp"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.yst.onecity">
+    >
+    <!-- 发送消息 -->
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <!-- 阅读消息 -->
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <!-- 写入消息 -->
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+    <!-- 接收消息 -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <!-- Zxing使用到的权限 -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
+    <!-- 允许程序打开网络套接字 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 允许程序设置内置sd卡的写权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- 在sdcard中创建/删除文件的权限 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <!-- 允许程序获取网络状态 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- 允许程序访问WiFi网络信息 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- 允许程序读写手机状态和身份 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <!-- 允许程序访问CellID或WiFi热点来获取粗略的位置 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- 用于访问GPS定位 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- 用于获取wifi的获取权限，wifi信息会用来进行网络定位 -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!-- 用于申请调用A-GPS模块 -->
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+
+    <uses-feature android:name="android.hardware.Camera"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+
+    <application
+        android:name="com.yst.onecity.TianyiApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/icon_logo"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/icon_logo"
+        android:supportsRtl="true"
+        android:theme="@style/NoActionBarTheme"
+        tools:replace="android:icon,android:name,android:label,android:theme,android:allowBackup">
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="5a1276a08f4a9d4ce6000028"/>
+
+        <activity
+            android:name="com.yst.onecity.activity.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/splash_style">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- //图片选择Activity -->
+        <activity android:name="com.donkingliang.imageselector.ImageSelectorActivity"/>
+        <!-- //去掉Activity的ActionBar。 -->
+        <!-- //使用者可以根据自己的项目去配置，不一定要这样写，只要不Activity的ActionBar去掉就可以了。 -->
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        <!-- //横竖屏切换处理。 -->
+        <!-- //如果要支持横竖屏切换，一定要加上这句，否则在切换横竖屏的时候会发生异常。 -->
+        android:configChanges="orientation|keyboardHidden|screenSize"/>
+
+        <!-- //图片预览Activity -->
+        <activity
+            android:name="com.donkingliang.imageselector.PreviewActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+        <!-- //图片剪切Activity -->
+        <activity
+            android:name="com.donkingliang.imageselector.ClipImageActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity
+            android:name="com.tencent.tauth.AuthActivity"
+            android:launchMode="singleTask"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="tencent1106303973"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.tencent.connect.common.AssistActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity
+            android:name="com.yst.onecity.wxapi.WXEntryActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:scheme="wx790b136fb3f3756e"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.yst.onecity.WBShareActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="com.sina.weibo.sdk.action.ACTION_SDK_REQ_ACTIVITY"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.sina.weibo.sdk.component.WeiboSdkBrowser"
+            android:configChanges="keyboardHidden|orientation"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <!-- <service android:name="com.sina.weibo.sdk.net.DownloadService" -->
+        <!-- android:exported="false"></service> -->
+
+        <activity
+            android:name="com.yst.onecity.wxapi.WXPayEntryActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="portrait"/>
+        <!-- 高德 -->
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="936f49dcc0363bcb8f9c16412504e703"/>
+
+        <service android:name="com.amap.api.location.APSService"/>
+
+        <!-- 支付宝H5支付页面 -->
+        <activity
+            android:name="com.alipay.sdk.app.H5PayActivity"
+            android:configChanges="orientation|keyboardHidden|navigation|screenSize"
+            android:exported="false"
+            android:screenOrientation="behind"
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
+
+        <!-- 支付宝H5支付授权页面 -->
+        <activity
+            android:name="com.alipay.sdk.app.H5AuthActivity"
+            android:configChanges="orientation|keyboardHidden|navigation"
+            android:exported="false"
+            android:screenOrientation="behind"
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
+
+        <!-- 腾讯im通讯 -->
+        <activity android:name="com.yst.onecity.activity.chat.SplashActivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.ChatActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.FriendshipHandleActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.FriendshipManageMessageActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.SearchFriendActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.AddFriendActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.ImagePreviewActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.VideoActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.ProfileActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.ImageViewActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.GroupProfileActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.EditActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.chat.ConvaActivity"
+            android:screenOrientation="portrait"/>
+
+        <!-- 消息收发 service -->
+        <service
+            android:name="com.tencent.qalsdk.service.QalService"
+            android:exported="false"
+            android:process=":QALSERVICE"/>
+        <!-- 消息收发辅助 service -->
+        <service
+            android:name="com.tencent.qalsdk.service.QalAssistService"
+            android:exported="false"
+            android:process=":QALSERVICE"/>
+        <!-- 离线消息广播接收器 -->
+        <receiver
+            android:name="com.tencent.qalsdk.QALBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.tencent.qalsdk.broadcast.qal"/>
+            </intent-filter>
+        </receiver>
+        <!-- 系统消息广播接收器 -->
+        <receiver
+            android:name="com.tencent.qalsdk.core.NetConnInfoCenter"
+            android:process=":QALSERVICE">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.yst.onecity.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <!-- 元数据 -->
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
+
+        <activity
+            android:name="com.yst.onecity.activity.login.RegisterActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.login.LoginActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.NameAuthenticationInfoActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.ModifyLoginPasswordActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.UnAuthAccountSafeActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.AuthAccountSafeActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.RealNameAuthenticationActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.AuthenticationStateActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.AddressManageActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.MyPublishActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.PublishActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.PublishInformationActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.DraftBoxActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.AddNewsContentActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.ClipImageActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.ChooseNewsProductActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.AddAddressActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.ProvinceActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.CityActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.AreaActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.MyAccountActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.BalanceDetailsActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.CashActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.MyMessageActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.MyOrderActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.AboutUsActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.MyAccountZyyjDetailActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.ContactCustomerServiceActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.InformationDetailActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.MyMemberAccountActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name="com.yst.onecity.activity.ProductDetailActivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.SearchActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.IntegralReturnedActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.IntegralReturnedDetailActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.BalanceDetailsDetailsActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.CashStateActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.CashDetailInfoActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.EssentialInformationActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.ServerMemberActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name="com.yst.onecity.activity.servermember.ServiceOnlineOrderDetailActivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.servermember.ServerMemberProductDetailActivity"
+            android:theme="@style/NoActionBarTheme"/>
+        <activity android:name="com.yst.onecity.activity.servermember.ServerMemberListActivity"/>
+        <activity android:name="com.yst.onecity.activity.servermember.StoreDetailActivity"/>
+        <activity android:name="com.yst.onecity.activity.servermember.NewListActivity"/>
+        <activity android:name="com.yst.onecity.activity.servermember.InvatationActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.OrderDetailActivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.member.OrderEvaluteActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
+        <activity android:name="com.yst.onecity.activity.member.OffLineOrderDetailActivity"/>
+        <!-- 我的关注，我的收藏 -->
+        <activity android:name="com.yst.onecity.activity.MyFocusActivity"/>
+        <activity android:name="com.yst.onecity.activity.MyCollectionActivity"/>
+        <activity android:name="com.yst.onecity.activity.bankcard.UserBankCardActivity"/>
+        <activity android:name="com.yst.onecity.activity.bankcard.UserBindCardPhoneActivity"/>
+        <activity android:name="com.yst.onecity.activity.bankcard.UserBindCardNumActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.PublishStateActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.UserEditNickNameActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.PayCenterActivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.MainActivity"
+            android:launchMode="singleTask"/>
+        <activity android:name="com.yst.onecity.activity.ShareActivity"/>
+
+        <!-- <activity android:name=".activity.share.VideoShareActivity" /> -->
+        <activity android:name="com.yst.onecity.activity.addorder.AddOrderActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.CashMemberActivity"/>
+        <activity android:name="com.yst.onecity.activity.servermember.ServiceOffLineOrderDetailActivity"/>
+        <activity android:name="com.yst.onecity.activity.GuideActivity"/>
+        <activity android:name="com.yst.onecity.activity.servermember.EssentialInfoMapActivity"/>
+        <activity android:name="com.yst.onecity.activity.login.UserAgreementActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.TianyiBaoDetailActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.RedPackageActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.BalanceDetailsMemberMonthActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.CashLingqianActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.InformationAcitivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.tickets.MyTicketsActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.tickets.TkNoLotteryDetailActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.tickets.TkPreviewActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.yst.onecity.activity.tickets.TkPreviewDetailActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name="com.yst.onecity.activity.member.SetPaymentPasswordActivity"/>
+        <activity android:name="com.yst.onecity.activity.member.PaymentCodeActivity"/>
+        <activity android:name="com.yst.onecity.activity.addorder.InvoiceActivity"/>
+        <activity android:name="com.yst.onecity.activity.addorder.InvoiceInfoActivity"/>
+        <activity
+            android:name="com.yst.onecity.addressmanager.ShopAddressActivity"
+            android:windowSoftInputMode="stateHidden|adjustPan"/>
+        <!-- 商品列表 -->
+        <activity
+            android:name="com.yst.onecity.activity.mall.GoodsListActivity"
+            android:screenOrientation="portrait"/>
+
+        <!-- 编辑收货地址 -->
+        <activity
+            android:name="com.yst.onecity.activity.member.EditAddressActivity"
+            android:screenOrientation="portrait"/>
+        <!-- 商城的搜索页面 -->
+        <activity android:name="com.yst.onecity.activity.mall.MallSearchActivity"/>
+        <activity android:name="com.yst.onecity.activity.LiveRoomActivity"/>
+        <activity android:name="com.yst.onecity.activity.servermember.MoreServerMemberActivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.order.OrderCommentActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"/>
+        <activity android:name="com.yst.onecity.activity.video.EditPublishVideoActivity"/>
+        <activity android:name="com.yst.onecity.activity.video.VideoRecoderActivity"/>
+        <activity
+            android:name="com.yst.onecity.activity.VideoPlayerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
+
+        <activity android:name="com.yst.onecity.activity.ChooseAddressActivity"/>
+        <activity android:name="com.yst.onecity.activity.publish.EditShareActivity"/>
+        <!-- 专员主页 -->
+        <activity
+            android:name="com.yst.onecity.activity.commissioner.CommissionerHomePageActivity"
+           />
+        <!-- 基本信息 -->
+        <activity
+            android:name="com.yst.onecity.activity.commissioner.BaseInfoAtivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:screenOrientation="portrait"/>
+        <!-- 个人简介 -->
+        <activity
+            android:name="com.yst.onecity.activity.commissioner.SimpleIntroActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
+        <!-- 我的发布 -->
+        <activity android:name="com.yst.onecity.activity.commissioner.MyShareActivity"/>
+        <!-- 品牌主页 -->
+        <activity android:name="com.yst.onecity.activity.member.TrademarkActivity"/>
+        <!-- 二维码扫描 -->
+        <activity android:name="com.yst.onecity.activity.zxing.activity.CaptureActivity"/>
+        <!-- 搜素服务专员 -->
+        <activity android:name="com.yst.onecity.activity.member.SearchServiceSpecialistActivity"/>
+        <activity android:name="com.yst.onecity.activity.publish.AddProductActivity"/>
+        <!-- 专员二维码 -->
+        <activity android:name="com.yst.onecity.activity.commissioner.CommissionerErCodeActivity"/>
+        <!-- 分享详情页 -->
+        <activity android:name="com.yst.onecity.activity.member.SearchShoppingActivity"/>
+        <activity android:name="com.yst.onecity.activity.InvitateRegisterActivity"/>
+        <activity android:name="com.yst.onecity.activity.commissioner.ShareDetailsActivity"/>
+        <activity android:name="com.yst.onecity.activity.NewDetailActivity"/>
+    </application>
+
+</manifest>

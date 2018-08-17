@@ -1,0 +1,149 @@
+package com.yst.onecity.adapter.commissoner;
+
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.onecity.R;
+import com.yst.onecity.activity.ProductDetailActivity;
+import com.yst.onecity.bean.commissioner.GoodsBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.interfaces.BaseAdapterListener;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 专员页面的商品列表适配器
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/1
+ */
+
+public class GoodsAdapter extends RecyclerView.Adapter {
+
+    private Context context;
+    private List<GoodsBean.ContentBean> goodsList = new ArrayList<>();
+    private BaseAdapterListener baseAdapterListener;
+    private String memberId;
+
+    public GoodsAdapter(Context context, BaseAdapterListener baseAdapterListener) {
+        this.context = context;
+        this.baseAdapterListener = baseAdapterListener;
+    }
+
+    /**
+     * 为集合添加数据
+     *
+     * @param mList 有数据的集合
+     */
+    public void addData(List<GoodsBean.ContentBean> mList) {
+        if (null != mList) {
+            goodsList = mList;
+            notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * 设置memberId
+     *
+     * @param memberId
+     */
+    public void setMemberId(String memberId) {
+        this.memberId = memberId;
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(context, R.layout.item_commisioner, null);
+        return new MyHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        MyHolder myHolder = (MyHolder) holder;
+        myHolder.tvCommentNum.setText(goodsList.get(position).getCommon_comment_num() + "人评价");
+        myHolder.tvIntro.setText(goodsList.get(position).getName());
+        Glide.with(context).load(ConstUtils.matchingImageUrl(goodsList.get(position).getImageurl())).error(R.mipmap.brand_default).into(myHolder.ivGoods);
+        myHolder.tvPrice.setText(String.format(context.getResources().getString(R.string.string_money), String.format("%.2f", goodsList.get(position).getSale_price())));
+        myHolder.tvPurchNum.setText(goodsList.get(position).getSale_num() + "人购买");
+        myHolder.tvLookNum.setText(goodsList.get(position).getViews() + "人浏览");
+        if (goodsList.get(position).getType() == Const.INTEGER_0) {
+            myHolder.ivLogo.setImageResource(R.mipmap.label);
+        } else if (goodsList.get(position).getType() == Const.INTEGER_1) {
+            myHolder.ivLogo.setImageResource(R.mipmap.this_locality);
+        }
+        myHolder.ivCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConstUtils.setFilter(myHolder.ivCart, Const.INTEGER_1000);
+                baseAdapterListener.onItemClick(position);
+            }
+        });
+        myHolder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!Utils.isClickable()) {
+                    return;
+                }
+                Bundle bundle = new Bundle();
+                bundle.putString("productId", String.valueOf(goodsList.get(position).getProductId()));
+                MyLog.e("sss", "--memberId: " + memberId);
+                bundle.putString(Const.CONS_STR_HUNTERID, memberId);
+                Const.TAG2 = Const.INTEGER_6;
+                JumpIntent.jump((Activity) context, ProductDetailActivity.class, bundle);
+            }
+        });
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return goodsList.size();
+    }
+
+    private static class MyHolder extends RecyclerView.ViewHolder {
+
+        private final ImageView ivGoods;
+        private final TextView tvIntro;
+        private final TextView tvPrice;
+        private final TextView tvLookNum;
+        private final TextView tvCommentNum;
+        private final TextView tvPurchNum;
+        private final ImageView ivCart;
+        private final CardView cardView;
+        private final ImageView ivLogo;
+
+        private MyHolder(View itemView) {
+            super(itemView);
+            ivGoods = (ImageView) itemView.findViewById(R.id.iv_goods);
+            tvIntro = (TextView) itemView.findViewById(R.id.tv_intro);
+            tvPrice = (TextView) itemView.findViewById(R.id.tv_price);
+            tvLookNum = (TextView) itemView.findViewById(R.id.tv_look_num);
+            tvCommentNum = (TextView) itemView.findViewById(R.id.tv_comment_num);
+            tvPurchNum = (TextView) itemView.findViewById(R.id.tv_purch_num);
+            ivCart = (ImageView) itemView.findViewById(R.id.iv_cart);
+            cardView = (CardView) itemView.findViewById(R.id.card_goods);
+            ivLogo = (ImageView) itemView.findViewById(R.id.iv_logo);
+        }
+    }
+
+    public interface onItemClick {
+        /*
+        商品条目跳转
+         */
+        void onGoodsView();
+    }
+}

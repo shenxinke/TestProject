@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="myHandler"
+            type="com.yst.tianyimember.activity.commissioner.BaseInfoAtivity.MyHandler"></variable>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/include_layout"
+            layout="@layout/layout_databinding_maintitle"
+            bind:handler="@{myHandler}"></include>
+
+        <RelativeLayout
+            android:id="@+id/ll_head"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:onClick="@{myHandler.onViewHead}"
+            android:padding="@dimen/margin_5dp">
+
+            <TextView
+                android:id="@+id/tv_head"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:padding="@dimen/margin_10dp"
+                android:text="@string/tv_head"
+                android:textSize="@dimen/x15_size" />
+
+            <com.yst.tianyimember.view.roundedimageview.RoundedImageView
+                android:id="@+id/iv_head"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/margin_5dp"
+                android:layout_toLeftOf="@+id/iv_right"
+                android:scaleType="fitXY"
+                android:src="@mipmap/head_2"
+                app:oval="true" />
+
+            <ImageView
+                android:id="@+id/iv_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/margin_10dp"
+                android:src="@mipmap/arrow_right" />
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tv_nick_name"
+                android:textSize="15sp" />
+
+            <EditText
+                android:id="@+id/et_nick_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_15dp"
+                android:layout_marginRight="@dimen/margin_20dp"
+                android:background="@null"
+                android:hint="@string/input_nick_name"
+                android:maxLength="8"
+                android:textSize="13sp" />
+
+
+        </LinearLayout>
+
+        <include layout="@layout/line"></include>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10dp">
+
+            <TextView
+                android:id="@+id/tv_one"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/one_intro"
+                android:textSize="@dimen/x15_size" />
+
+            <EditText
+                android:id="@+id/ed_one_word"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_15dp"
+                android:layout_toRightOf="@id/tv_one"
+                android:background="@null"
+                android:hint="@string/tv_intro"
+                android:maxLength="20"
+                android:maxLines="2"
+                android:textSize="@dimen/x15_size" />
+
+            <TextView
+                android:id="@+id/tv_no_put"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_toLeftOf="@+id/iv"
+                android:text="0"
+                android:textColor="@color/color_EB9834" />
+
+            <TextView
+                android:id="@+id/iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/tv_num"
+                android:text="/"
+                android:textColor="@color/color_EB9834" />
+
+            <TextView
+                android:id="@+id/tv_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/margin_10dp"
+                android:text="20"
+                android:textColor="@color/color_EB9834" />
+        </RelativeLayout>
+
+        <include layout="@layout/line"></include>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:onClick="@{myHandler.onViewClick}"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/simple_intro"
+                android:textSize="@dimen/x15_size" />
+
+            <TextView
+                android:id="@+id/tv_intro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_15dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/tv_simple_intro"
+                android:textSize="@dimen/x15_size" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"></View>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/arrow_right" />
+        </LinearLayout>
+
+        <include layout="@layout/line"></include>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_30dp"
+            android:background="@color/white"
+            android:onClick="@{myHandler.onServiceClick}"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tv_service_range"
+                android:textSize="@dimen/x15_size" />
+
+            <TextView
+                android:id="@+id/tv_service_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_15dp"
+                android:textSize="@dimen/x15_size" />
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>

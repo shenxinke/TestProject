@@ -1,0 +1,299 @@
+package com.yst.onecity.fragment;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
+import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.yst.onecity.R;
+import com.yst.onecity.adapter.AddressAdapter;
+import com.yst.onecity.bean.AdressBean;
+import com.yst.onecity.bean.ProvinceBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.TabLayoutIndicatorUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.utils.WindowUtils;
+import com.yst.onecity.utils.security.PreferenceUtil;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
+import gorden.rxbus2.RxBus;
+import okhttp3.Call;
+
+/**
+ * 地址选择框的dialog
+ *
+ * @author wuxiaofang
+ * @version 1.1.0
+ * @date 2018/5/24
+ */
+
+public class AddressDiaFragment extends DialogFragment implements AdapterView.OnItemClickListener {
+
+    @BindView(R.id.tab)
+    TabLayout tab;
+    @BindView(R.id.tvSure)
+    TextView tvSure;
+    @BindView(R.id.rl_tab)
+    RelativeLayout rlTab;
+    @BindView(R.id.lv)
+    ListView lv;
+    @BindView(R.id.iv_empty)
+    ImageView ivEmpty;
+    @BindView(R.id.rl_fragment)
+    RelativeLayout rlFragment;
+    Unbinder unbinder;
+    private int tabCount;
+    private int startTabIndex;
+    private AddressAdapter adapter;
+    private List<ProvinceBean.ContentBean> provinceList;
+    private List<ProvinceBean.ContentBean> cityList;
+    private List<ProvinceBean.ContentBean> districtList;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        final Window window = getDialog().getWindow();
+        View view = inflater.inflate(R.layout.layout_address_fragment, ((ViewGroup) window.findViewById(android.R.id.content)), false);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        wlp.height = (int) (WindowUtils.getScreenHeight(getActivity()) * 0.4);
+        wlp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        window.setAttributes(wlp);
+        window.setWindowAnimations(R.style.add_cart_pop_anim_style);
+        unbinder = ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        tab.addTab(tab.newTab().setText("省份"));
+        tab.addTab(tab.newTab().setText("城市"));
+        tab.addTab(tab.newTab().setText("区县"));
+        tabCount = tab.getTabCount();
+        try {
+            Utils.setCusorIsClick(tab, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        TabLayoutIndicatorUtils.setIndicator(tab, 10, 10);
+        adapter = new AddressAdapter(getActivity());
+        lv.setAdapter(adapter);
+        getProvinceData();
+        lv.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (startTabIndex == Const.INTEGER_0) {
+            Const.provinceState = Const.INTEGER_1;
+            getCity(String.valueOf(provinceList.get(position).getId()));
+            PreferenceUtil.put("provinceId", provinceList.get(position).getId());
+            PreferenceUtil.put("province", provinceList.get(position).getLetter());
+        }
+        if (startTabIndex == Const.INTEGER_1) {
+            Const.cityState = Const.INTEGER_1;
+            getDistrict(String.valueOf(cityList.get(position).getId()));
+            PreferenceUtil.put("cityId", cityList.get(position).getId());
+            PreferenceUtil.put("city", cityList.get(position).getLetter());
+        }
+        if (startTabIndex >= Const.INTEGER_2) {
+            Const.districtState = Const.INTEGER_1;
+            PreferenceUtil.put("districtId", districtList.get(position).getId());
+            PreferenceUtil.put("district", districtList.get(position).getLetter());
+        }
+        startTabIndex++;
+        if (startTabIndex < tabCount) {
+            if (null != tab.getTabAt(startTabIndex)) {
+                tab.getTabAt(startTabIndex).select();
+            }
+        }
+    }
+
+    @OnClick(R.id.tvSure)
+    public void sure() {
+        String province = PreferenceUtil.getString("province", "");
+        String city = PreferenceUtil.getString("city", "");
+        String district = PreferenceUtil.getString("district", "");
+        String provinceId = PreferenceUtil.getString("provinceId", "");
+        String cityId = PreferenceUtil.getString("cityId", "");
+        String districtId = PreferenceUtil.getString("districtId", "");
+        RxBus.get().send(Const.INTEGER_0, new AdressBean(province, city, district, provinceId, cityId, districtId));
+        dismiss();
+    }
+
+    /**
+     * 获取省
+     */
+    private void getProvinceData() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.GET_PROVINCE)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("province", "省onError______" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("province", "省response______" + response);
+                Gson gson = new Gson();
+                ProvinceBean provinceBean = gson.fromJson(response, ProvinceBean.class);
+                if (null != provinceBean) {
+                    if (provinceBean.getCode() == Const.INTEGER_1 && null != provinceBean.getContent()) {
+                        provinceList = provinceBean.getContent();
+                        adapter.addData(provinceList);
+                        if (provinceList.isEmpty()) {
+                            lv.setVisibility(View.GONE);
+                            ivEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            lv.setVisibility(View.VISIBLE);
+                            ivEmpty.setVisibility(View.GONE);
+                        }
+                    } else {
+                        ToastUtils.show(provinceBean.getMsg());
+                    }
+                } else {
+                    lv.setVisibility(View.GONE);
+                    ivEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取市
+     */
+    private void getCity(String provinceId) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "pId", provinceId,
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.GET_CITY)
+                .addParams("pId", provinceId)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("city", "市onError______" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("city", "市response______" + response);
+                Gson gson = new Gson();
+                ProvinceBean provinceBean = gson.fromJson(response, ProvinceBean.class);
+                if (null != provinceBean) {
+                    if (provinceBean.getCode() == Const.INTEGER_1 && null != provinceBean.getContent()) {
+                        cityList = provinceBean.getContent();
+                        adapter.addData(cityList);
+                        if (cityList.isEmpty()) {
+                            lv.setVisibility(View.GONE);
+                            ivEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            lv.setVisibility(View.VISIBLE);
+                            ivEmpty.setVisibility(View.GONE);
+                        }
+                    } else {
+                        ToastUtils.show(provinceBean.getMsg());
+                    }
+                } else {
+                    lv.setVisibility(View.GONE);
+                    ivEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取区
+     */
+    private void getDistrict(String cityId) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "cId", cityId,
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.GET_AREA)
+                .addParams("cId", cityId)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("area", "市onError______" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("area", "市response______" + response);
+                Gson gson = new Gson();
+                ProvinceBean provinceBean = gson.fromJson(response, ProvinceBean.class);
+                if (null != provinceBean) {
+                    if (provinceBean.getCode() == Const.INTEGER_1 && null != provinceBean.getContent()) {
+                        districtList = provinceBean.getContent();
+                        adapter.addData(districtList);
+                        if (districtList.isEmpty()) {
+                            lv.setVisibility(View.GONE);
+                            ivEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            lv.setVisibility(View.VISIBLE);
+                            ivEmpty.setVisibility(View.GONE);
+                        }
+                    } else {
+                        ToastUtils.show(provinceBean.getMsg());
+                    }
+                } else {
+                    lv.setVisibility(View.GONE);
+                    ivEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+}

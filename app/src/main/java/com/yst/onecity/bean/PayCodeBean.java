@@ -1,0 +1,108 @@
+package com.yst.onecity.bean;
+
+import java.util.List;
+
+/**
+ * @author Shenxinke
+ * @version 3.0.1
+ * @data 2018/3/23
+ */
+
+public class PayCodeBean {
+
+    /**
+     * code : 1
+     * msg : 成功
+     * content : {"cards":[{"bankNo":"6228****2876","bankName":"农业银行","id":16}],"code":"4411783240216"}
+     */
+
+    private int code;
+    private String msg;
+    private ContentBean content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * cards : [{"bankNo":"6228****2876","bankName":"农业银行","id":16}]
+         * code : 4411783240216
+         */
+
+        private String code;
+        private List<CardsBean> cards;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public List<CardsBean> getCards() {
+            return cards;
+        }
+
+        public void setCards(List<CardsBean> cards) {
+            this.cards = cards;
+        }
+
+        public static class CardsBean {
+            /**
+             * bankNo : 6228****2876
+             * bankName : 农业银行
+             * id : 16
+             */
+
+            private String bankNo;
+            private String bankName;
+            private int id;
+
+            public String getBankNo() {
+                return bankNo;
+            }
+
+            public void setBankNo(String bankNo) {
+                this.bankNo = bankNo;
+            }
+
+            public String getBankName() {
+                return bankName;
+            }
+
+            public void setBankName(String bankName) {
+                this.bankName = bankName;
+            }
+
+            public int getId() {
+                return id;
+            }
+
+            public void setId(int id) {
+                this.id = id;
+            }
+        }
+    }
+}

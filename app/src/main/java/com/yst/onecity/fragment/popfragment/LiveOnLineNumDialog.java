@@ -1,0 +1,215 @@
+package com.yst.onecity.fragment.popfragment;
+
+import android.app.DialogFragment;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.ListView;
+
+import com.bumptech.glide.Glide;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.AbstractCommonAdapter;
+import com.yst.onecity.adapter.CommonViewHolder;
+import com.yst.onecity.bean.livevideo.LiveOnLineNum;
+import com.yst.onecity.callbacks.AbstractLiveOnLineNumCallback;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.utils.WindowUtils;
+import com.yst.onecity.view.GlideCircleTransform;
+import com.yst.onecity.view.roundedimageview.RoundedImageView;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+import okhttp3.Call;
+
+/**
+ * 直播在线人数弹出页面
+ *
+ * @author WangJingWei
+ * @version 4.1.0
+ * @date 2018/5/17.
+ */
+public class LiveOnLineNumDialog extends DialogFragment {
+
+    @BindView(R.id.listview)
+    ListView listview;
+    @BindView(R.id.mSmartRefresh)
+    SmartRefreshLayout mSmartRefresh;
+    @BindView(R.id.img_empty)
+    ImageView imgEmpty;
+
+    private Unbinder unbinder;
+    private String groupId;
+    private int currentPage = 1;
+    private int pageSize = 5;
+    private List<LiveOnLineNum.OnLineNum> mOnLineData = new ArrayList<>();
+    private AbstractCommonAdapter<LiveOnLineNum.OnLineNum> onLineAdapter;
+
+    public static LiveOnLineNumDialog newInstance(String groupId) {
+        LiveOnLineNumDialog fragment = new LiveOnLineNumDialog();
+        Bundle bundle = new Bundle();
+        bundle.putString(Const.LIVE_GROUPID, groupId);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        Window window = getDialog().getWindow();
+        getDialog().setCanceledOnTouchOutside(true);
+        View view = inflater.inflate(R.layout.fragment_dialog_onlinenum, ((ViewGroup) window.findViewById(android.R.id.content)), false);
+        window.setBackgroundDrawableResource(R.color.transparent);
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        wlp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        wlp.height = (int) (WindowUtils.getScreenHeight(getActivity()) * 0.6);
+        window.setAttributes(wlp);
+        window.setWindowAnimations(R.style.add_cart_pop_anim_style);
+        unbinder = ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        currentPage = 1;
+        mOnLineData.clear();
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            groupId = bundle.getString(Const.LIVE_GROUPID);
+        }
+        MyLog.e("sss","----- groupId" + groupId);
+        initListener();
+        initOnLineNum();
+        requestOnLineNum();
+
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    /**
+     * 初始化组件监听事件
+     */
+    private void initListener() {
+        mSmartRefresh.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+                currentPage++;
+                requestOnLineNum();
+                mSmartRefresh.finishLoadmore(1000);
+            }
+
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                currentPage = 1;
+                mOnLineData.clear();
+                requestOnLineNum();
+                mSmartRefresh.finishRefresh(500);
+            }
+        });
+    }
+
+
+    /**
+     * 请求直播在线人数列表接口
+     */
+    private void requestOnLineNum() {
+        pageSize = (currentPage == 1) ? 40 : 5;
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "pageSize", String.valueOf(pageSize),
+                "timestamp", timestamp,
+                Const.LIVE_GROUPID,groupId,
+                "currentPage", String.valueOf(currentPage));
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils
+                .post()
+                .url(Constants.LIVE_ONLINENUM_LIST)
+                .addParams(Const.LIVE_GROUPID,groupId)
+                .addParams("currentPage", String.valueOf(currentPage))
+                .addParams("pageSize", String.valueOf(pageSize))
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractLiveOnLineNumCallback() {
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(LiveOnLineNum response, int id) {
+                if (response.getCode() == 1) {
+                    if (response.getContent() != null && response.getContent().size() > 0) {
+                        mOnLineData.addAll(response.getContent());
+                    }else{
+                        ToastUtils.show("暂无更多数据");
+                    }
+
+                    if (mOnLineData.size() > 0) {
+                        imgEmpty.setVisibility(View.GONE);
+                    } else {
+                        imgEmpty.setVisibility(View.VISIBLE);
+                    }
+
+                    onLineAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+    }
+
+    /**
+     * 初始化在线人数列表
+     */
+    private void initOnLineNum() {
+        onLineAdapter = new AbstractCommonAdapter<LiveOnLineNum.OnLineNum>(TianyiApplication.instance,mOnLineData,R.layout.item_live_onlinenum) {
+            @Override
+            public void convert(CommonViewHolder holder, int position, LiveOnLineNum.OnLineNum item) {
+                holder.setText(R.id.tv_name, ConstUtils.getStringNoEmpty(item.getName()));
+                RoundedImageView imageView =  holder.getView(R.id.iv_head);
+                Glide.with(TianyiApplication.getInstance())
+                        .load(ConstUtils.matchingImageUrl(ConstUtils.getStringNoEmpty(item.getImgUrl())))
+                        .asBitmap()
+                        .transform(new GlideCircleTransform(context))
+                        .error(R.mipmap.head_2)
+                        .into(imageView);
+            }
+        };
+
+        listview.setAdapter(onLineAdapter);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+}

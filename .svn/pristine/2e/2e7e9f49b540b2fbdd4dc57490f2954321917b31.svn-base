@@ -1,0 +1,787 @@
+package com.yst.onecity.activity.servermember;
+
+import android.Manifest;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
+import com.amap.api.maps.model.MyLocationStyle;
+import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+import com.tencent.TIMCallBack;
+import com.tencent.TIMFriendshipManager;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.FlagViewAdapter;
+import com.yst.onecity.adapter.ServerMemberBgAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.CodeMsgBean;
+import com.yst.onecity.bean.ServerMemberBackGrounImage;
+import com.yst.onecity.bean.ServerMemberInfoBean;
+import com.yst.onecity.callbacks.AbstractCodeMsgCallback;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.AddFlagDialog;
+import com.yst.onecity.dialog.AbstractCameraDialog;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.ImagesUitls;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.UiUtil;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.NoScrollGridView;
+import com.yst.onecity.view.TagView;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import me.nereo.multi_image_selector.MultiImageSelector;
+import me.nereo.multi_image_selector.MultiImageSelectorActivity;
+import okhttp3.Call;
+import okhttp3.Request;
+import pub.devrel.easypermissions.EasyPermissions;
+
+/**
+ * 服务专员基本信息页面
+ *
+ * @author Chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class EssentialInformationActivity extends BaseActivity {
+
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.tv_right)
+    TextView tvRight;
+    @BindView(R.id.iv_head)
+    ImageView ivHead;
+    @BindView(R.id.et_nick)
+    EditText etNick;
+    @BindView(R.id.tv_account)
+    TextView tvAccount;
+    @BindView(R.id.et_jianjie)
+    EditText etJianjie;
+    @BindView(R.id.fenlei_taglayout)
+    TagView fenleiTaglayout;
+    @BindView(R.id.gridview)
+    NoScrollGridView gridview;
+    @BindView(R.id.iv_card)
+    ImageView ivCard;
+    @BindView(R.id.tv_dianpu)
+    TextView tvDianpu;
+    @BindView(R.id.tv_address)
+    TextView tvAddress;
+    @BindView(R.id.iv_address)
+    MapView ivAddress;
+    @BindView(R.id.ll_nick)
+    LinearLayout llNick;
+    @BindView(R.id.ll_jianjie)
+    LinearLayout llJianjie;
+    private FlagViewAdapter flagViewAdapter;
+    private AbstractCameraDialog cameraDialog;
+    private String tempPath;
+    private String cipPath;
+    private static final int REQUEST_CAMERA = 1;
+    private static final int REQUEST_IMAGE = 2;
+    private static final int PHOTO_REQUEST_CUT = 3;
+    private String imagId = "";
+    private List<ServerMemberBackGrounImage.ContentBean> backgroungImageList = new ArrayList();
+    private ServerMemberBgAdapter serverMemberBGAdapter;
+    private int lablesTag = 0;
+    private List<ServerMemberInfoBean.ContentBean.HunterLableBean> flagViewBeanList = new ArrayList<>();
+    private String backImgId = "";
+    private String backImg = "";
+    private int onClicTag = 1;
+    private AMap aMap;
+    private Marker mCenterMarker;
+    private MarkerOptions mMarkerOptions;
+    public LatLng latLng;
+    private String lng, lat;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_essential_information;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // 此方法须覆写，虚拟机需要在很多情况下保存地图绘制的当前状态。
+        ivAddress.onCreate(savedInstanceState);
+        //初始化地图控制器对象
+        if (aMap == null) {
+            aMap = ivAddress.getMap();
+            //设置中心点和缩放比例
+            MyLocationStyle myLocationStyle = new MyLocationStyle();
+            myLocationStyle.showMyLocation(true);
+            myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE);
+            myLocationStyle.strokeColor(0x88D4E2EF);
+            myLocationStyle.radiusFillColor(0x88D4E2EF);
+            //设置定位蓝点的Style
+            aMap.setMyLocationStyle(myLocationStyle);
+            aMap.setMyLocationEnabled(false);
+            // 设置默认定位按钮是否显示
+            aMap.getUiSettings().setMyLocationButtonEnabled(false);
+            aMap.moveCamera(CameraUpdateFactory.zoomTo(17.5f));
+            aMap.getUiSettings().setZoomControlsEnabled(false);
+        }
+        //------------------------------------------添加中心标记
+        mMarkerOptions = new MarkerOptions();
+        //可拖放性
+        mMarkerOptions.draggable(false);
+        mMarkerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_choose_map_address));
+        mCenterMarker = aMap.addMarker(mMarkerOptions);
+        ViewTreeObserver vto = ivAddress.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                ivAddress.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                mCenterMarker.setPositionByPixels(ivAddress.getWidth() >> 1, ivAddress.getHeight() >> 1);
+                mCenterMarker.showInfoWindow();
+            }
+        });
+
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("基本信息");
+        setRightTextVisibility(View.VISIBLE);
+        setRightText("保存");
+        cameraDialog = new AbstractCameraDialog(this) {
+            @Override
+            public void onCameraClick() {
+                picByCamera(); // 相机
+            }
+
+            @Override
+            public void onPhotoClick() {
+                selectImg(); // 拍照
+            }
+        };
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                onClicTag = 2;
+                for (int j = 0; j < backgroungImageList.size(); j++) {
+                    if (j == i) {
+                        backgroungImageList.get(j).setCheck(true);
+                    } else {
+                        backgroungImageList.get(j).setCheck(false);
+                    }
+                }
+                flushBGImage();
+            }
+        });
+        etNick.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                onClicTag = 2;
+                return false;
+            }
+        });
+        etJianjie.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                onClicTag = 2;
+                return false;
+            }
+        });
+    }
+
+    @OnClick({R.id.tv_right, R.id.iv_head, R.id.et_nick, R.id.et_jianjie, R.id.ll_nick, R.id.ll_jianjie, R.id.tv_address, R.id.iv_address})
+    public void onViewClicked(View view) {
+        if (!ConstUtils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            //保存
+            case R.id.tv_right:
+                if (onClicTag == Const.INTEGER_2) {
+                    requestUpdateInfo();
+                }
+                requestAddLable();
+                break;
+            //头像
+            case R.id.iv_head:
+                onClicTag = 2;
+                if (cameraDialog != null) {
+                    cameraDialog.showDialog();
+                } else {
+                    cameraDialog = new AbstractCameraDialog(this) {
+                        @Override
+                        public void onCameraClick() {
+                            // 相机
+                            picByCamera();
+                        }
+
+                        @Override
+                        public void onPhotoClick() {
+                            // 拍照
+                            selectImg();
+                        }
+                    };
+                    cameraDialog.showDialog();
+                }
+                break;
+            case R.id.et_nick:
+                onClicTag = 2;
+                break;
+            case R.id.et_jianjie:
+                onClicTag = 2;
+                break;
+            //店铺地址
+            case R.id.tv_address:
+            case R.id.iv_address:
+                Bundle bundle = new Bundle();
+                bundle.putString("lng", lng);
+                bundle.putString("lat", lat);
+                JumpIntent.jump(EssentialInformationActivity.this, EssentialInfoMapActivity.class, bundle);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 修改推广师基本信息
+     */
+    private void requestUpdateInfo() {
+        String timestamp = SignUtils.getTimeStamp();
+        Map<String, String> map = new HashMap<>(16);
+        map.put("uuid", TianyiApplication.appCommonBean.getUuid());
+        map.put("phone", TianyiApplication.appCommonBean.getPhone());
+        map.put("timestamp", timestamp);
+        map.put("client_type", "A");
+        if (imagId != null && imagId != "") {
+            map.put("logoImgId", imagId);
+        }
+        if (backImgId != null && backImgId != "") {
+            map.put("backImgId", backImgId);
+        }
+        if (etNick.getText().toString().trim() != null) {
+            map.put("nickName", etNick.getText().toString().trim());
+        }
+        if (etJianjie.getText().toString().trim() != null) {
+            map.put("serviceDigest", etJianjie.getText().toString().trim());
+        }
+        MyLog.e("BackImage", "requestUpdateInfo___backImgId___" + backImgId);
+        MyLog.e("BackImage", "requestUpdateInfo___etjianjie___" + etJianjie.getText().toString().trim());
+        String sign = SignUtils.mapToSign(map);
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.UPDATE_TUIGUANGSHI_INFO)
+                .params(map)
+                .addParams("sign", sign)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("EssUpdate", "requestUpdateInfo____onerror___" + e);
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                MyLog.e("EssUpdate", "requestUpdateInfo____onResponse___" + response);
+                if (response != null && response.getCode() == 1) {
+                    TIMFriendshipManager.getInstance().setNickName((TextUtils.isEmpty(etNick.getText().toString().trim()) ? "匿名用户" : etNick.getText().toString().trim()), new TIMCallBack() {
+                        @Override
+                        public void onError(int i, String s) {
+                            MyLog.e("sss", "the result is === " + s);
+                        }
+
+                        @Override
+                        public void onSuccess() {
+                            MyLog.e("sss", "the result is === successful");
+                        }
+                    });
+                    finish();
+                }
+                ToastUtils.show(response.getMsg());
+            }
+        });
+    }
+
+    /**
+     * 添加或删除标签
+     */
+    private void requestAddLable() {
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < flagViewBeanList.size(); i++) {
+            JSONObject mJSONObject = new JSONObject();
+            try {
+                mJSONObject.put("id", i + 1);
+                mJSONObject.put("name", flagViewBeanList.get(i).getName());
+                mJSONObject.put("sortNum", i + 1);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            jsonArray.put(mJSONObject);
+        }
+
+        String s = jsonArray.toString();
+        if (s == null) {
+            ToastUtils.show("请输入标签");
+            return;
+        }
+        MyLog.e("EssentialInfos", "拼接好得json" + s);
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "json", s,
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.ADD_LABLES)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("json", s)
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(R.string.app_on_request_error_msg, Toast.LENGTH_SHORT);
+                MyLog.e("EssentialInfos", "onerror___" + e);
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                MyLog.e("EssentialInfos", "response___" + response);
+                if (response != null && response.getCode() == 1) {
+                    if (onClicTag == 1) {
+                        finish();
+                    }
+                }
+            }
+
+
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        flagViewBeanList.clear();
+        getServerMemberInfo();
+    }
+
+    /**
+     * 获取基本信息回显数据
+     */
+    private void getServerMemberInfo() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.SERVERMEMBER_INFO)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("EssentialInfo", "getServerMemberInfo____onerror___" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("EssentialInfo", "getServerMemberInfo____onResponse___" + response);
+                Gson gson = new Gson();
+                ServerMemberInfoBean serverMemberInfoBean = gson.fromJson(response, ServerMemberInfoBean.class);
+                if (serverMemberInfoBean != null && Const.STR1.equals(serverMemberInfoBean.getCode()) && serverMemberInfoBean.getContent() != null) {
+                    ServerMemberInfoBean.ContentBean content = serverMemberInfoBean.getContent();
+                    setServerMemberInfo(content);
+                }
+            }
+        });
+    }
+
+    /**
+     * 展示服务专员基本信息
+     *
+     * @param content 服务专员基本信息
+     */
+    private void setServerMemberInfo(ServerMemberInfoBean.ContentBean content) {
+        if (content.getLogoImg() != null) {
+            Glide.with(this).load(ConstUtils.matchingImageUrl(content.getLogoImg())).into(ivHead);
+        }
+        if (content.getNickname() != null) {
+            etNick.setText(content.getNickname());
+        }
+        ConstUtils.setTextString(TianyiApplication.appCommonBean.getPhone(), tvAccount);
+        if (content.getServiceDigest() != null) {
+            etJianjie.setText(content.getServiceDigest());
+        }
+        Editable b = etNick.getText();
+        etNick.setSelection(b.length());
+        Editable b1 = etJianjie.getText();
+        etJianjie.setSelection(b1.length());
+        if (content.getPapersImg() != null) {
+            Glide.with(this).load(content.getPapersImg()).into(ivCard);
+        }
+        ConstUtils.setTextString(content.getMerchantName(), tvDianpu);
+        ConstUtils.setTextString(content.getMerchantAdress(), tvAddress);
+        if (content.getHunterLable() != null) {
+            flagViewBeanList = content.getHunterLable();
+            flushFlagview();
+        }
+        backImg = content.getBackImg();
+        MyLog.e("BackImage", "getMember___backImg___" + backImg);
+        getBackgroundImage();
+        lng = content.getMerchantLng();
+        lat = content.getMerchantLat();
+        latLng = new LatLng(Double.parseDouble(content.getMerchantLat()), Double.parseDouble(content.getMerchantLng()));
+        MyLog.e("essmap", lng + "-----" + lat + "___" + latLng);
+        aMap.moveCamera(CameraUpdateFactory.changeLatLng(latLng));
+        aMap.moveCamera(CameraUpdateFactory.zoomTo(14));
+    }
+
+    /**
+     * 获取背景图
+     */
+    private void getBackgroundImage() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.TUIGUANG_BG_IMAGE)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("BackImage", "getBackgroundImage____onerror___" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("BackImage", "getBackgroundImage____onResponse___" + response);
+                Gson gson = new Gson();
+                ServerMemberBackGrounImage serverMemberBackGrounImage = gson.fromJson(response, ServerMemberBackGrounImage.class);
+                if (serverMemberBackGrounImage != null && serverMemberBackGrounImage.getCode() == 1 && serverMemberBackGrounImage.getContent() != null) {
+                    backgroungImageList = serverMemberBackGrounImage.getContent();
+                    if (backImg != null && !"".equals(backImg)) {
+                        MyLog.e("BackImage", "backImg___" + backImg);
+                        for (int i = 0; i < backgroungImageList.size(); i++) {
+                            if (backgroungImageList.get(i).getAddress().contains(backImg)) {
+                                backgroungImageList.get(i).setCheck(true);
+                            } else {
+                                backgroungImageList.get(i).setCheck(false);
+                            }
+                        }
+                    }
+                }
+                flushBGImage();
+            }
+        });
+    }
+
+    /**
+     * 刷新背景图片数据
+     */
+    private void flushBGImage() {
+        if (null == gridview) {
+            return;
+        }
+
+        if (serverMemberBGAdapter == null) {
+            serverMemberBGAdapter = new ServerMemberBgAdapter(backgroungImageList, this);
+            gridview.setAdapter(serverMemberBGAdapter);
+            serverMemberBGAdapter.setIScrollPositon(new ServerMemberBgAdapter.IGetScrollPosition() {
+                @Override
+                public void click(int i) {
+                    onClicTag = 2;
+                    backImgId = backgroungImageList.get(i).getId() + "";
+                    for (int j = 0; j < backgroungImageList.size(); j++) {
+                        if (j == i) {
+                            backgroungImageList.get(j).setCheck(true);
+                        } else {
+                            backgroungImageList.get(j).setCheck(false);
+                        }
+                    }
+                    flushBGImage();
+                    MyLog.e("EssUpdate", "backImgId____" + backImgId);
+                }
+            });
+        } else {
+            serverMemberBGAdapter.setData(backgroungImageList);
+        }
+    }
+
+    /**
+     * 刷新标签适配器
+     */
+    private void flushFlagview() {
+        if (flagViewAdapter == null) {
+            flagViewAdapter = new FlagViewAdapter(flagViewBeanList, this);
+            fenleiTaglayout.setAdapter(flagViewAdapter);
+            flagViewAdapter.notifyDataSetChanged();
+            flagViewAdapter.setIScrollPositon(new FlagViewAdapter.IGetScrollPosition() {
+                @Override
+                public void add() {
+                    AddFlagDialog dialog = new AddFlagDialog(EssentialInformationActivity.this, R.style.prompt_progress_dailog_dimenabled);
+                    dialog.show();
+                    dialog.setIScrollPositon(new AddFlagDialog.IGetScrollPosition() {
+                        @Override
+                        public void add(String content) {
+                            ServerMemberInfoBean.ContentBean.HunterLableBean flagViewBean = new ServerMemberInfoBean.ContentBean.HunterLableBean();
+                            flagViewBean.setName(content);
+                            flagViewBeanList.add(flagViewBean);
+                            flushFlagview();
+                        }
+                    });
+                }
+
+                @Override
+                public void delete(int position) {
+                    flagViewBeanList.remove(position);
+                    flushFlagview();
+                }
+            });
+        } else {
+            flagViewAdapter.setData(flagViewBeanList);
+        }
+    }
+
+    /**
+     * 选择图片
+     */
+    private void selectImg() {
+        if (EasyPermissions.hasPermissions(EssentialInformationActivity.this, Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            MultiImageSelector.create().single().showCamera(false).start(EssentialInformationActivity.this, REQUEST_IMAGE);
+        } else {
+            EasyPermissions.requestPermissions(EssentialInformationActivity.this,
+                    getString(R.string.hunter_center_open_camera_permission), 300,
+                    Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    /**
+     * 拍照
+     */
+    protected void picByCamera() {
+        if (EasyPermissions.hasPermissions(EssentialInformationActivity.this, Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            tempPath = System.currentTimeMillis() + ".png";
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(
+                    Environment.getExternalStorageDirectory(), tempPath)));
+            startActivityForResult(intent, REQUEST_CAMERA);
+        } else {
+            EasyPermissions.requestPermissions(EssentialInformationActivity.this,
+                    getString(R.string.hunter_center_open_camera_permission), 300,
+                    Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        UiUtil.getHandler().removeCallbacksAndMessages(null);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        switch (requestCode) {
+            case REQUEST_IMAGE:
+                List<String> list = data.getStringArrayListExtra(MultiImageSelectorActivity.EXTRA_RESULT);
+                if (list.size() > 0) {
+                    startPhotoZoom(Uri.fromFile(new File(list.get(0))));
+                }
+                break;
+            case REQUEST_CAMERA:
+                Uri photoUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), tempPath));
+                startPhotoZoom(photoUri);
+                break;
+            case PHOTO_REQUEST_CUT:
+                Uri clipPhotoUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), cipPath));
+                File fileClip = ImagesUitls.getFileFromMediaUri(getApplicationContext(), clipPhotoUri);
+                upLoadImg(fileClip);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 服务专员上传头像
+     *
+     * @param mImageFile 图片路径
+     */
+    private void upLoadImg(File mImageFile) {
+        OkHttpUtils.post()
+                .url(Constants.SERVER_MEMBER_UPLOADHEAD)
+                .addFile("urlfile", mImageFile.getName(), mImageFile)
+                .build()
+                .execute(new StringCallback() {
+                    @Override
+                    public void onBefore(Request request, int id) {
+                        super.onBefore(request, id);
+                        showInfoProgressDialog();
+                    }
+
+                    @Override
+                    public void onAfter(int id) {
+                        dismissInfoProgressDialog();
+                    }
+
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                    }
+
+                    @Override
+                    public void onResponse(String s, int id) {
+                        MyLog.e("sss", "response is === " + s);
+                        try {
+                            JSONObject jsonObject = new JSONObject(s);
+                            final String address = jsonObject.getString("address");
+                            imagId = jsonObject.getString("id");
+                            UiUtil.getHandler().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Glide.with(TianyiApplication.getContext())
+                                            .load(ConstUtils.matchingImageUrl(address))
+                                            .dontAnimate()
+                                            .into(ivHead);
+
+                                    TIMFriendshipManager.getInstance().setFaceUrl(ConstUtils.matchingImageUrl(address), new TIMCallBack() {
+                                        @Override
+                                        public void onError(int code, String desc) {
+                                            //错误码code和错误描述desc，可用于定位请求失败原因
+                                            //错误码code列表请参见错误码表
+                                            MyLog.e("TIM", "setFaceUrl failed: " + code + " desc" + desc);
+                                        }
+
+                                        @Override
+                                        public void onSuccess() {
+                                            MyLog.e("TIM", "setFaceUrl succ");
+                                        }
+                                    });
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 裁剪图片
+     * @param uri 图片路径
+     */
+    private void startPhotoZoom(Uri uri) {
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        // crop为true是设置在开启的intent中设置显示的view可以剪裁
+        intent.putExtra("crop", "true");
+        // aspectX aspectY 是宽高的比例
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        // outputX,outputY 是剪裁图片的宽高
+        intent.putExtra("outputX", 300);
+        intent.putExtra("outputY", 300);
+        cipPath = System.currentTimeMillis() + ".png";
+        intent.putExtra("output", Uri.fromFile(new File(
+                Environment.getExternalStorageDirectory(), cipPath)));
+        //返回格式
+        intent.putExtra("outputFormat", "JPEG");
+        startActivityForResult(intent, PHOTO_REQUEST_CUT);
+    }
+
+}

@@ -1,0 +1,81 @@
+package com.yst.onecity.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 线上订单适配器
+ *
+ * @author chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class OnLineOrderItemMyLvAdapter extends BaseAdapter {
+
+    private Context context;
+    private List<Integer> data;
+
+    public OnLineOrderItemMyLvAdapter(Context context, List<Integer> data){
+        this.context = context;
+        this.data = data;
+    }
+    @Override
+    public int getCount() {
+        return data.size();
+    }
+
+    @Override
+    public Object getItem(int i) {
+        return data.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if (view == null){
+            view = LayoutInflater.from(context).inflate(R.layout.item_item_on_line_mylv, null);
+            holder = new ViewHolder(view);
+            view.setTag(holder);
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+        holder.commodityName.setText(data.get(i).toString());
+        return view;
+    }
+    class ViewHolder{
+        @BindView(R.id.item_item_on_line_img)
+        ImageView image;
+        @BindView(R.id.item_item_on_line_name)
+        TextView commodityName;
+        @BindView(R.id.item_item_on_line_price)
+        TextView price;
+        @BindView(R.id.item_item_on_line_num)
+        TextView number;
+        @BindView(R.id.item_item_on_line_color)
+        TextView color;
+        @BindView(R.id.item_item_on_line_reward)
+        TextView reward;
+
+        ViewHolder(View view){
+            ButterKnife.bind(this,view);
+        }
+    }
+}

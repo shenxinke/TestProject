@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_my_collection"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/activity_title_layout_white"/>
+
+    <LinearLayout
+        android:id="@+id/llayout_collection_top"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x42"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/llayout_collection_goods"
+            android:layout_width="@dimen/x0"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/x50"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_collection_left_goods_content"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/x36"
+                android:layout_marginBottom="@dimen/x2"
+                android:layout_marginRight="@dimen/x2"
+                android:layout_marginTop="@dimen/x2"
+                android:gravity="center"
+                android:text="@string/str_collection_goods"
+                android:textColor="#FFBE0F" />
+
+            <TextView
+                android:id="@+id/txt_collection_left_goods_bottom"
+                android:layout_width="@dimen/x28"
+                android:layout_height="@dimen/x2"
+                android:layout_alignParentBottom="true"
+                android:background="#FFBE0F" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llayout_collection_message"
+            android:layout_width="@dimen/x0"
+            android:layout_height="match_parent"
+            android:paddingLeft="@dimen/x50"
+            android:layout_weight="1"
+            android:gravity="left"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_collection_right_message_content"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/x36"
+                android:layout_marginBottom="@dimen/x2"
+                android:layout_marginTop="@dimen/x2"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:text="资讯" />
+
+            <TextView
+                android:id="@+id/txt_collection_right_message_bottom"
+                android:layout_width="@dimen/x30"
+                android:layout_height="@dimen/x2"
+                android:layout_alignParentBottom="true"
+                android:background="#FFBE0F"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view_collection_line"
+        android:layout_width="match_parent"
+        android:layout_height="10px"
+        android:layout_alignParentBottom="true"
+        android:background="#F4F4F4"></View>
+
+    <FrameLayout
+        android:id="@+id/frame_collection_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></FrameLayout>
+
+</LinearLayout>

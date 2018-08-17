@@ -1,0 +1,354 @@
+package com.yst.tianyimember.activity.bankcard;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.activity.member.RealNameAuthenticationActivity;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.bean.CodeMsgBean;
+import com.yst.tianyimember.callbacks.AbstractCodeMsgCallback;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.dialog.AbstractBankCardNumHintDialog;
+import com.yst.tianyimember.dialog.AbstractDeleteBankCardDialog;
+import com.yst.tianyimember.dialog.AbstractSaveDialog;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Calendar;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 用户银行卡信息
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class UserBankCardActivity extends BaseActivity {
+
+    @BindView(R.id.activity_back_iv1)
+    ImageView activityBackIv1;
+    @BindView(R.id.activity_back_iv)
+    ImageView activityBackIv;
+    @BindView(R.id.activity_title_tv)
+    TextView activityTitleTv;
+    @BindView(R.id.activity_title_right_img)
+    ImageView activityTitleRightImg;
+    @BindView(R.id.activity_title_right_chat_say_img)
+    ImageView activityTitleRightChatSayImg;
+    @BindView(R.id.activity_complete_tv)
+    TextView activityCompleteTv;
+    @BindView(R.id.add_bank_tv)
+    TextView addBankTv;
+    @BindView(R.id.llayout_bind_card)
+    LinearLayout llayoutBindCard;
+    @BindView(R.id.txt_bank_card_name)
+    TextView txtBankCardName;
+    @BindView(R.id.txt_bank_name)
+    TextView txtBankName;
+    @BindView(R.id.txt_bank_card_num)
+    TextView txtBankCardNum;
+    @BindView(R.id.txt_bank_card_edit)
+    TextView txtBankCardEdit;
+    @BindView(R.id.txt_bank_card_delete)
+    TextView txtBankCardDelete;
+    @BindView(R.id.llayout_bank_card_list)
+    LinearLayout llayoutBankCardList;
+    @BindView(R.id.activity_user_bank_card)
+    LinearLayout activityUserBankCard;
+    private AbstractDeleteBankCardDialog deleteBankCardDialog;
+    private AbstractSaveDialog mVerifyDialog = null;
+    private int type = 0;
+    private String bankName = "", bankNum = "", backId = "", bankUserName = "", bindbacktime = "";
+    private String currentMonth = "";
+    private String total = "";
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_user_bank_card;
+    }
+
+    @Override
+    public void initData() {
+        type = getIntent().getExtras().getInt("type", 0);
+        activityTitleTv.setText(R.string.str_bind_card_title);
+        mVerifyDialog = new AbstractSaveDialog(this) {
+            @Override
+            public void onSureClick() {
+                mVerifyDialog.dismissDialog();
+                JumpIntent.jump(UserBankCardActivity.this, RealNameAuthenticationActivity.class);
+                finish();
+            }
+
+            @Override
+            public void onCancleClick() {
+                UserBankCardActivity.this.finish();
+            }
+        };
+        mVerifyDialog.setText(getString(R.string.str_bank_card_dialog_message));
+        mVerifyDialog.setCancleStyle(R.drawable.shape_white_10, R.color.color_333333, getString(R.string.cancel));
+        mVerifyDialog.setSureStyle(R.drawable.bt_gradient_shape, R.color.color_333333, getString(R.string.str_bank_card_real_name_message));
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Calendar c = Calendar.getInstance();
+        // 获取当前年份
+        int year = c.get(Calendar.YEAR);
+        // 获取当前月份
+        int month = c.get(Calendar.MONTH) + 1;
+        currentMonth = year + "-" + month;
+        getBandCardStatus();
+    }
+
+    @OnClick({R.id.activity_back_iv, R.id.txt_bank_card_delete, R.id.txt_bank_card_edit, R.id.add_bank_tv})
+    public void onViewClick(View view) {
+        switch (view.getId()) {
+            case R.id.activity_back_iv:
+                finish();
+                break;
+            case R.id.txt_bank_card_edit:
+                Bundle editBundle = new Bundle();
+                editBundle.putString("bankNum", bankNum);
+                editBundle.putString("bankName", bankName);
+                editBundle.putString("id", backId);
+                editBundle.putInt("type", type);
+                editBundle.putString("num", bindbacktime);
+                editBundle.putBoolean(UserBindCardNumActivity.isNew, false);
+                JumpIntent.jump(this, UserBindCardNumActivity.class, editBundle);
+                break;
+            case R.id.txt_bank_card_delete:
+                if (Utils.isClickable()) {
+                    deleteBankCardDialog = new AbstractDeleteBankCardDialog(this) {
+                        @Override
+                        public void onSureClick() {
+                            deleteCard();
+                            finish();
+                        }
+                    };
+                    deleteBankCardDialog.setCancleStyle(R.drawable.shape_white_10, R.color.black, "取消");
+                    deleteBankCardDialog.setSureStyle(R.drawable.shape_gray_180dp_bg, R.color.black, "确认");
+                    deleteBankCardDialog.showDialog();
+                }
+                break;
+            case R.id.add_bank_tv:
+                try {
+                    if (Integer.parseInt(bindbacktime) <= 0) {
+                        //requestMyBalanceDetail();
+                        AbstractBankCardNumHintDialog dialog = new AbstractBankCardNumHintDialog(UserBankCardActivity.this) {
+                            @Override
+                            public void onSureClick() {
+                                Bundle bundle = new Bundle();
+                                bundle.putInt("type", type);
+                                bundle.putString("number", bindbacktime);
+                                JumpIntent.jump(UserBankCardActivity.this, UserBindCardPhoneActivity.class, bundle);
+                            }
+                        };
+                        dialog.setCancleStyle(R.drawable.shape_white_10, R.color.black, "取消");
+                        dialog.setSureStyle(R.drawable.shape_gray_180dp_bg, R.color.black, "确认");
+                        dialog.showDialog();
+                    } else {
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("type", type);
+                        bundle.putString("number", bindbacktime);
+                        JumpIntent.jump(UserBankCardActivity.this, UserBindCardPhoneActivity.class, bundle);
+                    }
+                } catch (NumberFormatException e) {
+                    Log.d("Exception", e.getMessage());
+                }
+                break;
+            default:
+        }
+    }
+
+    /**
+     * 显示未绑卡界面
+     */
+    private void showNoneBankCard() {
+        llayoutBindCard.setVisibility(View.VISIBLE);
+        llayoutBankCardList.setVisibility(View.GONE);
+    }
+
+    /**
+     * 显示绑卡的信息回显
+     */
+    private void showBankCardInfo() {
+        llayoutBindCard.setVisibility(View.GONE);
+        llayoutBankCardList.setVisibility(View.VISIBLE);
+        String start = bankNum.substring(0, 4);
+        String end = bankNum.substring(bankNum.length() - 4);
+        String spaceStr = "";
+        for (int i = 0; i < bankNum.length() - Const.INTEGER_8; i++) {
+            spaceStr += "*";
+        }
+        String bEnd = bankUserName.substring(bankUserName.length() - 1);
+        String nameSpaceStr = "";
+        for (int k = 0; k < bankUserName.length() - 1; k++) {
+            nameSpaceStr += "*";
+        }
+        txtBankName.setText(bankName);
+        txtBankCardNum.setText(start + spaceStr + end);
+        txtBankCardName.setText(nameSpaceStr + bEnd);
+    }
+
+    /**
+     * 获取用户的绑卡信息
+     * 未实名
+     * 未绑卡
+     * 已绑卡
+     */
+    private void getBandCardStatus() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "usetType", String.valueOf(type),
+                "timestamp", timestamp);
+        OkHttpUtils
+                .post()
+                .url(Constants.URL_TO_BIND_BANKCARD)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("usetType", String.valueOf(type))
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "response === " + response);
+                bankName = "";
+                bankNum = "";
+                backId = "";
+                bankUserName = "";
+                bindbacktime = "";
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String code = "";
+                    if (jsonObject.getInt(Const.CONS_STR_CODE) == 1) {
+                        if (jsonObject.getJSONObject(Const.CONS_STR_CONTENT).has(Const.CONS_STR_CODES)) {
+                            code = jsonObject.getJSONObject("content").getString("codes");
+                        } else {
+                            code = jsonObject.getJSONObject("content").getString("code");
+                        }
+                        if (Const.STR1.equals(code)) {
+                            //未实名认证
+                            mVerifyDialog.showDialog();
+                        } else if (Const.STR2.equals(code)) {
+                            //绑卡成功信息回显
+                            bankUserName = jsonObject.getJSONObject("content").getString("name");
+                            bankName = jsonObject.getJSONObject("content").getString("bank");
+                            bankNum = jsonObject.getJSONObject("content").getString("bankNo");
+                            backId = jsonObject.getJSONObject("content").getString("id");
+                            bindbacktime = jsonObject.getJSONObject("content").getString("num");
+                            showBankCardInfo();
+                        } else if (Const.STR3.equals(code)) {
+                            //尚未绑卡显示页面
+                            showNoneBankCard();
+                            bindbacktime = jsonObject.getJSONObject("content").getString("num");
+                        }
+                    } else {
+                        ToastUtils.show(jsonObject.getString("msg"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    MyLog.e("sss", "exception ==============" + e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * 删除银行卡
+     */
+    private void deleteCard() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "usetid", TianyiApplication.appCommonBean.getId(),
+                "id", backId,
+                "usetType", String.valueOf(type),
+                "timestamp", timestamp);
+        OkHttpUtils
+                .post()
+                .url(Constants.URL_DELETE_BANKCARD)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("id", backId)
+                .addParams("usetid", TianyiApplication.appCommonBean.getId())
+                .addParams("usetType", String.valueOf(type))
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    backId = "";
+                    bankName = "";
+                    bankNum = "";
+                    txtBankCardName.setText("");
+                    txtBankCardNum.setText("");
+                    showNoneBankCard();
+                }
+                ToastUtils.show(response.getMsg());
+            }
+        });
+    }
+
+}

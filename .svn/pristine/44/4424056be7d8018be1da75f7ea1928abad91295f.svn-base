@@ -1,0 +1,589 @@
+<resources>Protocol
+    <string name="app_name">普济一城</string>
+    <array name="main_tab_name_arr">
+        <item>首页</item>
+        <item>服务专员</item>
+        <item>购物车</item>
+        <item>我的</item>
+    </array>
+
+    <!-- common -->
+    <string name="delete">删除</string>
+    <string name="sure">确 认</string>
+    <string name="cancel">取 消</string>
+    <string name="edit">编辑</string>
+    <string name="string_money">¥%1$s</string>
+    <string name="double_money">¥%1$f</string>
+    <string name="tv_search_indicate">搜索校区/大厦/学校</string>
+
+    <!--    登录/注册    账户安全 修改密码 -->
+    <string name="phone">手机号:</string>
+    <string name="input_phone">请输入手机号</string>
+    <string name="input_code">输入验证码</string>
+    <string name="id_number">身份证号:</string>
+    <string name="login_password">登录密码</string>
+    <string name="bank_card_num">银行卡:</string>
+    <string name="verification_code">验证码：</string>
+    <string name="get_verification_code">发送验证码</string>
+    <string name="get_verification">获取验证码</string>
+    <string name="new_password">新密码：</string>
+    <string name="set_password">设置密码：</string>
+    <string name="sure_password">确认密码:</string>
+    <string name="input_password">输入密码</string>
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+    <string name="protocol">我已阅读并同意《普济一城用户协议》</string>
+    <string name="wechat_login">微信登录</string>
+    <string name="qq_login">QQ登录</string>
+    <string name="next">下一步</string>
+    <string name="change_phone">更换手机号</string>
+
+
+    <string name="add_address">新增收货地址</string>
+    <string name="manager_address">管理收货地址</string>
+    <string name="edit_address">编辑收货地址</string>
+
+
+    <!--   我的     -->
+    <string name="my_order">我的订单</string>
+    <string name="my_account">我的账户</string>
+    <string name="my_payment">付款码</string>
+    <string name="my_publish">我的发布</string>
+    <string name="my_share">我的分享</string>
+    <string name="my_bank_card">我的银行卡</string>
+    <string name="my_attache">专员主页</string>
+    <string name="account_safe">账号安全</string>
+    <string name="news_list">消息列表</string>
+    <string name="basic_info">基本信息</string>
+    <string name="invite_promotion_division">邀请服务专员</string>
+    <string name="sort_edit">分类编辑</string>
+    <string name="my_attention">我的关注</string>
+    <string name="my_collection">我的收藏</string>
+    <string name="my_news">我的消息</string>
+    <string name="about_us">关于我们</string>
+    <string name="version_update">版本更新</string>
+    <string name="agree_us">我已阅读并同意</string>
+    <string name="xieyi">《普济一城用户协议》</string>
+    <string name="contact_customer_service">联系客服</string>
+    <string name="logout">退出登录</string>
+    <string name="tv_invitate_register">邀请注册</string>
+
+
+    <string name="real_name_identification">实名认证</string>
+    <string name="add_bank_card">添加银行卡</string>
+    <string name="bind">绑定</string>
+    <string name="cart_empty">购物车空空的</string>
+    <string name="go_stroll">去逛逛</string>
+
+    <!--服务专员-->
+    <string name="search_text">搜罗万千好物</string>
+    <string name="line_order">线上订单</string>
+    <string name="off_line_order">线下订单</string>
+
+    <!-- conversation fragment -->
+    <string name="conversation_system">系统消息</string>
+    <string name="conversation_system_friend">新朋友</string>
+    <string name="conversation_system_group">群组消息</string>
+    <string name="conversation_del">删除会话</string>
+    <string name="conversation_draft">[草稿]</string>
+
+    <!-- contact fragment -->
+    <string name="home_contact_tab">联系人</string>
+    <string name="new_friend">新朋友</string>
+    <string name="public_group">公开群</string>
+    <string name="discuss_group">讨论组</string>
+    <string name="chatroom">聊天室</string>
+    <string name="addfriend">添加好友</string>
+    <string name="contact_add_group">添加群组</string>
+    <string name="manangergroup">管理分组</string>
+
+    <!-- settings fragment -->
+    <string name="setting_logout">退出登录</string>
+    <string name="setting_logout_fail">退出登录失败，请稍后重试</string>
+    <string name="setting_friend_confirm">好友申请</string>
+    <string name="setting_black_list">黑名单</string>
+    <string name="setting_message_notify">消息提醒</string>
+    <string name="setting_about">关于</string>
+    <string name="setting_friend_need_confirm">需验证</string>
+    <string name="setting_nick_name_change">修改昵称</string>
+    <string name="setting_friend_confirm_change_err">修改验证类型失败</string>
+
+    <!-- Add newfriend activity -->
+    <string name="search_default">搜索</string>
+    <string name="search_cancel">取消</string>
+    <string name="search_hint">搜索ID或手机号</string>
+    <string name="search_no_result">很抱歉，没有找到符合内容</string>
+
+    <!-- Add newfriend activity -->
+    <string name="title_addfri">添加好友</string>
+    <string name="add_detail_ID">帐号ID</string>
+    <string name="add_detail_name">备注名</string>
+    <string name="add_detail_group">分组</string>
+    <string name="add_detail_message">附加消息</string>
+    <string name="add_friend_send">发送添加好友请求</string>
+    <string name="add_friend_succeed">请求已发送</string>
+    <string name="add_friend_added">已添加好友</string>
+    <string name="add_friend_refuse_all">对方拒绝添加任何人为好友</string>
+    <string name="add_friend_to_blacklist">我在对方的黑名单中</string>
+    <string name="add_friend_error">添加好友失败，请稍后重试</string>
+    <string name="add_friend_del_black_list">添加失败，该用户在你的黑名单中，是否将该用户从黑名单中移除（你需要在移除成功后重发添加好友请求）</string>
+    <string name="add_friend_del_black_err">移出黑名单失败</string>
+    <string name="add_friend_del_black_succ">移出黑名单成功</string>
+
+    <!-- Manager group activity -->
+    <string name="title_manager_group">分组管理</string>
+    <string name="add_new_group">添加分组</string>
+    <string name="add_dialog_title">添加分组</string>
+    <string name="add_dialog_subtitle">请输入新分组的名称</string>
+    <string name="add_dialog_null">分组名称不能为空</string>
+    <string name="title_confirm_delete_group">确认删除改分组吗？</string>
+    <string name="delete_dialog_subtitle">删除分组</string>
+    <string name="delete_dialog_subtitle_sur">,该分组好友将移动到默认分组</string>
+    <string name="delete_group_succ">删除分组成功</string>
+    <string name="add_group_succ">添加分组成功</string>
+    <string name="add_group_error_existed">添加失败，分组已存在</string>
+    <string name="add_group_error_limit">添加失败，分组达到上限</string>
+    <string name="add_group_error">添加分组失败</string>
+    <string name="del_group_error">删除分组失败</string>
+
+    <!-- chat activity -->
+    <string name="chat_image">图片</string>
+    <string name="chat_file">文件</string>
+    <string name="chat_photo">拍摄</string>
+    <string name="chat_video">小视频</string>
+    <string name="chat_press_talk">按住 说话</string>
+    <string name="chat_release_send">松开 结束</string>
+    <string name="chat_up_finger">手指上滑，取消发送</string>
+    <string name="chat_audio_too_short">录音过短，请重试</string>
+    <string name="chat_video_too_short">录制过短，请重试</string>
+    <string name="chat_resend">重新发送</string>
+    <string name="chat_del">删除</string>
+    <string name="chat_save">保存</string>
+    <string name="chat_file_too_large">文件过大，发送失败</string>
+    <string name="chat_file_not_exist">文件不存在，发送失败</string>
+    <string name="chat_image_preview_title">图片预览</string>
+    <string name="chat_image_preview_send">发送</string>
+    <string name="chat_image_preview_load_err">图片加载失败</string>
+    <string name="chat_image_preview_ori">原图发送</string>
+    <string name="chat_typing">对方正在输入…</string>
+    <string name="chat_content_bad">内容含有敏感词</string>
+
+    <!-- profile activity -->
+    <string name="profile_detail">详细资料</string>
+    <string name="profile_back">返回</string>
+    <string name="profile_id">账号</string>
+    <string name="profile_remark">备注名</string>
+    <string name="profile_black">加入黑名单</string>
+    <string name="profile_remark_edit">修改备注</string>
+    <string name="profile_chat">发送消息</string>
+    <string name="profile_del">删除好友</string>
+    <string name="profile_group">添加分组</string>
+    <string name="profile_now_group">所在分组</string>
+    <string name="profile_del_succeed">删除好友成功</string>
+    <string name="profile_del_fail">删除好友失败</string>
+    <string name="profile_black_succ">加入黑名单成功</string>
+
+    <!-- group profile activity -->
+    <string name="chat_setting_title">聊天设置</string>
+    <string name="chat_setting_group_member">群成员</string>
+    <string name="chat_setting_group_id">群组ID</string>
+    <string name="chat_setting_group_name">群名称</string>
+    <string name="chat_setting_group_add_opt">加群方式</string>
+    <string name="chat_setting_group_msg_alert">消息提醒</string>
+    <string name="chat_setting_group_introduce">群介绍</string>
+    <string name="chat_setting_group_all_accept">允许任何人加入</string>
+    <string name="chat_setting_group_all_reject">禁止加入</string>
+    <string name="chat_setting_group_auth">需群主审核</string>
+    <string name="chat_setting_quit">退出群</string>
+    <string name="chat_setting_dismiss">解散群</string>
+    <string name="chat_setting_add">申请加群</string>
+    <string name="chat_setting_dismiss_succ">解散群成功</string>
+    <string name="chat_setting_quit_succ">退出群成功</string>
+    <string name="chat_setting_quit_fail_private">讨论组不能解散</string>
+    <string name="chat_setting_change_err">修改失败</string>
+    <string name="chat_setting_change_group_name">修改群名称</string>
+    <string name="chat_setting_change_group_intro">修改群介绍</string>
+    <string name="chat_setting_no_rev">不接收消息</string>
+    <string name="chat_setting_rev_notify">接收并提醒消息</string>
+    <string name="chat_setting_rev_not_notify">接收不提醒消息</string>
+    <string name="chat_setting_invite_error">邀请群成员失败</string>
+
+    <!-- Add newfri activity -->
+    <string name="title_new_fri">新朋友</string>
+    <string name="newfri_agree">同意</string>
+    <string name="newfri_reject">拒绝</string>
+    <string name="newfri_do">操作</string>
+    <string name="newfri_disagree">已拒绝</string>
+    <string name="newfri_accept">已接受</string>
+    <string name="newfri_wait">等待验证</string>
+
+    <!-- message -->
+    <string name="summary_image">[图片]</string>
+    <string name="summary_voice">[语音]</string>
+    <string name="summary_video">[小视频]</string>
+    <string name="summary_file">[文件]</string>
+    <string name="summary_friend_add">请求添加好友</string>
+    <string name="summary_friend_added">我已添加</string>
+    <string name="summary_friend_add_me">请求添加</string>
+    <string name="summary_friend_recommend">推荐添加</string>
+    <string name="summary_me">我</string>
+    <string name="summary_group_apply">申请加群</string>
+    <string name="summary_group_invite">邀请</string>
+    <string name="summary_group_add">加入群</string>
+    <string name="summary_agree">同意</string>
+    <string name="summary_disagree">拒绝</string>
+    <string name="summary_invite_person">邀请人</string>
+    <string name="summary_handle_person">处理人</string>
+    <string name="summary_group_admin_change">管理员变更</string>
+    <string name="summary_group_info_change">群资料变更</string>
+    <string name="summary_group_mem_change">群成员变更</string>
+    <string name="summary_group_mem_add">加入群</string>
+    <string name="summary_group_mem_quit">退出群</string>
+    <string name="summary_group_mem_kick">被踢出群</string>
+    <string name="summary_group_mem_modify">资料变更</string>
+
+    <!-- time -->
+    <string name="time_yesterday">昨天</string>
+    <string name="time_day">日</string>
+    <string name="time_month">月</string>
+    <string name="time_year">年</string>
+    <string name="time_more">99+</string>
+    <string name="title_activity_group_chat_setting">GroupChatSettingActivity</string>
+
+    <!--publicgroup-->
+    <string name="title_public_group">公开群</string>
+    <string name="btn__create_public_group">创建公开群</string>
+    <string name="subtitle_created_public_group">我创建的公开群</string>
+    <string name="subtitle_hosting_public_group">我管理的公开群</string>
+    <string name="subtitle_joined_public_group">我加入的公开群</string>
+
+    <!--chatroom-->
+    <string name="title_chatroom">聊天室</string>
+    <string name="btn__create_chatroom">创建聊天室</string>
+    <string name="subtitle_owner_chatrrom">我创建的聊天室</string>
+    <string name="subtitle_hosting_chatroom">我管理的聊天室</string>
+    <string name="subtitle_joined_chatroom">我加入的聊天室</string>
+
+    <!--privategroup-->
+    <string name="title_private_group">讨论组</string>
+    <string name="btn__create_private_group">创建讨论组</string>
+    <string name="subtitle_owner_private_group">我创建的讨论组</string>
+    <string name="subtitle_hosting_private_group">我管理的讨论组</string>
+    <string name="subtitle_joined_private_group">我加入的讨论组</string>
+
+    <!--creategroup-->
+    <string name="title_create_group">创建群</string>
+    <string name="subtitle_create_group_name">群名称</string>
+    <string name="btn_add_member">添加群成员</string>
+    <string name="title_choose_group_members">选择联系人</string>
+    <string name="create_group_fail">创建群失败</string>
+    <string name="create_group_fail_because_wording">创建失败，群名含有敏感词</string>
+    <string name="create_group_succeed">创建群成功</string>
+    <string name="create_group_need_name">请输入群名称</string>
+
+    <!-- change category activity -->
+    <string name="change_category_title">移至分组</string>
+
+    <!-- search group activity -->
+    <string name="search_group_hint">搜索ID或名称</string>
+
+    <!-- edit activity -->
+    <string name="edit_error">修改失败</string>
+
+    <!-- choose activity -->
+    <string name="choose_title">选择联系人</string>
+    <string name="choose_need_one">至少选择一个联系人</string>
+
+    <!-- group member profile activity -->
+    <string name="group_member_profile">成员资料</string>
+    <string name="group_member_quiet">设置禁言</string>
+    <string name="group_member_manage">设为管理员</string>
+    <string name="group_member_card">群名片</string>
+    <string name="group_member_del">移出本群</string>
+    <string name="group_member_del_err">移出群成员失败</string>
+    <string name="group_member_del_succ">移出群成员成功</string>
+    <string name="group_member_manage_set_err">设置管理员失败</string>
+    <string name="group_member_manage_set_type_err">该类型群组不能设置管理员</string>
+    <string name="group_member_manage_set_succ">设置管理员成功</string>
+    <string name="group_member_quiet_ing">禁言中</string>
+    <string name="group_member_quiet_ten_min">十分钟</string>
+    <string name="group_member_quiet_one_hour">一小时</string>
+    <string name="group_member_quiet_one_day">一天</string>
+    <string name="group_member_quiet_cancel">取消禁言</string>
+    <string name="group_member_quiet_err">设置禁言失败</string>
+    <string name="group_member_change_card">修改群名片</string>
+    <string name="group_member_already">已经是群成员</string>
+
+    <!-- friendship handle activity -->
+    <string name="friendship_handle_title">申请详情</string>
+    <string name="friendship_handle_ok">同意</string>
+    <string name="friendship_handle_reject">拒绝</string>
+    <string name="friendship_handle_word">附加信息</string>
+
+    <!-- about activity -->
+    <string name="about_title">关于</string>
+    <string name="about_imsdk">IMSDK版本</string>
+    <string name="about_qalsdk">QAL版本</string>
+    <string name="about_tlssdk">TLS版本</string>
+    <string name="about_env">网络环境</string>
+    <string name="about_log">日志等级</string>
+    <string name="about_env_normal">正式环境</string>
+    <string name="about_env_test">测试环境</string>
+    <string name="about_set_effect">设置成功，杀进程重启后生效</string>
+
+    <!-- message notify activity -->
+    <string name="message_notify_title">消息提醒</string>
+    <string name="message_notify_push">离线消息推送</string>
+    <string name="message_notify_c2c_music">自定义C2C消息推送声音</string>
+    <string name="message_notify_group_music">自定义群消息推送声音</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="action_bar_back">返回</string>
+    <string name="confirm">确定</string>
+    <string name="agree">同意</string>
+    <string name="agreed">已同意</string>
+    <string name="refuse">拒绝</string>
+    <string name="refused">已拒绝</string>
+    <string name="done">完成</string>
+    <string name="friend_allow_all">允许任何人添加</string>
+    <string name="friend_refuse_all">拒绝任何人添加</string>
+    <string name="friend_need_confirm">需验证</string>
+    <string name="default_group_name">默认分组</string>
+    <string name="change_group_error">修改分组失败</string>
+    <string name="people">人</string>
+    <string name="login_error">登录失败，请稍后重试</string>
+    <string name="login_error_timeout">登录失败，当前无网络</string>
+    <string name="login_succ">登录成功</string>
+    <string name="kick_logout">你的账号已在其他终端登录,重新登录</string>
+    <string name="operate_fail">操作失败</string>
+    <string name="need_permission">您需要开启权限,并重启应用</string>
+    <string name="hunter_center_open_camera_permission">请打开拍照和读取照片权限</string>
+    <string name="read_phone_state_permission">允许获取系统状态或内容</string>
+    <string name="save_succ">保存成功</string>
+    <string name="download_fail">下载失败</string>
+    <string name="downloading">正在下载，请稍候</string>
+    <string name="save_fail">保存失败</string>
+    <string name="save_exist">文件已存在</string>
+    <string name="tls_expire">账号登录已过期，请重新登录</string>
+    <string name="env_normal">当前连接正式环境</string>
+    <string name="env_test">当前连接测试环境</string>
+    <string name="file_not_found">未找到文件，请稍后重试</string>
+    <string name="google_service_not_available">google推送服务不可用，请检查google play设置</string>
+
+    <!-- home activity -->
+    <string name="home_conversation_tab">会话</string>
+    <string name="home_setting_tab">设置</string>
+    <!-- xlistview -->
+    <string name="xlistview_header_hint_normal">下拉刷新</string>
+    <string name="xlistview_header_hint_ready">松开刷新数据</string>
+    <string name="xlistview_header_hint_loading">正在加载...</string>
+    <string name="xlistview_header_last_time">上次更新时间：</string>
+    <string name="xlistview_footer_hint_normal">查看更多</string>
+    <string name="xlistview_footer_hint_ready">松开载入更多</string>
+    <string name="consult_reply">资讯回复</string>
+    <string name="service_specialist_interaction">服务专员互动</string>
+    <string name="reply">回复</string>
+    <string name="all_select">全选</string>
+    <string name="all_cost">总计：%1$s</string>
+    <string name="search">搜索</string>
+    <string name="find_ta_and_comment">%1$d人找Ta   %2$d条评论</string>
+
+    <!--订单管理-->
+    <array name="order_manage_tabname_arr">
+        <item>全部</item>
+        <item>待付款</item>
+        <item>待发货</item>
+        <item>待收货</item>
+        <item>待评价</item>
+        <item>已撤销</item>
+    </array>
+
+    <!-- 我的关注 -->
+    <string name="str_empty_content">暂无关注</string>
+    <string name="str_empty_handle_content">去看看</string>
+    <string name="str_my_unfocus_dialog_message">确认不再关注</string>
+    <string name="str_my_unfocus_dialog_sure_btn">不再关注</string>
+
+    <!-- 我的收藏 -->
+    <string name="str_collection_goods">商品</string>
+    <string name="str_collection_message">资讯</string>
+    <string name="str_bank_card_dialog_message">请先实名认证再绑定银行卡</string>
+    <string name="str_bank_card_dialog_cash_message">请先绑定银行卡再提现</string>
+    <string name="str_bank_card_real_name_message">实名认证</string>
+    <string name="str_bind_card_title">绑定银行卡</string>
+
+    <!-- 会员列表 -->
+    <string name="str_server_member_list_title">会员列表</string>
+    <!-- 用户昵称 -->
+    <string name="user_edit_nickname_title">用户昵称</string>
+
+    <!-- 网络接口访问错误提醒的信息 -->
+    <string name="app_on_request_error_msg">网络访问失败，请重试!</string>
+    <!-- 数据解析异常的信息 -->
+    <string name="app_on_request_exception_msg">数据解析异常</string>
+    <!-- 数据全部加载 -->
+    <string name="xlist_add_all_msg">已加载全部数据</string>
+
+    <!--购物车页面  -->
+    <string name="complete">完成</string>
+    <string name="select_tip">请选择商品</string>
+    <!--商品管理-->
+    <string name="goodsmanager_listitem_stock">库存</string>
+    <string name="goodsmanager_listitem_xiajia">已下架</string>
+    <string name="goodsmanager_listitem_shangjia">上架</string>
+    <string name="goodsmanager_listitem_default_productname">华为手机</string>
+    <string name="goodsmanager_listitem_default_productprice">$ 2580.00</string>
+    <string name="goodsmanager_listitem_default_time">添加 2017-02-10</string>
+    <string name="goodsmanager_listitem_default_salenum">销量 0</string>
+
+    <!-- addorderfragment -->
+    <string name="addres_no_error">还没有收货地址</string>
+    <string name="order_details_expectation_text">期望送达时间:</string>
+    <string name="order_details_plan_on_text">预计送达时间:</string>
+    <string name="txt_add_order_item_memo_hint">选填：对本次交易的说明（建议填写已和卖家沟通）</string>
+    <string name="order_stockout">当前购买商品店铺缺货</string>
+    <string name="str_pay_type_select_title">支付中心</string>
+    <string name="main_activity_exit_msg">再按一次退出</string>
+    <string name="share">分享</string>
+    <string name="about_us_second">\u3000\u3000市场竞争不断的加剧，传统行业面临着巨大的挑 战，甶于近几年电子商务的快速发展，人们的消费意 识已经从原来的线下购物转换为网络采购模式，移动 互联、微营销、电子商务不断侵蚀着传统的销售渠道 ，迫使商家也在不断的转型升级。多数商城采用BB- C+020的模式，继承了互联网开放、协作、无中心 的特点，又具备移动通信的实时性、便捷性、隐私性 和可定位的特点，能更好的挖掘基于用户需求的增值 业务、打造优质交互平台、构建高效便捷的支付系统 、强化虚实互动、实现精准营销等〇2〇商业发展问题 ，为〇2〇创新发展孕育了新的商业机会。</string>
+    <string name="about_us_first">\u3000\u3000普济一城商城是在分享经济时代下提出的一个新的区代 模式。它将是易商通打造“优质产品+优质服务+城市 平台”品牌名片的重要标志，也是易商通五大板块第 一个走向资本市场的项目。以职业经理人-认证推广 师为主体组成的人际服务网和产品体验口碑宣传方式 是打造易商通专卖商城特色和亮点的重要环节。</string>
+    <string name="about_us_third">\u3000\u3000整实现共享平台分享经济价值，完成第三代电商 落地，打造民族电商品牌平台。</string>
+    <string name="str_net_error_message">网络请求失败，请重试</string>
+    <string name="like">%1$d人点赞</string>
+    <string name="findTa">%1$d人找Ta</string>
+    <string name="sale_count">销量%1$d</string>
+
+    <string name="msg_camera_framework_bug">Sorry, the Android camera encountered a problem. You may need to restart the device.</string>
+    <string name="button_ok">OK</string>
+    <string name="viewfinderview_status_text1">将二维码/条码放入取景框内</string>
+    <string name="viewfinderview_status_text2">即可自动扫描</string>
+
+    <!--我的奖券-->
+    <string name="my_tickets">我的奖券</string>
+    <string name="my_tickets_nolottery">未开奖</string>
+    <string name="my_tickets_haslottery">已开奖</string>
+    <string name="tickets_ordernum">订单号: 20180320153366</string>
+    <string name="tickets_tknum">券号: 20180320153366</string>
+    <string name="tickets_one">一等奖</string>
+    <string name="tickets_search">搜奖券 (一等奖)</string>
+    <string name="tickets_order_all">订单总金额</string>
+    <string name="tickets_jlje">奖励金额</string>
+    <string name="tickets_benqi">本期奖券</string>
+    <string name="tickets_shangqi">上期奖券</string>
+    <string name="tickets_preview">奖券预览</string>
+    <string name="tickets_shangqihuojiang">上期获奖名单</string>
+    <string name="tickets_jiangxiang">奖项</string>
+    <string name="tickets_100">100</string>
+    <string name="tickets_jine">金额</string>
+    <string name="tickets_fafang">发放数量</string>
+    <string name="tickets_gailv">概率</string>
+    <string name="tickets_yi">一等奖</string>
+    <string name="tickets_er">二等奖</string>
+    <string name="tickets_san">三等奖</string>
+    <string name="tickets_si">四等奖</string>
+    <string name="tickets_wu">五等奖</string>
+    <string name="tickets_liu">六等奖</string>
+    <string name="tickets_qi">七等奖</string>
+    <string name="tickets_ba">八等奖</string>
+    <string name="tickets_5000">奖励金额: 5000元</string>
+    <string name="tickets_desc1">如何获得奖券。在普济一城app中使用余额支付或者快捷支付方式购买商品，订单完结后则会获得一定数量的奖券。</string>
+    <string name="tickets_desc2">中奖概率。普济一城app发放的奖券综合中奖概率约为50%。具体奖项中奖概率详见每期开奖结果。</string>
+    <string name="tickets_desc3">奖金发放。在每期开奖后1个工作日内奖金会自动发放到“我的-我的账户-普济一城余额”中，可等同现金使用或直接提现。</string>
+    <string name="tickets_desc4">您参与普济一城平台抽奖，即视为您同意本规则，普济一城平台有权对本规则不时进行修改、完善，最终解释权归北京易商通科技股份有限公司所有。非本平台公布的抽奖行为均属欺骗行为，如造成用户财产损失的均与平台无关，用户请须知。</string>
+
+    <array name="my_tickets">
+        <item>未开奖</item>
+        <item>已开奖</item>
+    </array>
+
+    <!-- 商城 -->
+    <string name="tv_mall">商城</string>
+    <string name="tv_title">精选品牌·为您推荐</string>
+
+    <string name="invoice_type">发票类型</string>
+    <string name="common_invoice">普通发票</string>
+    <string name="invoice_head">发票抬头</string>
+    <string name="myself">个人</string>
+    <string name="company">单位</string>
+    <string name="edit_myself">请输入个人名称</string>
+    <string name="edit_head">请输入抬头名称</string>
+    <string name="edit_code">请输入纳税人识别号</string>
+    <string name="invoice_content">发票内容</string>
+    <string name="invoice_content2">发票内容选项已根据税法调整，具体请以展示为准</string>
+    <string name="goods_info">商品明细</string>
+    <string name="invoice_content3">发票内容将显示详细商品名称与价格信息</string>
+
+    <!--我的账户-->
+    <string name="tianyiyue">普济一城余额</string>
+    <string name="tv_zyyj">专员佣金</string>
+    <string name="tianyiyue_zhushi"> 注: 其中XX元为冻结资金,冻结资金仅用于购物支付。</string>
+    <string name="desc_zyyj">注: 余额大于100元才可以提现</string>
+    <string name="zhuanmaijifen">专卖可用积分</string>
+    <string name="zhuanmaijifen_zhushi">注: 可在普济一城商城购物使用。</string>
+    <string name="zmjf">专卖积分</string>
+
+    <!-- 商城的商品列表 -->
+    <string name="tv_sale_count">销量</string>
+    <string name="tv_goods_price">价格</string>
+    <string name="tv_goods_update">上新</string>
+    <string name="tv_goods_pinkage">包邮</string>
+    <string name="tv_main_title">商品列表</string>
+    <string name="tv_net_error">请求失败</string>
+    <string name="tv_check_service">请检查服务器</string>
+
+    <!-- 线上订单列表 -->
+    <string name="im_kuaijie_pay">快捷支付</string>
+    <string name="im_jifen_pay">积分支付</string>
+    <string name="im_yue_pay">余额支付</string>
+
+    <!-- 物流状态 -->
+    <string name="tv_yiqianshou"></string>
+
+    <!-- 添加资讯内容 -->
+    <string name="tv_chakan">查看</string>
+
+    <!-- 是否是模拟器 -->
+    <string name="unknown">unknown</string>
+
+    <!-- 商品列表 -->
+    <string name="current_kunum_no">商品库存不足</string>
+    <string name="current_kunum_shangxian">已达库存上限</string>
+
+    <item name="tag_second" type="id"></item>
+    <item name="tag_first" type="id"></item>
+
+    <string name="dianzan_success">点赞成功</string>
+    <string name="dianzan_cancel">点赞取消</string>
+    <string name="message_sendfail_10"> 10秒内不能再次发送</string>
+    <!--专员介绍-->
+    <string name="commissoner_intro">
+        Dior迪奥由法国时装设计师克里斯汀迪奥于1946年创于巴黎，品牌设计不断创新始终保持高贵优雅的风格品味，演绎时尚魅惑，自信活力。品牌设计不断创新。
+    </string>
+    <string name="comment_desc1">古典欧式风格是追求华丽、高雅的古典，设计风格直接对欧洲建筑、家具、绘画、文学甚至音乐艺术产生了极其重大的影响。</string>
+    <string name="publish_desc1">发布一篇文章</string>
+
+    <string name="comment">评价</string>
+    <string name="publish">发布</string>
+
+    <string name="collection">(或收藏一个商品)</string>
+    <string name="content">检测到您还未发布过文章，发布过文章后您的主页将公布于众，大家可以在您的主页下单，您会获得相应的奖励！</string>
+    <string name="publish_now">立即发布</string>
+    <string name="tv_intro">普济一城服务专员为您服务</string>
+    <string name="tv_simple_intro">这个人很懒，什么都没有留下~</string>
+    <string name="tv_base_info">基本信息</string>
+    <string name="tv_simple_intr">个人简介</string>
+    <string name="tv_head">头像</string>
+    <string name="tv_nick_name">昵称</string>
+    <string name="input_nick_name">请输入昵称</string>
+    <string name="one_intro">一句话介绍</string>
+    <string name="simple_intro">个人简介</string>
+    <string name="tv_service_range">服务范围</string>
+
+    <string name="tv_have_publish">已发布(10)</string>
+    <string name="tv_shenhezhong">审核中</string>
+    <string name="tv_no_passed">未通过</string>
+    <string name="tv_copy">草稿箱</string>
+    <string name="tv_my_share">我的分享</string>
+
+</resources>

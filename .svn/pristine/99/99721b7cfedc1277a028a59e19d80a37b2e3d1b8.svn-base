@@ -1,0 +1,232 @@
+package com.yst.onecity.fragment.commissoner;
+
+import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.onecity.R;
+import com.yst.onecity.activity.ProductDetailActivity;
+import com.yst.onecity.activity.commissioner.CommissionerHomePageActivity;
+import com.yst.onecity.adapter.commissoner.ShareAdapter;
+import com.yst.onecity.base.BaseFragment;
+import com.yst.onecity.bean.commissioner.ShareBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.interfaces.BaseAdapterListener;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.SpaceItemDecoration;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.Unbinder;
+import okhttp3.Call;
+
+/**
+ * 分享页面
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/1
+ */
+
+public class ShareFragment extends BaseFragment implements OnLoadmoreListener, ShareAdapter.onClikListener, BaseAdapterListener, OnRefreshLoadmoreListener {
+    @BindView(R.id.recycler)
+    RecyclerView recycler;
+    @BindView(R.id.refreshlayout)
+    SmartRefreshLayout refreshlayout;
+    @BindView(R.id.iv_empty)
+    ImageView ivEmpty;
+    Unbinder unbinder;
+    @BindView(R.id.rl_parent)
+    RelativeLayout rlParent;
+    private boolean isVisiable;
+    private boolean isRepared;
+    private boolean isFirst = true;
+    private ShareAdapter adapter;
+    private int page = Const.INTEGER_1;
+    private List<ShareBean.ContentBean> shareList = new ArrayList<>();
+    private int position;
+    private String hid;
+    private String memberId;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_goods;
+    }
+
+    @Override
+    public void initData() {
+        isRepared = true;
+        init();
+        lazyLoad();
+    }
+
+    public static ShareFragment newInstance(String hid, String memberId) {
+        ShareFragment fragment = new ShareFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("hid", hid);
+        bundle.putString("memberId", memberId);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    /**
+     * 懒加载
+     */
+    public void lazyLoad() {
+        MyLog.e("sss", "isFirst: " + isFirst + "-isRepared: " + isRepared + "_isVisible: " + isVisiable);
+        if (!isRepared || !isVisiable || !isFirst) {
+            return;
+        }
+        getShareList();
+        isFirst = false;
+    }
+
+    /**
+     * 初始化
+     */
+    private void init() {
+        refreshlayout.setOnRefreshLoadmoreListener(this);
+        adapter = new ShareAdapter(getActivity());
+        adapter.setOnclick(this, this);
+        rlParent.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.color_my_focus_list_divider));
+        recycler.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        recycler.addItemDecoration(new SpaceItemDecoration(0, 20));
+        recycler.setAdapter(adapter);
+        Bundle arguments = getArguments();
+        if (null != arguments) {
+            hid = arguments.getString("hid");
+            memberId = arguments.getString("memberId");
+            adapter.setMemberId(memberId);
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            isVisiable = true;
+            lazyLoad();
+        } else {
+            isVisiable = false;
+        }
+    }
+
+    /**
+     * 获取分享列表
+     */
+    private void getShareList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "hunterId", hid,
+                "page", String.valueOf(page),
+                "rows", String.valueOf(Const.INTEGER_10),
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GET_COMMISSONER_SHARE_LIST)
+                .addParams("hunterId", hid)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .addParams("page", String.valueOf(page))
+                .addParams("rows", String.valueOf(Const.INTEGER_10))
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(e.getMessage());
+                MyLog.e("sss", "---" + e.getMessage());
+                List<ShareBean.ContentBean> emptyList = new ArrayList<>();
+                setVisiableGone(emptyList);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "---response: " + response);
+                if (null != response) {
+                    ShareBean shareBean = new Gson().fromJson(response, ShareBean.class);
+                    if (null != shareBean) {
+                        if (shareBean.getCode() == Const.INTEGER_1 && null != shareBean.getContent()) {
+                            if (page == Const.INTEGER_1) {
+                                shareList.clear();
+                            } else {
+                                if (shareBean.getContent().isEmpty()) {
+                                    ToastUtils.show(getString(R.string.xlist_add_all_msg));
+                                }
+                            }
+                            shareList.addAll(shareBean.getContent());
+                            adapter.addData(shareList);
+                            setVisiableGone(shareList);
+                        } else {
+                            ToastUtils.show(shareBean.getMsg());
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 设置数据和图片的展示
+     *
+     * @param list 集合
+     */
+    public void setVisiableGone(List<ShareBean.ContentBean> list) {
+        if (null != list) {
+            if (list.isEmpty()) {
+                ivEmpty.setVisibility(View.VISIBLE);
+            } else {
+                ivEmpty.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        getShareList();
+        refreshlayout.finishLoadmore(500);
+    }
+
+    @Override
+    public void onClick() {
+        if (!Utils.isClickable()) {
+            return;
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString("productId", String.valueOf(shareList.get(position).getId()));
+        bundle.putString(Const.CONS_STR_HUNTERID, memberId);
+        bundle.putString(Const.CONS_STR_AUTHORID, memberId);
+        Const.TAG = Const.INTEGER_6;
+        CommissionerHomePageActivity.isFirst = false;
+        JumpIntent.jump(getActivity(), ProductDetailActivity.class, bundle);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        this.position = position;
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = Const.INTEGER_1;
+        getShareList();
+        refreshlayout.finishRefresh(500);
+    }
+}
+

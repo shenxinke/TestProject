@@ -1,0 +1,209 @@
+package com.yst.onecity.bean.tickets;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * 奖项表格实体类
+ *
+ * @author WangJingWei
+ * @version 4.0.0
+ * @date 2018/3/21.
+ */
+
+public class TableTicketsBean implements Serializable{
+
+
+    /**
+     * code : 1
+     * msg : 成功
+     * content : {"record":[{"awards":1,"price":50,"name":"一等奖","nameList":[{"phone":"13886244152","nickname":"小杨","lottery_price":50},{"phone":"13886244152","nickname":"小杨","lottery_price":50},{"phone":"13886244152","nickname":"小杨","lottery_price":50},{"phone":"13886244152","nickname":"小杨","lottery_price":50}]},{"awards":2,"price":20,"name":"二等奖","nameList":[{"phone":"13886244152","nickname":"小杨","lottery_price":20}]},{"awards":3,"price":50,"name":"三等奖","nameList":[{"phone":"13886244152","nickname":"小杨","lottery_price":50}]}],"currentPeriod":[{"red_packet_num":2,"price":10000,"name":"一等奖","scale":0,"giveOutNum":0}]}
+     */
+
+    private int code;
+    private String msg;
+    private ContentBean content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        private List<RecordBean> record;
+        private List<CurrentPeriodBean> currentPeriod;
+
+        public List<RecordBean> getRecord() {
+            return record;
+        }
+
+        public void setRecord(List<RecordBean> record) {
+            this.record = record;
+        }
+
+        public List<CurrentPeriodBean> getCurrentPeriod() {
+            return currentPeriod;
+        }
+
+        public void setCurrentPeriod(List<CurrentPeriodBean> currentPeriod) {
+            this.currentPeriod = currentPeriod;
+        }
+
+        public static class RecordBean {
+            /**
+             * awards : 1
+             * price : 50
+             * name : 一等奖
+             * nameList : [{"phone":"13886244152","nickname":"小杨","lottery_price":50},{"phone":"13886244152","nickname":"小杨","lottery_price":50},{"phone":"13886244152","nickname":"小杨","lottery_price":50},{"phone":"13886244152","nickname":"小杨","lottery_price":50}]
+             */
+
+            private String awards;
+            private String price;
+            private String name;
+            private List<NameListBean> nameList;
+
+            public String getAwards() {
+                return awards;
+            }
+
+            public void setAwards(String awards) {
+                this.awards = awards;
+            }
+
+            public String getPrice() {
+                return price;
+            }
+
+            public void setPrice(String price) {
+                this.price = price;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public List<NameListBean> getNameList() {
+                return nameList;
+            }
+
+            public void setNameList(List<NameListBean> nameList) {
+                this.nameList = nameList;
+            }
+
+            public static class NameListBean {
+                /**
+                 * phone : 13886244152
+                 * nickname : 小杨
+                 * lottery_price : 50
+                 */
+
+                private String phone;
+                private String nickname;
+                private int lottery_price;
+
+                public String getPhone() {
+                    return phone;
+                }
+
+                public void setPhone(String phone) {
+                    this.phone = phone;
+                }
+
+                public String getNickname() {
+                    return nickname;
+                }
+
+                public void setNickname(String nickname) {
+                    this.nickname = nickname;
+                }
+
+                public int getLottery_price() {
+                    return lottery_price;
+                }
+
+                public void setLottery_price(int lottery_price) {
+                    this.lottery_price = lottery_price;
+                }
+            }
+        }
+
+        public static class CurrentPeriodBean {
+            /**
+             * red_packet_num : 2
+             * price : 10000
+             * name : 一等奖
+             * scale : 0.0
+             * giveOutNum : 0.0
+             */
+
+            private String red_packet_num;
+            private String price;
+            private String name;
+            private String scale;
+            private String giveOutNum;
+
+            public String getRed_packet_num() {
+                return red_packet_num;
+            }
+
+            public void setRed_packet_num(String red_packet_num) {
+                this.red_packet_num = red_packet_num;
+            }
+
+            public String getPrice() {
+                return price;
+            }
+
+            public void setPrice(String price) {
+                this.price = price;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getScale() {
+                return scale;
+            }
+
+            public void setScale(String scale) {
+                this.scale = scale;
+            }
+
+            public String getGiveOutNum() {
+                return giveOutNum;
+            }
+
+            public void setGiveOutNum(String giveOutNum) {
+                this.giveOutNum = giveOutNum;
+            }
+        }
+    }
+}

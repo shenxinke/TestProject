@@ -1,0 +1,133 @@
+package com.yst.tianyimember.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.bean.order.SonBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.utils.ConstUtils;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 订单商品适配器
+ *
+ * @author chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class OrderProductAdapter extends BaseAdapter {
+    private Context context;
+    private List<SonBean> data;
+    private int scoreStatus;
+    private String state;
+    private String payType;
+    private int isXYT;
+
+    public OrderProductAdapter(Context context, List<SonBean> data, int scoreStatus, String payType, String state, int isXYT) {
+        this.context = context;
+        this.data = data;
+        this.scoreStatus = scoreStatus;
+        this.state = state;
+        this.payType = payType;
+        this.isXYT = isXYT;
+    }
+
+    @Override
+    public int getCount() {
+        if (data != null) {
+            return data.size();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public SonBean getItem(int position) {
+        return data.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View view, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if (view == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.item_product, null);
+            holder = new ViewHolder(view);
+            view.setTag(holder);
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+        SonBean item = getItem(position);
+        Glide.with(context).load(item.getAddress())
+                .placeholder(R.mipmap.img_default_p)
+                .error(R.mipmap.img_default_p).into(holder.ivImage);
+        holder.tvTitle.setText(ConstUtils.getStringNoEmpty(item.getName()));
+        holder.tvPrice.setText("¥" + item.getPrice());
+        holder.tvDes.setText(ConstUtils.getStringNoEmpty(item.getContent()));
+        holder.tvCount.setText("x" + item.getNum());
+        holder.tvScore.setText("" + item.getScore());
+        holder.weight.setText(item.getWeight() + "kg");
+        if (Const.STR0.equals(state)) {
+            /**
+             * 判断是否是新业态用户  判断后台积分按钮是否打开  判断是否积分支付
+             * 0 是新业态  1不是新业态
+             * 0是开启  1是不开启
+             */
+            if (isXYT == Const.INTEGER_1) {
+                holder.llJifen.setVisibility(View.INVISIBLE);
+            } else {
+                if (scoreStatus == Const.INTEGER_0) {
+                    holder.llJifen.setVisibility(View.VISIBLE);
+                } else {
+                    holder.llJifen.setVisibility(View.INVISIBLE);
+                }
+            }
+        } else {
+            if (Const.CONS_STR_JIFENZHIFU.equals(payType)) {
+                holder.llJifen.setVisibility(View.VISIBLE);
+            } else {
+                holder.llJifen.setVisibility(View.INVISIBLE);
+            }
+        }
+        return view;
+    }
+
+    class ViewHolder {
+        @BindView(R.id.iv_image)
+        ImageView ivImage;
+        @BindView(R.id.tv_title)
+        TextView tvTitle;
+        @BindView(R.id.tv_price)
+        TextView tvPrice;
+        @BindView(R.id.tv_count)
+        TextView tvCount;
+        @BindView(R.id.tv_des)
+        TextView tvDes;
+        @BindView(R.id.tv_score)
+        TextView tvScore;
+        @BindView(R.id.weight)
+        TextView weight;
+        @BindView(R.id.ll_jifen)
+        LinearLayout llJifen;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

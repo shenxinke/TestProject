@@ -1,0 +1,134 @@
+package com.yst.tianyimember.adapter;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Point;
+import android.view.Display;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+
+import com.bumptech.glide.Glide;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.bean.ServerMemberBackGrounImage;
+import com.yst.tianyimember.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 服务专员背景adapter
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class ServerMemberBgAdapter extends BaseAdapter {
+    private List<ServerMemberBackGrounImage.ContentBean> dataBean = new ArrayList<>();
+    private int defaultCount = 0;
+    private Activity mContext;
+
+    public ServerMemberBgAdapter(List<ServerMemberBackGrounImage.ContentBean> datas, Activity mContext) {
+        if (dataBean != null) {
+            this.dataBean = datas;
+        } else {
+            this.dataBean = new ArrayList<>();
+        }
+        this.mContext = mContext;
+    }
+
+    @Override
+    public int getCount() {
+        if (dataBean.size() != 0) {
+            return dataBean.size();
+        }
+        return defaultCount;
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return dataBean.get(position);
+    }
+
+    public void setData(List<ServerMemberBackGrounImage.ContentBean> data) {
+        if (dataBean != null) {
+            this.dataBean = data;
+            this.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup viewGroup) {
+        ViewHolder mGridItemHolder = null;
+        if (convertView == null) {
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_servermember_bg, null);
+            mGridItemHolder = new ViewHolder(convertView);
+            convertView.setTag(mGridItemHolder);
+        }
+        mGridItemHolder = (ViewHolder) convertView.getTag();
+        mGridItemHolder.ivBg.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display d = wm.getDefaultDisplay();
+        Point outSize = new Point();
+        d.getSize(outSize);
+        int width = outSize.x;
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(new ViewGroup.LayoutParams(width / 3 - 20, width / 3 - 20));
+        mGridItemHolder.ivBg.setLayoutParams(lp);
+        if (dataBean.get(position).getAddress() != null) {
+            MyLog.e("servermBg", "adapter————————————" + dataBean.get(position).getAddress());
+            Glide.with(mContext).load(dataBean.get(position).getAddress()).into(mGridItemHolder.ivBg);
+        }
+        if (dataBean.get(position).isCheck()){
+            mGridItemHolder.civChoose.setVisibility(View.VISIBLE);
+        }else {
+            mGridItemHolder.civChoose.setVisibility(View.GONE);
+        }
+        mGridItemHolder.ivBg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (iGetScrollPosition != null) {
+                    iGetScrollPosition.click(position);
+                }
+            }
+        });
+        return convertView;
+    }
+
+    private IGetScrollPosition iGetScrollPosition;
+
+    public void setIScrollPositon(IGetScrollPosition iGetScrollPosition) {
+        this.iGetScrollPosition = iGetScrollPosition;
+    }
+
+    public interface IGetScrollPosition {
+        /**
+         * 点击加号回掉
+         * @param i
+         */
+        void click(int i);
+
+    }
+
+    public class ViewHolder {
+        @BindView(R.id.iv_bg)
+        ImageView ivBg;
+        @BindView(R.id.iv_choosh)
+        ImageView civChoose;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

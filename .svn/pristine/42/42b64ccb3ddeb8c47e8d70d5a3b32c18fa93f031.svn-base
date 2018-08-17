@@ -1,0 +1,264 @@
+package com.yst.tianyimember.bean;
+
+import java.util.List;
+
+/**
+ * 购物车bean
+ *
+ * @author wuxiaofang
+ * @version 4.0.0
+ * @date 2018/3/27
+ */
+
+public class CartListBean {
+
+    /**
+     * code : 1
+     * content : [{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171204/20171204152033047473199.png","buyNum":1,"id":1043,"name":"sf","num":456,"phtype":1,"price":89,"productId":136,"productSpecification":"4","productSpecificationId":309,"productStatus":0,"scorePrice":"","weight":"5000"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171021/20171021094938160958251.jpg","buyNum":4,"id":1044,"name":"《科技文摘》----十九大特刊(10份)","phtype":1,"price":1,"productId":21,"productSpecification":"10份","productSpecificationId":240,"scorePrice":"","weight":"5000"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171128/20171128105155556929013.jpg","buyNum":1,"id":1047,"name":"蒙牛酸牛奶","phtype":0,"price":20,"productId":102,"productSpecification":"100克-草莓味","productSpecificationId":120,"scorePrice":"","weight":"5000"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171201/20171201145219222839386.jpg","buyNum":1,"id":1048,"name":"面包","phtype":0,"price":10,"productId":118,"productSpecification":"10","productSpecificationId":163,"scorePrice":"","weight":"5000"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171201/20171201140109973638773.jpg","buyNum":1,"id":1065,"name":"鲜果汁","num":239,"phtype":1,"price":6,"productId":117,"productSpecification":"胡萝卜","productSpecificationId":160,"productStatus":1,"scorePrice":"","weight":"5000"}]
+     * msg : 成功
+     */
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * address : https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171204/20171204152033047473199.png
+         * buyNum : 1
+         * id : 1043
+         * name : sf
+         * num : 456
+         * phtype : 1
+         * price : 89.0
+         * productId : 136
+         * productSpecification : 4
+         * productSpecificationId : 309
+         * productStatus : 0
+         * scorePrice :
+         * weight : 5000
+         * isAbate: 0失效 1 未失效
+         */
+
+        private String address;
+        private int buyNum;
+        private int id;
+        private int isAbate;
+        private String name;
+        private int num;
+        private int phtype;
+        private double price;
+        private int productId;
+        private String productSpecification;
+        private int productSpecificationId;
+        private int productStatus;
+        private String scorePrice;
+        private String weight;
+        private boolean isChildCheck;
+        private int productStock;
+        private boolean isEdit;
+        private boolean isChecked;
+        private boolean isUseful;
+
+        public int getIsAbate() {
+            return isAbate;
+        }
+
+        public void setIsAbate(int isAbate) {
+            this.isAbate = isAbate;
+        }
+
+        public boolean isUseful() {
+            return isUseful;
+        }
+
+        public void setUseful(boolean useful) {
+            isUseful = useful;
+        }
+
+        public boolean isEdit() {
+            return isEdit;
+        }
+
+        public void setEdit(boolean edit) {
+            isEdit = edit;
+        }
+
+        public boolean isChecked() {
+            return isChecked;
+        }
+
+        public void setChecked(boolean checked) {
+            isChecked = checked;
+        }
+
+        public ContentBean() {
+        }
+
+        public int getProductStock() {
+            return productStock;
+        }
+
+        public void setProductStock(int productStock) {
+            this.productStock = productStock;
+        }
+
+        public ContentBean(String address, int buyNum, int id, String name, int num, int phtype, double price, int productId, String productSpecification, int productSpecificationId, int productStatus, String scorePrice, String weight, boolean isChildCheck, int productStock) {
+            this.address = address;
+            this.buyNum = buyNum;
+            this.id = id;
+            this.name = name;
+            this.num = num;
+            this.phtype = phtype;
+            this.price = price;
+            this.productId = productId;
+            this.productSpecification = productSpecification;
+            this.productSpecificationId = productSpecificationId;
+            this.productStatus = productStatus;
+            this.scorePrice = scorePrice;
+            this.weight = weight;
+            this.isChildCheck = isChildCheck;
+            this.productStock = productStock;
+        }
+
+        public boolean isChildCheck() {
+            return isChildCheck;
+        }
+
+        public void setChildCheck(boolean childCheck) {
+            isChildCheck = childCheck;
+        }
+
+        public ContentBean(String address) {
+            this.address = address;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public int getBuyNum() {
+            return buyNum;
+        }
+
+        public void setBuyNum(int buyNum) {
+            this.buyNum = buyNum;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getNum() {
+            return num;
+        }
+
+        public void setNum(int num) {
+            this.num = num;
+        }
+
+        public int getPhtype() {
+            return phtype;
+        }
+
+        public void setPhtype(int phtype) {
+            this.phtype = phtype;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
+
+        public int getProductId() {
+            return productId;
+        }
+
+        public void setProductId(int productId) {
+            this.productId = productId;
+        }
+
+        public String getProductSpecification() {
+            return productSpecification;
+        }
+
+        public void setProductSpecification(String productSpecification) {
+            this.productSpecification = productSpecification;
+        }
+
+        public int getProductSpecificationId() {
+            return productSpecificationId;
+        }
+
+        public void setProductSpecificationId(int productSpecificationId) {
+            this.productSpecificationId = productSpecificationId;
+        }
+
+        public int getProductStatus() {
+            return productStatus;
+        }
+
+        public void setProductStatus(int productStatus) {
+            this.productStatus = productStatus;
+        }
+
+        public String getScorePrice() {
+            return scorePrice;
+        }
+
+        public void setScorePrice(String scorePrice) {
+            this.scorePrice = scorePrice;
+        }
+
+        public String getWeight() {
+            return weight;
+        }
+
+        public void setWeight(String weight) {
+            this.weight = weight;
+        }
+    }
+}

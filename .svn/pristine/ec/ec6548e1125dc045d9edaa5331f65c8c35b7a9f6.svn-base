@@ -1,0 +1,98 @@
+package com.yst.tianyimember.bean.order;
+
+import com.yst.tianyimember.bean.CodeMsgBean;
+
+/**
+ * 线上订单状态数量
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class OrderStatusNumBean extends CodeMsgBean{
+
+    private OrderNumBean content;
+
+    public OrderNumBean getContent() {
+        return content;
+    }
+
+    public void setContent(OrderNumBean content) {
+        this.content = content;
+    }
+
+    /**
+     * allOrder : 2
+     * dfh : 1
+     * dfk : 0
+     * dsh : 0
+     * dpj : 0
+     * ycx : 0
+     */
+
+    public class OrderNumBean {
+        private int allOrder;
+        private int dfh;
+        private int dfk;
+        private int dsh;
+        private int dpj;
+        private int ycx;
+        private int ywc;
+
+        public int getYwc() {
+            return ywc;
+        }
+
+        public void setYwc(int ywc) {
+            this.ywc = ywc;
+        }
+
+        public int getAllOrder() {
+            return allOrder;
+        }
+
+        public void setAllOrder(int allOrder) {
+            this.allOrder = allOrder;
+        }
+
+        public int getDfh() {
+            return dfh;
+        }
+
+        public void setDfh(int dfh) {
+            this.dfh = dfh;
+        }
+
+        public int getDfk() {
+            return dfk;
+        }
+
+        public void setDfk(int dfk) {
+            this.dfk = dfk;
+        }
+
+        public int getDsh() {
+            return dsh;
+        }
+
+        public void setDsh(int dsh) {
+            this.dsh = dsh;
+        }
+
+        public int getDpj() {
+            return dpj;
+        }
+
+        public void setDpj(int dpj) {
+            this.dpj = dpj;
+        }
+
+        public int getYcx() {
+            return ycx;
+        }
+
+        public void setYcx(int ycx) {
+            this.ycx = ycx;
+        }
+    }
+}

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/iv_comment_head"
+        android:layout_width="@dimen/x48"
+        android:layout_height="@dimen/x48"
+        android:layout_marginLeft="@dimen/x16"
+        android:layout_marginTop="@dimen/x24"
+        android:src="@mipmap/img_default_p"
+        android:scaleType="fitXY"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:oval="true" />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x12"
+        android:text="春天来了"
+        android:textColor="@color/color_333333"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_comment_head"
+        app:layout_constraintLeft_toRightOf="@+id/iv_comment_head"
+        app:layout_constraintTop_toTopOf="@+id/iv_comment_head" />
+
+    <com.yst.onecity.view.RatingBar
+        android:id="@+id/comment_ratingbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_comment_head"
+        app:layout_constraintLeft_toRightOf="@+id/tv_name"
+        app:layout_constraintTop_toTopOf="@+id/iv_comment_head"
+        android:layout_marginLeft="@dimen/x10"
+        app:starCount="5"
+        app:starEmpty="@drawable/pingjia_star_n"
+        app:starFill="@drawable/pingjia_star_s"
+        app:starImageSize="12dp"
+        app:starPadding="4dp"
+        app:starStep="5"
+        app:stepSize="Full" />
+
+
+    <TextView
+        android:id="@+id/tv_itemdz"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/x12"
+        android:background="@drawable/comment_dz_bg"
+        android:drawableLeft="@drawable/product_zan_unpress"
+        android:drawablePadding="@dimen/x4"
+        android:gravity="center_vertical"
+        android:paddingBottom="@dimen/x4"
+        android:paddingLeft="@dimen/x12"
+        android:paddingRight="@dimen/x12"
+        android:paddingTop="@dimen/x4"
+        android:text="10086"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/text_size_12"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_comment_head"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_comment_head" />
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x6"
+        android:layout_marginTop="@dimen/x16"
+        android:text="2018-04-14"
+        android:textColor="@color/color_888888"
+        app:layout_constraintLeft_toLeftOf="@+id/iv_comment_head"
+        app:layout_constraintTop_toBottomOf="@+id/iv_comment_head" />
+
+    <TextView
+        android:id="@+id/tv_guige"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x16"
+        android:layout_marginTop="@dimen/x16"
+        android:text="规格: 300*300"
+        android:textColor="@color/color_888888"
+        app:layout_constraintLeft_toRightOf="@+id/tv_time"
+        app:layout_constraintTop_toBottomOf="@+id/iv_comment_head" />
+
+
+    <TextView
+        android:id="@+id/tv_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/x24"
+        android:paddingBottom="@dimen/x20"
+        android:text="养生堂的吃很多年了，是真不好吃。"
+        android:textColor="@color/color_333333"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_time"
+        app:layout_constraintTop_toBottomOf="@+id/tv_time"
+        />
+</android.support.constraint.ConstraintLayout>

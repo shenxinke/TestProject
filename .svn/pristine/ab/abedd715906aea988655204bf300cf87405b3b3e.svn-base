@@ -1,0 +1,805 @@
+package com.yst.onecity.activity;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.constraint.ConstraintLayout;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.tencent.TIMCustomElem;
+import com.tencent.TIMMessage;
+import com.tencent.rtmp.ITXLivePlayListener;
+import com.tencent.rtmp.TXLiveConstants;
+import com.tencent.rtmp.TXLivePlayConfig;
+import com.tencent.rtmp.TXLivePlayer;
+import com.tencent.rtmp.ui.TXCloudVideoView;
+import com.umeng.socialize.UMShareAPI;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.activity.login.LoginActivity;
+import com.yst.onecity.adapter.ChatMsgListAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.liveroom.ChatEntityBean;
+import com.yst.onecity.bean.liveroom.JoinLiveRoomBean;
+import com.yst.onecity.bean.liveroom.OnLinePeopleBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.SendCommentDialog;
+import com.yst.onecity.fragment.popfragment.LiveOnLineNumDialog;
+import com.yst.onecity.fragment.popfragment.ShareCommonDialog;
+import com.yst.onecity.interfaces.LiveView;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.KeyBoardUtils;
+import com.yst.onecity.utils.LiveHelp;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.RxCode;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.builder.PostFormBuilder;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import butterknife.BindView;
+import gorden.rxbus2.RxBus;
+import okhttp3.Call;
+
+/**
+ * 直播间页面
+ *
+ * @author WangJingWei
+ * @version 4.1.0
+ * @date 2018/5/14.
+ */
+public class LiveRoomActivity extends BaseActivity implements ITXLivePlayListener, LiveView, View.OnClickListener, SendCommentDialog.OnSendListener {
+    @BindView(R.id.play_view)
+    TXCloudVideoView mPlayerView;
+    @BindView(R.id.live_constraintLayout)
+    ConstraintLayout liveConstraint;
+    @BindView(R.id.live_image_over)
+    ImageView liveImageOver;
+    @BindView(R.id.live_text_over)
+    TextView liveTextOver;
+    @BindView(R.id.live_button_over)
+    Button liveButtonOver;
+    @BindView(R.id.image_liveOut)
+    ImageView liveImageOut;
+    @BindView(R.id.image_liveFenxiang)
+    ImageView liveImageShare;
+    @BindView(R.id.text_livePinglun)
+    TextView liveImageComment;
+    @BindView(R.id.live_list)
+    ListView mListViewMsgItems;
+    @BindView(R.id.text_livePeople)
+    TextView liveTextPeople;
+    @BindView(R.id.text_liveRoom)
+    TextView textLiveRoom;
+
+
+    private TXLivePlayer mLivePlayer = null;
+    private boolean mHWDecode = false;
+    private int mCurrentRenderMode;
+    private int mPlayType = TXLivePlayer.PLAY_TYPE_LIVE_RTMP;
+    private TXLivePlayConfig mPlayConfig;
+    protected int mActivityType;
+    private SendCommentDialog editDialog;
+    private String groupId;
+    private String flvliveUrl;
+    private String roomId;
+    private String imgUrl;
+    private String hlsAddress;
+    private String title;
+    private LiveOnLineNumDialog liveOnLineNumDialog;
+    private ShareCommonDialog mShareCommonDialog;
+
+    private LiveHelp mLiveControlHelper;
+    private boolean mBoolRefreshLock = false;
+    private boolean mBoolNeedRefresh = false;
+    private ArrayList<ChatEntityBean> mTmpChatList = new ArrayList<>();
+    private ArrayList<ChatEntityBean> mArrayListChatEntity;
+    private RefreshListViewTask mRefreshListViewTask = null;
+    private RefreshLiveOnLineNumTask mRefreshLiveOnLineNumTask = null;
+    private ChatMsgListAdapter mChatMsgListAdapter;
+    private String joinLiveRoomAddress;
+    private String joinLiveRoomname;
+    private String loginJoinLiveRoomimg;
+    private int spTime = 1000 * 60;
+    private ScheduledExecutorService executorServiceChatView;
+    private ScheduledThreadPoolExecutor executorServiceOnline;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_live_room;
+    }
+
+    /**
+     * 跳转直播详情页面
+     */
+    public static void openActivity(Context context, String groupId, String flvPlayAddress, String roomId, String imgUrl, String hlsPlayAddress, String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString("groupId", groupId);
+        bundle.putString("flvPlayAddress", flvPlayAddress);
+        bundle.putString("roomId", roomId);
+        bundle.putString("imgUrl", imgUrl);
+        bundle.putString("hlsPlayAddress", hlsPlayAddress);
+        bundle.putString("title", title);
+
+        JumpIntent.jump((Activity) context, LiveRoomActivity.class, bundle);
+    }
+
+    @Override
+    public void initData() {
+        RxBus.get().register(this);
+        Bundle bundle = getIntent().getExtras();
+        groupId = bundle.getString("groupId");
+        flvliveUrl = bundle.getString("flvPlayAddress");
+        roomId = bundle.getString("roomId");
+        imgUrl = bundle.getString("imgUrl");
+        hlsAddress = bundle.getString("hlsPlayAddress");
+        title = bundle.getString("title");
+
+        mLiveControlHelper = new LiveHelp(LiveRoomActivity.this, this);
+        toLoginLiveRoom();
+        initLivePlay();
+        initChatListView();
+        initLiveListener();
+        initThreadPool();
+    }
+
+    /**
+     * 初始化直播间参数
+     */
+    private void initLivePlay() {
+        mCurrentRenderMode = TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION;
+        mActivityType = getIntent().getIntExtra("PLAY_TYPE", Const.INTEGER_2);
+        mPlayConfig = new TXLivePlayConfig();
+        if (mLivePlayer == null) {
+            mLivePlayer = new TXLivePlayer(this);
+        }
+        mPlayerView.showLog(false);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        textLiveRoom.setText(roomId);
+        textLiveRoom.setVisibility(View.VISIBLE);
+        startPlay();
+    }
+
+    /**
+     * 初始化直播间聊天界面布局
+     */
+    private void initChatListView() {
+        mArrayListChatEntity = new ArrayList<ChatEntityBean>();
+        mChatMsgListAdapter = new ChatMsgListAdapter(this, mListViewMsgItems, mArrayListChatEntity);
+        mListViewMsgItems.setAdapter(mChatMsgListAdapter);
+    }
+
+    /**
+     * 初始化直播间监听事件
+     */
+    private void initLiveListener() {
+        liveButtonOver.setOnClickListener(this);
+        liveTextPeople.setOnClickListener(this);
+        liveImageOut.setOnClickListener(this);
+        liveImageShare.setOnClickListener(this);
+        liveImageComment.setOnClickListener(this);
+    }
+
+    /**
+     * 判断播放地址是否合法
+     *
+     * @param playUrl
+     * @return
+     */
+    private boolean checkPlayUrl(final String playUrl) {
+        boolean flag = TextUtils.isEmpty(playUrl) || (!playUrl.startsWith(Const.CONS_STR_LIVE_HTTP) && !playUrl.startsWith(Const.CONS_STR_LIVE_HTTPS) && !playUrl.startsWith(Const.CONS_STR_LIVE_RTMP) && !playUrl.startsWith(Const.CONS_STR_LIVE_LINE));
+        if (flag) {
+            Toast.makeText(getApplicationContext(), Const.CONS_STR_ISLIVEURL, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        boolean flagFlv = (playUrl.startsWith(Const.CONS_STR_LIVE_HTTP) || playUrl.startsWith(Const.CONS_STR_LIVE_HTTPS)) && playUrl.contains(Const.CONS_STR_LIVE_FLV);
+
+        switch (mActivityType) {
+            case Const.INTEGER_2: {
+                if (playUrl.startsWith(Const.CONS_STR_LIVE_RTMP)) {
+                    mPlayType = TXLivePlayer.PLAY_TYPE_LIVE_RTMP;
+                } else if (flagFlv) {
+                    mPlayType = TXLivePlayer.PLAY_TYPE_LIVE_FLV;
+                } else {
+                    Toast.makeText(getApplicationContext(), Const.CONS_STR_ISLIVEURL, Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }
+            break;
+            case Const.INTEGER_1:
+                mPlayType = TXLivePlayer.PLAY_TYPE_LIVE_RTMP_ACC;
+                break;
+            default:
+                Toast.makeText(getApplicationContext(), Const.CONS_STR_ISLIVEURL, Toast.LENGTH_SHORT).show();
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * 开始直播
+     *
+     * @return
+     */
+    private boolean startPlay() {
+        if (!checkPlayUrl(flvliveUrl)) {
+            return false;
+        }
+        mLivePlayer.setPlayerView(mPlayerView);
+        mLivePlayer.setPlayListener(this);
+        mLivePlayer.enableHardwareDecode(mHWDecode);
+        mLivePlayer.setRenderMode(mCurrentRenderMode);
+        mLivePlayer.setConfig(mPlayConfig);
+        int result = mLivePlayer.startPlay(flvliveUrl, mPlayType);
+        if (result != Const.INTEGER_0) {
+            return false;
+        }
+        showProgressDialog();
+        return true;
+    }
+
+    /**
+     * 停止直播
+     *
+     * @return
+     */
+    private void stopPlay() {
+        dismissProgressDialog();
+        if (mLivePlayer != null) {
+            mLivePlayer.stopRecord();
+            mLivePlayer.setPlayListener(null);
+            mLivePlayer.stopPlay(true);
+        }
+    }
+
+    /**
+     * 直播状态
+     *
+     * @param event
+     * @param param
+     */
+    @Override
+    public void onPlayEvent(int event, Bundle param) {
+        if (event == TXLiveConstants.PLAY_EVT_PLAY_BEGIN) {
+            dismissProgressDialog();
+        } else if (event == TXLiveConstants.PLAY_EVT_PLAY_END) {
+            stopPlay();
+            liveImageOver.setVisibility(View.VISIBLE);
+            liveTextOver.setVisibility(View.VISIBLE);
+            liveButtonOver.setVisibility(View.VISIBLE);
+        } else if (event == TXLiveConstants.PLAY_ERR_NET_DISCONNECT) {
+            stopPlay();
+            liveImageOver.setVisibility(View.VISIBLE);
+            liveTextOver.setVisibility(View.VISIBLE);
+            liveButtonOver.setVisibility(View.VISIBLE);
+        } else if (event == TXLiveConstants.PLAY_EVT_PLAY_LOADING) {
+            showProgressDialog();
+        } else if (event == TXLiveConstants.PLAY_EVT_RCV_FIRST_I_FRAME) {
+            dismissProgressDialog();
+        }
+    }
+
+    @Override
+    public void onNetStatus(Bundle bundle) {
+    }
+
+    /**
+     * 初始化两个线程池（维护聊天列表的线程池 和 获取在线人数任务的线程池）
+     */
+    private void initThreadPool() {
+        executorServiceChatView = new ScheduledThreadPoolExecutor(8,
+                new BasicThreadFactory.Builder().namingPattern("thread_live_chatlist_pool").daemon(true).build());
+
+        mRefreshLiveOnLineNumTask = new RefreshLiveOnLineNumTask();
+        executorServiceOnline = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("thread_live_onlinenum_pool").daemon(true).build());
+        executorServiceOnline.scheduleAtFixedRate(mRefreshLiveOnLineNumTask, 0, spTime, TimeUnit.MILLISECONDS);
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.text_livePeople:
+                if (Utils.isClickable()) {
+                    if (liveOnLineNumDialog == null) {
+                        liveOnLineNumDialog = LiveOnLineNumDialog.newInstance(groupId);
+                    }
+                    liveOnLineNumDialog.show(getFragmentManager(), LiveOnLineNumDialog.class.toString());
+                }
+                break;
+            case R.id.image_liveOut:
+                finish();
+                break;
+
+            case R.id.image_liveFenxiang:
+                if (!TianyiApplication.isLogin) {
+                    toLogOutLiveRoom();
+                    JumpIntent.jump((Activity) context, LoginActivity.class);
+                    return;
+                }
+
+                if (mShareCommonDialog == null) {
+                    mShareCommonDialog = ShareCommonDialog.openShareDialog(LiveRoomActivity.this, "直播", title, hlsAddress, imgUrl);
+                }
+                mShareCommonDialog.show(getFragmentManager(), ShareCommonDialog.class.toString());
+
+                break;
+            case R.id.text_livePinglun:
+                if (!TianyiApplication.isLogin) {
+                    toLogOutLiveRoom();
+                    JumpIntent.jump((Activity) context, LoginActivity.class);
+                    return;
+                }
+                if (editDialog == null) {
+                    editDialog = SendCommentDialog.creat(this, 1);
+                }
+                editDialog.show(getSupportFragmentManager());
+                break;
+            case R.id.live_button_over:
+                finish();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 通用消息1 通知消息2
+     *
+     * @param manager
+     * @param etComment
+     */
+    @Override
+    public void editSend(String manager, EditText etComment) {
+        if (!editDialog.isDisallowEnable) {
+            editDialog.setDisallowEnable(true);
+            KeyBoardUtils.closeKeybord(etComment, this);
+            sendText(manager, Const.INTEGER_1);
+            etComment.setText("");
+            mHandler.sendEmptyMessageDelayed(Const.MESSAGE_SETSENDENABLE, Const.INTEGER_10000);
+        } else {
+            ToastUtils.show(getString(R.string.message_sendfail_10));
+        }
+    }
+
+    /**
+     * 进入直播间接口
+     */
+    private void toLoginLiveRoom() {
+        String timestamp = SignUtils.getTimeStamp();
+        String[] strings;
+        String sign;
+        PostFormBuilder post = OkHttpUtils.post();
+
+        if (!TianyiApplication.isLogin) {
+            strings = new String[]{"groupId", groupId, "timestamp", timestamp};
+            sign = Utils.getSign(strings);
+            if (TextUtils.isEmpty(sign)) {
+                return;
+            }
+            post.addParams("sign", sign);
+        } else {
+            String image = TianyiApplication.appCommonBean.getAddress();
+            String imId = TianyiApplication.appCommonBean.getIm_id();
+            String nick = !TextUtils.isEmpty(TianyiApplication.appCommonBean.getNickname())
+                    ? TianyiApplication.appCommonBean.getNickname() : TianyiApplication.appCommonBean.getPhone();
+            strings = new String[]{"groupId", groupId, "image", image, "im_id", imId, "nick", nick, "timestamp", timestamp};
+            sign = Utils.getSign(strings);
+            if (TextUtils.isEmpty(sign)) {
+                return;
+            }
+            post.addParams("im_id", imId);
+            post.addParams("nick", nick);
+            post.addParams("image", image);
+            post.addParams("sign", sign);
+        }
+
+        post.url(Constants.LIVE_JOIN_ROOM);
+        post.addParams("timestamp", timestamp);
+        post.addParams("client_type", "A");
+        post.addParams("groupId", groupId);
+
+        post.build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+
+                MyLog.e("sss", "---" + response);
+                JoinLiveRoomBean joinLiveRoomBean = new Gson().fromJson(response, JoinLiveRoomBean.class);
+                JoinLiveRoomBean.ContentBean content = joinLiveRoomBean.getContent();
+                if (joinLiveRoomBean != null && content != null) {
+                    switch (joinLiveRoomBean.getCode()) {
+                        case Const.INTEGER_1:
+                        case Const.INTEGER_2:
+                            Const.ISLOGING ++;
+                            joinLiveRoomAddress = content.getAddress();
+                            joinLiveRoomname = content.getName();
+                            loginJoinLiveRoomimg = content.getAddress();
+
+                            if (TianyiApplication.isLogin) {
+                                mHandler.sendEmptyMessageDelayed(Const.MESSAGE_INIT_IMLISTENER, Const.INTEGER_1000);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 退出直播间接口
+     */
+    private void toLogOutLiveRoom() {
+        String timestamp = SignUtils.getTimeStamp();
+        String[] strings;
+        String sign;
+        PostFormBuilder post = OkHttpUtils.post();
+
+        if (!TianyiApplication.isLogin) {
+            strings = new String[]{"groupId", groupId, "nick", joinLiveRoomname, "image", joinLiveRoomAddress, "timestamp", timestamp};
+            sign = Utils.getSign(strings);
+            if (TextUtils.isEmpty(sign)) {
+                return;
+            }
+            post.addParams("image", joinLiveRoomAddress);
+            post.addParams("nick", joinLiveRoomname);
+            post.addParams("sign", sign);
+        } else {
+            String image = TianyiApplication.appCommonBean.getAddress();
+            if (TextUtils.isEmpty(image)) {
+                image = loginJoinLiveRoomimg;
+            }
+            String imId = TianyiApplication.appCommonBean.getIm_id();
+            String nick = !TextUtils.isEmpty(TianyiApplication.appCommonBean.getNickname())
+                    ? TianyiApplication.appCommonBean.getNickname() : TianyiApplication.appCommonBean.getPhone();
+            strings = new String[]{"groupId", groupId, "image", image, "im_id", imId, "nick", nick, "timestamp", timestamp};
+            sign = Utils.getSign(strings);
+            if (TextUtils.isEmpty(sign)) {
+                return;
+            }
+            post.addParams("im_id", imId);
+            post.addParams("nick", nick);
+            post.addParams("image", image);
+            post.addParams("sign", sign);
+        }
+
+        post.url(Constants.LIVE_OUT_ROOM);
+        post.addParams("timestamp", timestamp);
+        post.addParams("client_type", "A");
+        post.addParams("groupId", groupId);
+
+        post.build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "LogingJoinLiveRoom____" + response);
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    if (jsonObject != null && Const.INTEGER_1 == jsonObject.getInt(Const.CONS_STR_CODE)) {
+                        Const.ISLOGING = 0;
+                    } else {
+///                        ToastUtils.show(jsonObject.getString(Const.CONS_STR_MESSAGE));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+
+    /**
+     * 获取在线人数
+     **/
+    private void getOnLivePeople() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "groupId", groupId,
+                "timestamp", timestamp);
+
+        OkHttpUtils.post().url(Constants.LIVE_ONLINE_PEOPLE)
+                .addParams("groupId", groupId)
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("OnLivePeople\n", response);
+                OnLinePeopleBean onLinePeopleBean = new Gson().fromJson(response, OnLinePeopleBean.class);
+                int code = onLinePeopleBean.getCode();
+                if (code == Const.INTEGER_1) {
+                    liveTextPeople.setVisibility(View.VISIBLE);
+                    liveTextPeople.setText(Utils.signString(onLinePeopleBean.getContent()) + "人");
+                }
+            }
+        });
+    }
+
+
+    /***
+     * 发送消息
+     */
+    private void sendText(String msg, int type) {
+        String name = !TextUtils.isEmpty(TianyiApplication.appCommonBean.getNickname())
+                ? TianyiApplication.appCommonBean.getNickname() : TianyiApplication.appCommonBean.getPhone();
+        MyLog.e("sss", "json.toString()___" + name);
+        if (msg.length() == 0) {
+            return;
+        }
+        try {
+            byte[] byte_num = msg.getBytes("utf8");
+            MyLog.e("sss", "" + byte_num.length);
+//            if (byte_num.length > Const.INTEGER_200) {
+//                Toast.makeText(LiveRoomActivity.this, "请少于30字", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return;
+        }
+        TIMMessage tMsg = new TIMMessage();
+        TIMCustomElem elem = new TIMCustomElem();
+        JSONObject json = new JSONObject();
+        try {
+            json.put("roomId", roomId);
+            json.put("msg", msg);
+            json.put("type", type);
+            json.put("name", name);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        MyLog.e("sss", "json.toString()___" + json.toString());
+        elem.setData(json.toString().getBytes());
+        if (tMsg.addElement(elem) != 0) {
+            return;
+        }
+        mLiveControlHelper.sendGroupText(tMsg);
+    }
+
+    /**
+     * 消息刷新显示
+     *
+     * @param name    发送者
+     * @param context 内容
+     * @param type    类型 （上线线消息和 聊天消息）
+     */
+    public void refreshTextListView(String name, String context, int type) {
+        Log.e("sss", "refreshTextListView=====" + context + " -----" + name);
+
+        ChatEntityBean entity = new ChatEntityBean();
+        entity.setSenderName(name);
+        entity.setContext(context);
+        entity.setType(type);
+        notifyRefreshListView(entity);
+
+        mListViewMsgItems.setVisibility(View.VISIBLE);
+
+        if (mListViewMsgItems.getCount() > 1) {
+            if (true) {
+                mListViewMsgItems.setSelection(0);
+            } else {
+                mListViewMsgItems.setSelection(mListViewMsgItems.getCount() - 1);
+            }
+        }
+    }
+
+    /**
+     * 通知刷新消息ListView
+     */
+    private void notifyRefreshListView(ChatEntityBean entity) {
+        mBoolNeedRefresh = true;
+        mTmpChatList.add(entity);
+        if (mBoolRefreshLock) {
+            return;
+        } else {
+            doRefreshListView();
+        }
+    }
+
+    /**
+     * 刷新ListView并重置状态
+     */
+    private void doRefreshListView() {
+        if (mBoolNeedRefresh) {
+            mBoolRefreshLock = true;
+            mBoolNeedRefresh = false;
+            mArrayListChatEntity.addAll(mTmpChatList);
+            mTmpChatList.clear();
+            mChatMsgListAdapter.notifyDataSetChanged();
+
+            if (null != mRefreshListViewTask) {
+                mRefreshListViewTask.cancel();
+            }
+            mRefreshListViewTask = new RefreshListViewTask();
+            executorServiceChatView.scheduleAtFixedRate(mRefreshListViewTask, 0, spTime, TimeUnit.MILLISECONDS);
+//            mListViewTimer.schedule(mRefreshListViewTask, Const.INTEGER_500);
+
+        } else {
+            mBoolRefreshLock = false;
+        }
+    }
+
+    @Override
+    public void refreshText(String text, String name, int type) {
+        if (text != null) {
+            refreshTextListView(name, text, type);
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish();
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * 刷新聊天列表任务
+     */
+    class RefreshListViewTask extends TimerTask {
+        @Override
+        public void run() {
+            mHandler.sendEmptyMessage(Const.INTEGER_5);
+        }
+    }
+
+    /**
+     * 实时获取在线人数任务
+     */
+    class RefreshLiveOnLineNumTask extends TimerTask {
+        @Override
+        public void run() {
+            getOnLivePeople();
+        }
+    }
+
+    /**
+     * 直播间消息处理Handler
+     */
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case Const.INTEGER_5:
+                    doRefreshListView();
+                    break;
+                case Const.MESSAGE_SETSENDENABLE:
+                    if (editDialog != null) {
+                        editDialog.setDisallowEnable(false);
+                    }
+                    break;
+                case Const.MESSAGE_INIT_IMLISTENER:
+                    mLiveControlHelper.initTIMListener(groupId);
+                    if(Const.ISLOGING ==Const.INTEGER_1){
+                        sendText("来捧场了", Const.INTEGER_2);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (TianyiApplication.isLogin && !Const.ISSHAREING ) {
+            toLoginLiveRoom();
+        } else {
+            Const.ISSHAREING = false;
+        }
+        startPlay();
+    }
+
+    @Override
+    public void onDestroy() {
+        toLogOutLiveRoom();
+        mLiveControlHelper.onDestory();
+        super.onDestroy();
+
+        if (!executorServiceOnline.isShutdown()) {
+            executorServiceOnline.shutdown();
+        }
+        if (!executorServiceChatView.isShutdown()) {
+            executorServiceChatView.shutdown();
+        }
+
+        if (mLivePlayer != null) {
+            mLivePlayer.stopRecord();
+            mLivePlayer.setPlayListener(null);
+            mLivePlayer.stopPlay(true);
+            mLivePlayer = null;
+        }
+        if (mPlayerView != null) {
+            mPlayerView.onDestroy();
+            mPlayerView = null;
+        }
+        if (editDialog != null) {
+            editDialog.dismiss();
+            editDialog = null;
+        }
+        mPlayConfig = null;
+
+        if (mRefreshListViewTask != null) {
+            mRefreshListViewTask.cancel();
+        }
+
+        if (mRefreshLiveOnLineNumTask != null) {
+            mRefreshLiveOnLineNumTask.cancel();
+        }
+
+        RxBus.get().unRegister(this);
+        mHandler.removeCallbacksAndMessages(null);
+
+    }
+
+    @gorden.rxbus2.Subscribe(code = RxCode.CODE_SHARE_SUCCESS, threadMode = gorden.rxbus2.ThreadMode.MAIN)
+    public void dismissShare() {
+        if (mShareCommonDialog != null) {
+            mShareCommonDialog.dismiss();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        UMShareAPI.get(LiveRoomActivity.this).onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopPlay();
+    }
+}

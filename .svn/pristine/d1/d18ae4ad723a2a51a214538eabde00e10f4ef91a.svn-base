@@ -1,0 +1,323 @@
+package com.yst.tianyimember.bean;
+
+
+import java.util.List;
+
+/**
+ * 品牌商品页面
+ *
+ * @author Shenxinke
+ * @version 4.2.0
+ * @data 2018/6/11
+ */
+
+public class TrademarkShoppingBean {
+
+
+    /**
+     * code : 1
+     * msg : 查询成功
+     * content : {"branddetail":{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171129/20171129185725159961986.jpg","sale_num":84,"name":"可口可乐","description":null,"id":24,"brand_img":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171129/20171129185725159961986.jpg","story":null},"count":18,"productList":[{"commentNum":0,"salePrice":20,"shopCartNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180615/20180615095118276209706.jpg","fabulousNum":0,"name":"不要购买","memberImg":[{"address":"","userType":0,"userId":1295},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180530/20180530114114039398184.png","userType":0,"userId":1546},{"address":"","userType":3,"userId":2561}],"id":702,"saleNum":15,"shareNum":0,"views":8},{"commentNum":0,"salePrice":30,"shopCartNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180615/20180615135614047832803.jpg","fabulousNum":0,"name":"镜子勿动","memberImg":[{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180614/20180614173702568896798.png","userType":0,"userId":1573},{"address":"","userType":0,"userId":1603},{"address":"","userType":3,"userId":2561}],"id":708,"saleNum":3,"shareNum":0,"views":0}]}
+     */
+
+    private int code;
+    private String msg;
+    private ContentBean content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * branddetail : {"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171129/20171129185725159961986.jpg","sale_num":84,"name":"可口可乐","description":null,"id":24,"brand_img":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171129/20171129185725159961986.jpg","story":null}
+         * count : 18
+         * productList : [{"commentNum":0,"salePrice":20,"shopCartNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180615/20180615095118276209706.jpg","fabulousNum":0,"name":"不要购买","memberImg":[{"address":"","userType":0,"userId":1295},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180530/20180530114114039398184.png","userType":0,"userId":1546},{"address":"","userType":3,"userId":2561}],"id":702,"saleNum":15,"shareNum":0,"views":8},{"commentNum":0,"salePrice":30,"shopCartNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180615/20180615135614047832803.jpg","fabulousNum":0,"name":"镜子勿动","memberImg":[{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180614/20180614173702568896798.png","userType":0,"userId":1573},{"address":"","userType":0,"userId":1603},{"address":"","userType":3,"userId":2561}],"id":708,"saleNum":3,"shareNum":0,"views":0}]
+         */
+
+        private BranddetailBean branddetail;
+        private String count;
+        private List<ProductListBean> productList;
+
+        public BranddetailBean getBranddetail() {
+            return branddetail;
+        }
+
+        public void setBranddetail(BranddetailBean branddetail) {
+            this.branddetail = branddetail;
+        }
+
+        public String getCount() {
+            return count;
+        }
+
+        public void setCount(String count) {
+            this.count = count;
+        }
+
+        public List<ProductListBean> getProductList() {
+            return productList;
+        }
+
+        public void setProductList(List<ProductListBean> productList) {
+            this.productList = productList;
+        }
+
+        public static class BranddetailBean {
+            /**
+             * address : https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171129/20171129185725159961986.jpg
+             * sale_num : 84
+             * name : 可口可乐
+             * description : null
+             * id : 24
+             * brand_img : https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171129/20171129185725159961986.jpg
+             * story : null
+             */
+
+            private String address;
+            private int sale_num;
+            private String name;
+            private Object description;
+            private int id;
+            private String brand_img;
+            private Object story;
+
+            public String getAddress() {
+                return address;
+            }
+
+            public void setAddress(String address) {
+                this.address = address;
+            }
+
+            public int getSale_num() {
+                return sale_num;
+            }
+
+            public void setSale_num(int sale_num) {
+                this.sale_num = sale_num;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public Object getDescription() {
+                return description;
+            }
+
+            public void setDescription(Object description) {
+                this.description = description;
+            }
+
+            public int getId() {
+                return id;
+            }
+
+            public void setId(int id) {
+                this.id = id;
+            }
+
+            public String getBrand_img() {
+                return brand_img;
+            }
+
+            public void setBrand_img(String brand_img) {
+                this.brand_img = brand_img;
+            }
+
+            public Object getStory() {
+                return story;
+            }
+
+            public void setStory(Object story) {
+                this.story = story;
+            }
+        }
+
+        public static class ProductListBean {
+            /**
+             * commentNum : 0
+             * salePrice : 20
+             * shopCartNum : 0
+             * imageurl : https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180615/20180615095118276209706.jpg
+             * fabulousNum : 0
+             * name : 不要购买
+             * memberImg : [{"address":"","userType":0,"userId":1295},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180530/20180530114114039398184.png","userType":0,"userId":1546},{"address":"","userType":3,"userId":2561}]
+             * id : 702
+             * saleNum : 15
+             * shareNum : 0
+             * views : 8
+             */
+
+            private int commentNum;
+            private String salePrice;
+            private int shopCartNum;
+            private String imageurl;
+            private int fabulousNum;
+            private String name;
+            private int id;
+            private int saleNum;
+            private int shareNum;
+            private int views;
+            private String consultaionNum;
+            private List<MemberImgBean> memberImg;
+
+            public String getConsultaionNum() {
+                return consultaionNum;
+            }
+
+            public void setConsultaionNum(String consultaionNum) {
+                this.consultaionNum = consultaionNum;
+            }
+
+            public int getCommentNum() {
+                return commentNum;
+            }
+
+            public void setCommentNum(int commentNum) {
+                this.commentNum = commentNum;
+            }
+
+            public String getSalePrice() {
+                return salePrice;
+            }
+
+            public void setSalePrice(String salePrice) {
+                this.salePrice = salePrice;
+            }
+
+            public int getShopCartNum() {
+                return shopCartNum;
+            }
+
+            public void setShopCartNum(int shopCartNum) {
+                this.shopCartNum = shopCartNum;
+            }
+
+            public String getImageurl() {
+                return imageurl;
+            }
+
+            public void setImageurl(String imageurl) {
+                this.imageurl = imageurl;
+            }
+
+            public int getFabulousNum() {
+                return fabulousNum;
+            }
+
+            public void setFabulousNum(int fabulousNum) {
+                this.fabulousNum = fabulousNum;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public int getId() {
+                return id;
+            }
+
+            public void setId(int id) {
+                this.id = id;
+            }
+
+            public int getSaleNum() {
+                return saleNum;
+            }
+
+            public void setSaleNum(int saleNum) {
+                this.saleNum = saleNum;
+            }
+
+            public int getShareNum() {
+                return shareNum;
+            }
+
+            public void setShareNum(int shareNum) {
+                this.shareNum = shareNum;
+            }
+
+            public int getViews() {
+                return views;
+            }
+
+            public void setViews(int views) {
+                this.views = views;
+            }
+
+            public List<MemberImgBean> getMemberImg() {
+                return memberImg;
+            }
+
+            public void setMemberImg(List<MemberImgBean> memberImg) {
+                this.memberImg = memberImg;
+            }
+
+            public static class MemberImgBean {
+                /**
+                 * address :
+                 * userType : 0
+                 * userId : 1295
+                 */
+
+                private String address;
+                private int userType;
+                private int userId;
+
+                public String getAddress() {
+                    return address;
+                }
+
+                public void setAddress(String address) {
+                    this.address = address;
+                }
+
+                public int getUserType() {
+                    return userType;
+                }
+
+                public void setUserType(int userType) {
+                    this.userType = userType;
+                }
+
+                public int getUserId() {
+                    return userId;
+                }
+
+                public void setUserId(int userId) {
+                    this.userId = userId;
+                }
+            }
+        }
+    }
+}

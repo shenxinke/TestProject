@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_f5f5f5"
+    android:orientation="vertical">
+
+    <include layout="@layout/main_title" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="115dp"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="17dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="服务专员头像"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/iv_head"
+                    android:layout_width="95dp"
+                    android:layout_height="95dp"
+                    android:scaleType="fitXY"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="32dp"
+                    android:src="@mipmap/server_information_header" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_nick"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="17dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="服务专员昵称"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/et_nick"
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="32dp"
+                    android:background="@null"
+                    android:gravity="center|right"
+                    android:maxLength="6"
+                    android:hint="昵称"
+                    android:src="@mipmap/server_information_header"
+                    android:textColor="#3d3d3d"
+                    android:textColorHint="@color/color_999999"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="17dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="服务专员账号"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_account"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="32dp"
+                    android:gravity="center|right"
+                    android:src="@mipmap/server_information_header"
+                    android:text="1722222222222"
+                    android:textColor="#3d3d3d"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_jianjie"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="17dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="简介填写"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+                <EditText
+                    android:id="@+id/et_jianjie"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="32dp"
+                    android:background="@null"
+                    android:gravity="center|right"
+                    android:hint="请用一句话描述自己"
+                    android:textColor="#3d3d3d"
+                    android:maxLength="20"
+                    android:textColorHint="@color/color_999999"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="17dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="标签填写"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+
+                <com.yst.tianyimember.view.TagView
+                    android:id="@+id/fenlei_taglayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginRight="32dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:layout_marginBottom="9dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="44dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginLeft="17dp"
+                    android:text="背景图选择"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+
+                <com.yst.tianyimember.view.NoScrollGridView
+                    android:id="@+id/gridview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="17dp"
+                    android:layout_marginRight="17dp"
+                    android:layout_marginTop="25dp"
+                    android:verticalSpacing="5dp"
+                    android:horizontalSpacing="5dp"
+                    android:numColumns="3"></com.yst.tianyimember.view.NoScrollGridView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="115dp"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="17dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="服务专员证件"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/iv_card"
+                    android:layout_width="133dp"
+                    android:layout_height="90dp"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="32dp"
+                    android:gravity="center"
+                    android:src="@mipmap/img_default_p"
+                    android:text="1722222222222"
+                    android:textColor="#3d3d3d"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="9dp"
+                android:background="@color/white"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:paddingRight="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="17dp"
+                    android:gravity="center_vertical"
+                    android:text="服务专员所在店铺"
+                    android:textColor="#2a2a2a"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_dianpu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_marginRight="32dp"
+                    android:gravity="center_vertical|right"
+                    android:textColor="#3d3d3d"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="389dp"
+                android:layout_marginTop="9dp"
+                android:visibility="visible"
+                android:background="@color/white"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="17dp"
+                        android:gravity="center_vertical"
+                        android:text="店铺地址"
+                        android:textColor="#2a2a2a"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/tv_address"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="32dp"
+                        android:drawableLeft="@mipmap/server_information_address"
+                        android:drawablePadding="10dp"
+                        android:gravity="center"
+                        android:text="北京市朝阳区霄云路"
+                        android:textColor="#3d3d3d"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <com.amap.api.maps.MapView
+                    android:id="@+id/iv_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="306dp"
+                    android:layout_marginLeft="17dp"
+                    android:layout_marginRight="17dp"
+                 />
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </ScrollView>
+</LinearLayout>

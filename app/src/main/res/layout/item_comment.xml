@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/head"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@mipmap/head_2"
+            android:layout_margin="@dimen/margin_10dp"
+            android:scaleType="centerCrop"
+            app:oval="true"/>
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="13sp"
+            android:textColor="@color/color_222222"
+            android:text="name"
+            android:layout_toRightOf="@id/head"
+            android:layout_alignTop="@id/head"
+            />
+        <TextView
+            android:id="@+id/comment_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:text="content"
+            android:textColor="@color/color_222222"
+            android:layout_toRightOf="@id/head"
+            android:layout_below="@id/name"
+            android:layout_marginTop="3dp"
+            />
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:layout_toRightOf="@id/head"
+            android:layout_below="@id/comment_content"
+            android:text="time"
+            android:textColor="@color/color_BABABA"
+            android:layout_marginTop="5dp"
+            />
+
+    </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/layout_height_0.5dp"
+        android:background="@color/color_dddddd"
+        android:layout_marginTop="4dp"
+        />
+
+</LinearLayout>

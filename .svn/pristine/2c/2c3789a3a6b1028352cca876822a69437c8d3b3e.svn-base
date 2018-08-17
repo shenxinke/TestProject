@@ -1,0 +1,56 @@
+package com.yst.onecity.view;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.widget.ScrollView;
+
+/**
+ * 自定义ScrollView
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class MyScrollView extends ScrollView {
+
+    public MyScrollView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        //判断是否是滑动状态
+        boolean b = super.onTouchEvent(ev);
+        //触发取消
+        int i = MotionEvent.ACTION_CANCEL;
+        return b;
+    }
+
+    /**
+     * 负责分发事
+     * @param ev
+     * @return
+     */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // TODO Auto-generated method stub
+        //判断是否调用分发事件
+        boolean b = super.dispatchTouchEvent(ev);
+        return b;
+    }
+
+    /**
+     * onInterceptTouchEvent()是ViewGroup的一个方法
+     * 目的是在系统向该ViewGroup及其各个childView触发onTouchEvent()之前对相关事件进行一次拦截
+     * @param ev
+     * @return
+     */
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // TODO Auto-generated method stub
+        boolean b = super.onInterceptTouchEvent(ev);
+        return b;
+    }
+}

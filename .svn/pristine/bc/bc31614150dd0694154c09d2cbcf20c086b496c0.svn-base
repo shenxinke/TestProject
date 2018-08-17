@@ -1,0 +1,342 @@
+package com.yst.onecity.activity.member;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.activity.bankcard.UserBindCardPhoneActivity;
+import com.yst.onecity.activity.servermember.CashStateActivity;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.CashBean;
+import com.yst.onecity.bean.EventBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.AbstractSaveDialog;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.DecimalFormat;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 服务专员提现页面
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class CashLingqianActivity extends BaseActivity {
+
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.tv_right)
+    TextView tvRight;
+    @BindView(R.id.iv_bank)
+    ImageView ivBank;
+    @BindView(R.id.tv_bank)
+    TextView tvBank;
+    @BindView(R.id.tv_bank_name)
+    TextView tvBankName;
+    @BindView(R.id.tv_yue)
+    TextView tvYue;
+    @BindView(R.id.tv_shouxufei)
+    TextView tvShouxufei;
+    @BindView(R.id.tv_cash)
+    TextView tvCash;
+    @BindView(R.id.et_cash_money)
+    EditText etCashMoney;
+    private String bankName = "", bankNum = "", backId = "", bankUserName = "", bindbacktime = "";
+    private AbstractSaveDialog mVerifyDialog = null;
+    private AbstractSaveDialog bindCard = null;
+    private int type = 0;
+    private String jump = "jump";
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_cash;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("提现");
+        EventBus.getDefault().register(this);
+        String s = getIntent().getStringExtra("money");
+        float m = Float.parseFloat(s);
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String format = decimalFormat.format(m);
+        ConstUtils.setTextString(format, tvYue);
+        showDialog();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getBandCardStatus();
+    }
+
+    @OnClick({R.id.tv_cash})
+    public void onViewClicked(View view) {
+        if (!ConstUtils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            //确认提现
+            case R.id.tv_cash:
+                goCash();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 获取用户的绑卡信息
+     * 未实名
+     * 未绑卡
+     * 已绑卡
+     */
+    private void getBandCardStatus() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "usetType", "0",
+                "timestamp", timestamp);
+        OkHttpUtils
+                .post()
+                .url(Constants.URL_TO_BIND_BANKCARD)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("usetType", "0")
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("CashMember", "getBandCardStatus_response === " + response);
+                bankName = "";
+                bankNum = "";
+                backId = "";
+                bankUserName = "";
+                bindbacktime = "";
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String code = "";
+                    if (jsonObject.getInt(Const.CONS_STR_CODE) == 1) {
+                        if (jsonObject.getJSONObject(Const.CONS_STR_CONTENT).has(Const.CONS_STR_CODES)) {
+                            code = jsonObject.getJSONObject("content").getString("codes");
+                        } else {
+                            code = jsonObject.getJSONObject("content").getString("code");
+                        }
+                        if (Const.STR1.equals(code)) {
+                            //未实名认证
+                            mVerifyDialog.showDialog();
+                        } else if (Const.STR2.equals(code)) {
+                            //绑卡成功信息回显
+                            bankUserName = jsonObject.getJSONObject("content").getString("name");
+                            bankName = jsonObject.getJSONObject("content").getString("bank");
+                            bankNum = jsonObject.getJSONObject("content").getString("bankNo");
+                            backId = jsonObject.getJSONObject("content").getString("id");
+                            bindbacktime = jsonObject.getJSONObject("content").getString("num");
+                            showBankCardInfo();
+                        } else if (Const.STR3.equals(code)) {
+                            //尚未绑卡显示页面
+                            bindCard.showDialog();
+                            bindbacktime = jsonObject.getJSONObject("content").getString("num");
+                        }
+                    } else {
+                        ToastUtils.show(jsonObject.getString("msg"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    MyLog.e("CashMember", "exception ==============" + e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * 初始化弹框
+     */
+    private void showDialog() {
+        mVerifyDialog = new AbstractSaveDialog(this) {
+            @Override
+            public void onSureClick() {
+                mVerifyDialog.dismissDialog();
+                JumpIntent.jump(CashLingqianActivity.this, RealNameAuthenticationActivity.class);
+                finish();
+            }
+
+            @Override
+            public void onCancleClick() {
+                CashLingqianActivity.this.finish();
+            }
+        };
+        mVerifyDialog.setText(getString(R.string.str_bank_card_dialog_message));
+        mVerifyDialog.setCancleStyle(R.drawable.shape_white_10, R.color.black, getString(R.string.cancel));
+        mVerifyDialog.setSureStyle(R.drawable.shape_gray_180dp_bg, R.color.black, getString(R.string.str_bank_card_real_name_message));
+        bindCard = new AbstractSaveDialog(this) {
+            @Override
+            public void onSureClick() {
+                bindCard.dismissDialog();
+                Bundle bundle = new Bundle();
+                bundle.putInt("type", type);
+                bundle.putString("number", bindbacktime);
+                JumpIntent.jump(CashLingqianActivity.this, UserBindCardPhoneActivity.class, bundle);
+                finish();
+            }
+
+            @Override
+            public void onCancleClick() {
+                CashLingqianActivity.this.finish();
+            }
+        };
+        bindCard.setText(getString(R.string.str_bank_card_dialog_cash_message));
+        bindCard.setCancleStyle(R.drawable.shape_white_10, R.color.black, getString(R.string.cancel));
+        bindCard.setSureStyle(R.drawable.shape_gray_180dp_bg, R.color.black, getString(R.string.str_bind_card_title));
+    }
+
+    /**
+     * 显示绑卡的信息回显
+     */
+    private void showBankCardInfo() {
+        String end = bankNum.substring(bankNum.length() - 4);
+        tvBank.setText(bankName);
+        tvBankName.setText("尾号" + end + "储存卡");
+    }
+
+    /**
+     * 提现
+     */
+    private void goCash() {
+        String cashMoney = etCashMoney.getText().toString().trim();
+        if (TextUtils.isEmpty(cashMoney)) {
+            ToastUtils.show("请输入您要提现得金额");
+            return;
+        }
+        String usedMoney = tvYue.getText().toString().trim();
+        float iCashMoney = Float.parseFloat(cashMoney);
+        float iUsedMoney = Float.parseFloat(usedMoney);
+        if (iCashMoney < Const.INTEGER_100) {
+            ToastUtils.show("最低提现金额为100元");
+            return;
+        }
+        if (iCashMoney >= iUsedMoney) {
+            ToastUtils.show("您的可提余额为" + usedMoney);
+            return;
+        }
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "cardId", backId,
+                "money", cashMoney,
+                "userType", "0",
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.SERVER_MEMBER_CASH)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("cardId", backId)
+                .addParams("money", cashMoney)
+                .addParams("userType", "0")
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("cash", "server_member_goCash____onerror___" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("cash", "server_member_goCash____onResponse___" + response);
+                Gson gson = new Gson();
+                CashBean cashBean = gson.fromJson(response, CashBean.class);
+                if (cashBean != null && cashBean.getCode() == 1) {
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("isSuccess", true);
+                    bundle.putString("bankno", bankNum);
+                    bundle.putString("cashmoney", etCashMoney.getText().toString().trim());
+                    JumpIntent.jump(CashLingqianActivity.this, CashStateActivity.class, bundle);
+                    finish();
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("isSuccess", false);
+                    bundle.putString("msg", cashBean.getMsg());
+                    JumpIntent.jump(CashLingqianActivity.this, CashStateActivity.class, bundle);
+                    finish();
+                }
+            }
+
+        });
+    }
+
+    @Subscribe
+    public void onEventMainThread(EventBean event) {
+        if (jump.equals(event.getMsg())) {
+            finish();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+}

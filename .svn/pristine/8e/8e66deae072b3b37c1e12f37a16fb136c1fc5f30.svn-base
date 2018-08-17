@@ -1,0 +1,68 @@
+package com.yst.onecity.bean;
+
+import com.yst.onecity.bean.cartbean.ProductEntity;
+
+import java.util.ArrayList;
+
+/**
+ * @author wuxiaofang
+ * @version 4.0.0
+ * @date 2018/3/27
+ */
+
+public class CartEntityNew {
+private String name;
+    private boolean isGroupCheck;
+    private boolean isGroupEdit;
+    private ArrayList<ProductEntity> list;
+
+    public CartEntityNew(String name, boolean isGroupCheck, boolean isGroupEdit, ArrayList<ProductEntity> list) {
+        this.name = name;
+        this.isGroupCheck = isGroupCheck;
+        this.isGroupEdit = isGroupEdit;
+        this.list = list;
+    }
+
+    public boolean isGroupCheck() {
+        return isGroupCheck;
+    }
+
+    public void setGroupCheck(boolean groupCheck) {
+        isGroupCheck = groupCheck;
+    }
+
+    public boolean isGroupEdit() {
+        return isGroupEdit;
+    }
+
+    public void setGroupEdit(boolean groupEdit) {
+        isGroupEdit = groupEdit;
+    }
+
+    public CartEntityNew(String name, boolean isGroupEdit, ArrayList<ProductEntity> list) {
+        this.name = name;
+        this.isGroupEdit = isGroupEdit;
+        this.list = list;
+    }
+
+    public CartEntityNew(String name, ArrayList<ProductEntity> list) {
+        this.name = name;
+        this.list = list;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public ArrayList<ProductEntity> getList() {
+        return list;
+    }
+
+    public void setList(ArrayList<ProductEntity> list) {
+        this.list = list;
+    }
+}

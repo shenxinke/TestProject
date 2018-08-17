@@ -1,0 +1,162 @@
+package com.yst.onecity.activity.servermember;
+
+import android.annotation.TargetApi;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.ServerMemberAccountBean;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.text.DecimalFormat;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 服务专员我的账户页面
+ *
+ * @author Chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class MyAccountActivity extends BaseActivity {
+
+    @BindView(R.id.tv_money)
+    TextView tvMoney;
+    @BindView(R.id.ll_tixian)
+    LinearLayout llTixian;
+    @BindView(R.id.ll_balance_detail)
+    LinearLayout llBalanceDetail;
+    @BindView(R.id.activity_my_account)
+    LinearLayout activityMyAccount;
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    private String money;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_my_account;
+    }
+
+    @Override
+    public void initData() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            setTranslucentStatus(true);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        requestMyBalanceDetail();
+    }
+
+    /**
+     * 获取服务专员账户余额
+     */
+    private void requestMyBalanceDetail() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "userType", "1",
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.SERVERMEMBER_MYCOUNT_YUE)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("userType", "1")
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("MyCount", "tui____onResponse___" + response);
+                Gson gson = new Gson();
+                ServerMemberAccountBean serverMemberAccountBean = gson.fromJson(response, ServerMemberAccountBean.class);
+                if (serverMemberAccountBean != null && serverMemberAccountBean.getCode() == 1) {
+                    ServerMemberAccountBean.ContentBean content = serverMemberAccountBean.getContent();
+                    String s = content.getMoney();
+                    float m = Float.parseFloat(s);
+                    DecimalFormat decimalFormat = new DecimalFormat("0.00");
+                    String format = decimalFormat.format(m);
+                    ConstUtils.setMoneyTextString(format, tvMoney);
+                    money = content.getMoney();
+               }
+            }
+        });
+    }
+
+    @OnClick({R.id.ll_tixian, R.id.ll_balance_detail, R.id.ll_back})
+    public void onViewClicked(View view) {
+        if (!ConstUtils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            //去提现
+            case R.id.ll_tixian:
+                Bundle bundle = new Bundle();
+                bundle.putString("money", money == null ? "0" : money);
+                JumpIntent.jump(this, CashActivity.class, bundle);
+                break;
+            case R.id.ll_back:
+                finish();
+                break;
+            //余额明细
+            case R.id.ll_balance_detail:
+                JumpIntent.jump(this, BalanceDetailsActivity.class);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @TargetApi(19)
+    private void setTranslucentStatus(boolean on) {
+        Window win = getWindow();
+        WindowManager.LayoutParams winParams = win.getAttributes();
+        final int bits = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+        if (on) {
+            winParams.flags |= bits;
+        } else {
+            winParams.flags &= ~bits;
+        }
+        win.setAttributes(winParams);
+    }
+
+}

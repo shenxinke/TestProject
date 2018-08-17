@@ -1,0 +1,22 @@
+package com.yst.tianyimember.bean.order;
+
+import com.yst.tianyimember.bean.CodeMsgBean;
+
+/**
+ * 会员线下订单详情
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class OnLineOrderDetailBean extends CodeMsgBean{
+    private OrderDetailBean content;
+
+    public OrderDetailBean getContent() {
+        return content;
+    }
+
+    public void setContent(OrderDetailBean content) {
+        this.content = content;
+    }
+}

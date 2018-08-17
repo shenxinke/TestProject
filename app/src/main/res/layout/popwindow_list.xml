@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popwindow_listView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/x5"
+    android:background="@drawable/hunter_add_bankcard_bg"
+    android:padding="@dimen/x5"
+    android:scrollbars="none" />

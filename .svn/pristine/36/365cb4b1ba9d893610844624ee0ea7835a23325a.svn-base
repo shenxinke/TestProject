@@ -1,0 +1,332 @@
+package com.yst.tianyimember.adapter.addorder;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.activity.ProductDetailActivity;
+import com.yst.tianyimember.activity.servermember.StoreDetailActivity;
+import com.yst.tianyimember.bean.addorder.OrderBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.view.ContainsEmojiEditText;
+import com.yst.tianyimember.view.GlideCircleTransform;
+import com.yst.tianyimember.view.roundedimageview.RoundedImageView;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 二级列表适配器
+ *
+ * @author jiaofan
+ * @version 4.0.0
+ * @date 2018/3/21
+ */
+public class MyExpandableAdapter extends BaseExpandableListAdapter {
+
+    private List<OrderBean.ContentBean.MerchantListBean> orderBean;
+    private Activity activity;
+
+    public MyExpandableAdapter(List<OrderBean.ContentBean.MerchantListBean> orderBean, Activity activity) {
+        this.orderBean = orderBean;
+        this.activity = activity;
+    }
+
+    @Override
+    public int getGroupCount() {
+        return orderBean.size();
+    }
+
+    @Override
+    public int getChildrenCount(int groupPosition) {
+        if (orderBean != null && orderBean.size() > 0 && orderBean.get(groupPosition) != null && orderBean.get(groupPosition).getProductDetail() != null) {
+            return orderBean.get(groupPosition).getProductDetail().size();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public Object getGroup(int groupPosition) {
+        return orderBean.get(groupPosition);
+    }
+
+    @Override
+    public Object getChild(int groupPosition, int childPosition) {
+        return orderBean.get(groupPosition).getProductDetail().get(childPosition);
+    }
+
+    @Override
+    public long getGroupId(int groupPosition) {
+        return groupPosition;
+    }
+
+    @Override
+    public long getChildId(int groupPosition, int childPosition) {
+        return childPosition;
+    }
+
+    @Override
+    public boolean isChildSelectable(int groupPosition, int childPosition) {
+        return false;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    public void setDataList(List<OrderBean.ContentBean.MerchantListBean> data) {
+        if (data != null && data.size() > 0) {
+            this.orderBean = data;
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+        MyLog.e("adapter", "getGroupView.size===" + orderBean.size());
+        GroupViewHolder groupHolder = null;
+        if (convertView == null) {
+            convertView = LayoutInflater.from(activity).inflate(R.layout.item_add_order_group, null);
+            groupHolder = new GroupViewHolder(convertView);
+            convertView.setTag(groupHolder);
+        } else {
+            groupHolder = (GroupViewHolder) convertView.getTag();
+        }
+
+        Glide.with(activity).load(orderBean.get(groupPosition).getAddress()).transform(new GlideCircleTransform(activity))
+                .placeholder(R.mipmap.store_icon).error(R.mipmap.store_icon).into(groupHolder.mStoreIcon);
+        groupHolder.mStoreName.setText(orderBean.get(groupPosition).getMerchantName());
+        groupHolder.mTxtGroupTips.setVisibility(View.GONE);
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putString("merchantId", String.valueOf(orderBean.get(groupPosition).getMerchantId()));
+                JumpIntent.jump(activity, StoreDetailActivity.class, bundle);
+            }
+        });
+        return convertView;
+    }
+
+    @Override
+    public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+        MyLog.e("adapter", "getChildView.size===" + orderBean.size());
+        ChildViewHolder childHolder = null;
+        if (convertView == null) {
+            convertView = LayoutInflater.from(activity).inflate(R.layout.item_child_cart, null);
+            childHolder = new ChildViewHolder(convertView);
+            convertView.setTag(childHolder);
+        } else {
+            childHolder = (ChildViewHolder) convertView.getTag();
+        }
+
+        if (orderBean.get(groupPosition).getProductDetail().get(childPosition).getIsScope() == 1) {
+            childHolder.mTxtRange.setVisibility(View.VISIBLE);
+        } else {
+            childHolder.mTxtRange.setVisibility(View.GONE);
+        }
+
+        //如果是最后一条子view，就将底布局显示出来
+        if (isLastChild) {
+            childHolder.llBottomView.setVisibility(View.VISIBLE);
+            childHolder.mTxtFootPrice.setText(String.format(activity.getResources().getString(R.string.string_money), String.format("%.2f", orderBean.get(groupPosition).getTotalPrice())));
+            childHolder.mTxtFootWeight.setText(String.format("%.2f", orderBean.get(groupPosition).getTotalWeight()) + "kg");
+            //0是新业态用户，1不是
+            if (orderBean.get(groupPosition).getIsNyt() == Const.INTEGER_1) {
+                Const.ISNEWYETAI = Const.INTEGER_1;
+                childHolder.mTxtNull.setVisibility(View.GONE);
+                childHolder.mIvFootJifen.setVisibility(View.GONE);
+                childHolder.mTxtFootJifen.setVisibility(View.GONE);
+                childHolder.mTxtHuoPostage.setVisibility(View.GONE);
+                childHolder.mIvHuoPostage.setVisibility(View.GONE);
+                childHolder.mTxtFootScorePostage.setVisibility(View.GONE);
+            } else {
+                Const.ISNEWYETAI = Const.INTEGER_0;
+                childHolder.mTxtNull.setVisibility(View.VISIBLE);
+                childHolder.mIvFootJifen.setVisibility(View.VISIBLE);
+                childHolder.mTxtFootJifen.setVisibility(View.VISIBLE);
+                childHolder.mTxtHuoPostage.setVisibility(View.VISIBLE);
+                childHolder.mIvHuoPostage.setVisibility(View.VISIBLE);
+                childHolder.mTxtFootScorePostage.setVisibility(View.VISIBLE);
+                childHolder.mTxtFootScorePostage.setText(String.format("%.2f", orderBean.get(groupPosition).getFreight() * 5));
+                childHolder.mTxtFootJifen.setText(String.format("%.2f", orderBean.get(groupPosition).getTotalScorePrice()));
+            }
+            childHolder.mLlInvoiceInfo.setVisibility(View.VISIBLE);
+            childHolder.mTxtFootInvoice.setText(orderBean.get(groupPosition).getFapiao());
+            childHolder.mRelFootInvoice.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mClick.onInvoiceClick(groupPosition);
+                }
+            });
+        } else {
+            childHolder.llBottomView.setVisibility(View.GONE);
+        }
+
+        Glide.with(activity).load(orderBean.get(groupPosition).getProductDetail().get(childPosition).getPimg()).placeholder(R.mipmap.img_default_p).error(R.mipmap.img_default_p).into(childHolder.mProductIcon);
+        childHolder.mProductName.setText(orderBean.get(groupPosition).getProductDetail().get(childPosition).getPname());
+        childHolder.mProductPrice.setText(String.format(activity.getResources().getString(R.string.string_money), String.format("%.2f", orderBean.get(groupPosition).getProductDetail().get(childPosition).getPrice())));
+        childHolder.mProductSpecificationTv.setText("商品规格:" + orderBean.get(groupPosition).getProductDetail().get(childPosition).getPspcification());
+        childHolder.mTxtBuynum.setText(String.valueOf(orderBean.get(groupPosition).getProductDetail().get(childPosition).getBuy_num()));
+
+        //0是新业态用户，1不是
+        if (orderBean.get(groupPosition).getIsNyt() == Const.INTEGER_1) {
+            Const.ISNEWYETAI = Const.INTEGER_1;
+            childHolder.mTxtChildJifen.setVisibility(View.GONE);
+            childHolder.mIvChildJifen.setVisibility(View.GONE);
+        } else {
+            Const.ISNEWYETAI = Const.INTEGER_0;
+            childHolder.mTxtChildJifen.setVisibility(View.VISIBLE);
+            childHolder.mIvChildJifen.setVisibility(View.VISIBLE);
+            childHolder.mTxtChildJifen.setText(String.format("%.2f", orderBean.get(groupPosition).getProductDetail().get(childPosition).getScorePrice()));
+        }
+        //设置EditText的显示方式为多行文本输入
+        childHolder.mEdtUserNote.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        childHolder.mEdtUserNote.setSingleLine(false);
+        childHolder.mEdtUserNote.setHorizontallyScrolling(false);
+        childHolder.mEdtUserNote.setFilters(new InputFilter[]{new InputFilter.LengthFilter(Const.INTEGER_50)});
+        childHolder.mEdtUserNote.setText(orderBean.get(groupPosition).getMessage());
+        childHolder.mEdtUserNote.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (!TextUtils.isEmpty(editable.toString())) {
+                    if (orderBean.size() > groupPosition && orderBean.get(groupPosition) != null) {
+                        orderBean.get(groupPosition).message = editable.toString();
+                    }
+                }
+            }
+        });
+
+        childHolder.mProductIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle b = new Bundle();
+                b.putString("merchantId", String.valueOf(orderBean.get(groupPosition).getMerchantId()));
+                b.putString("spid", String.valueOf(orderBean.get(groupPosition).getProductDetail().get(childPosition).getSpid()));
+                b.putString("productId", String.valueOf(orderBean.get(groupPosition).getProductDetail().get(childPosition).getProduct_id()));
+                JumpIntent.jump(activity, ProductDetailActivity.class, b);
+            }
+        });
+        return convertView;
+    }
+
+    /**
+     * 发票点击接口
+     */
+    public interface InvoiceClick {
+        /**
+         * 发票点击事件
+         *
+         * @param groupPosition 店铺下标
+         */
+        void onInvoiceClick(int groupPosition);
+    }
+
+    private InvoiceClick mClick;
+
+    public void setOnInvoiceClick(InvoiceClick click) {
+        this.mClick = click;
+    }
+
+    static class GroupViewHolder {
+        @BindView(R.id.txt_group_tips)
+        TextView mTxtGroupTips;
+        @BindView(R.id.store_icon)
+        ImageView mStoreIcon;
+        @BindView(R.id.store_name)
+        TextView mStoreName;
+        @BindView(R.id.ll_store)
+        RelativeLayout mLlStore;
+
+        GroupViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    static class ChildViewHolder {
+        @BindView(R.id.product_icon)
+        RoundedImageView mProductIcon;
+        @BindView(R.id.product_name)
+        TextView mProductName;
+        @BindView(R.id.txt_child_jifen)
+        TextView mTxtChildJifen;
+        @BindView(R.id.iv_child_jifen)
+        ImageView mIvChildJifen;
+        @BindView(R.id.product_price)
+        TextView mProductPrice;
+        @BindView(R.id.product_specification_tv)
+        TextView mProductSpecificationTv;
+        @BindView(R.id.txt_buynum)
+        TextView mTxtBuynum;
+        @BindView(R.id.txt_range)
+        TextView mTxtRange;
+
+        /**
+         * 底布局
+         */
+        @BindView(R.id.ll_bottom_view)
+        LinearLayout llBottomView;
+        @BindView(R.id.edt_user_note)
+        ContainsEmojiEditText mEdtUserNote;
+        @BindView(R.id.txt_foot_invoice)
+        TextView mTxtFootInvoice;
+        @BindView(R.id.ll_invoice_info)
+        LinearLayout mLlInvoiceInfo;
+        @BindView(R.id.rel_foot_invoice)
+        RelativeLayout mRelFootInvoice;
+        @BindView(R.id.txt_foot_price)
+        TextView mTxtFootPrice;
+        @BindView(R.id.txt_null)
+        TextView mTxtNull;
+        @BindView(R.id.iv_foot_jifen)
+        ImageView mIvFootJifen;
+        @BindView(R.id.txt_foot_jifen)
+        TextView mTxtFootJifen;
+        @BindView(R.id.txt_foot_weight)
+        TextView mTxtFootWeight;
+        @BindView(R.id.txt_foot_postage)
+        TextView mTxtFootPostage;
+        @BindView(R.id.txt_huo_postage)
+        TextView mTxtHuoPostage;
+        @BindView(R.id.iv_huo_postage)
+        ImageView mIvHuoPostage;
+        @BindView(R.id.txt_foot_scorepostage)
+        TextView mTxtFootScorePostage;
+
+        ChildViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+
+    }
+}

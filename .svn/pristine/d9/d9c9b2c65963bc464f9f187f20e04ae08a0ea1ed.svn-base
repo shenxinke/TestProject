@@ -1,0 +1,227 @@
+package com.yst.onecity.bean;
+
+import java.util.List;
+
+/**
+ * 用户资讯收藏实体类
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class UserCollectionMessageBean {
+
+    /**
+     * code : 1
+     * msg : 请求成功
+     * content : [{"comment_num":1,"address":"upload/skysimple/20171017172318769723136.png","consultation_classify_id":3,"model_type":2,"title":"美美哒的头像","is_delete":0,"photoAddress":[{"modelt":2,"address":"upload/consultationimg/20171017153300027952610.jpg"},{"modelt":2,"address":"upload/consultationimg/20171017153308019122084.jpg"},{"modelt":2,"address":"upload/consultationimg/20171017153316187349165.jpg"}],"user_type":0,"user_id":184,"fabulous_num":0,"nickname":"牙娅亚","id":29,"status":2},{"comment_num":0,"address":"upload/skysimple/20171017200929519696267.png","consultation_classify_id":1,"model_type":1,"title":"养生","is_delete":0,"photoAddress":[{"modelt":1,"address":"upload/consultationimg/20171017182756483194202.png"}],"user_type":1,"user_id":42,"fabulous_num":1,"nickname":"妮妮","id":42,"status":2},{"comment_num":1,"address":"upload/skysimple/20171017145654448740689.png","consultation_classify_id":6,"model_type":1,"title":"小猫咪","is_delete":0,"photoAddress":[{"modelt":1,"address":"upload/consultationimg/20171017150949179576096.jpeg"}],"user_type":0,"user_id":182,"fabulous_num":1,"nickname":"小仙女","id":16,"status":2},{"comment_num":0,"address":"upload/skysimple/20171017145654448740689.png","consultation_classify_id":2,"model_type":0,"title":"哈啦啦","is_delete":0,"photoAddress":[{"modelt":0,"address":null}],"user_type":0,"user_id":182,"fabulous_num":0,"nickname":"小仙女","id":23,"status":2},{"comment_num":1,"address":null,"consultation_classify_id":1,"model_type":0,"title":"bbbbv","is_delete":0,"photoAddress":[{"modelt":0,"address":null}],"user_type":0,"user_id":178,"fabulous_num":0,"nickname":null,"id":4,"status":2},{"comment_num":4,"address":"upload/skysimple/20171017145654448740689.png","consultation_classify_id":1,"model_type":2,"title":"全民养生","is_delete":0,"photoAddress":[{"modelt":2,"address":"upload/consultationimg/20171017151158198651733.jpeg"},{"modelt":2,"address":"upload/consultationimg/20171017151158223417162.jpeg"},{"modelt":2,"address":"upload/consultationimg/20171017151158226324921.jpeg"}],"user_type":0,"user_id":182,"fabulous_num":4,"nickname":"小仙女","id":18,"status":2}]
+     */
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * comment_num : 1
+         * address : upload/skysimple/20171017172318769723136.png
+         * consultation_classify_id : 3
+         * model_type : 2
+         * title : 美美哒的头像
+         * is_delete : 0
+         * photoAddress : [{"modelt":2,"address":"upload/consultationimg/20171017153300027952610.jpg"},{"modelt":2,"address":"upload/consultationimg/20171017153308019122084.jpg"},{"modelt":2,"address":"upload/consultationimg/20171017153316187349165.jpg"}]
+         * user_type : 0
+         * user_id : 184
+         * fabulous_num : 0
+         * nickname : 牙娅亚
+         * id : 29
+         * status : 2
+         */
+
+        private int comment_num;
+        private String address;
+        private int consultation_classify_id;
+        private int model_type;
+        private String title;
+        private int is_delete;
+        private int user_type;
+        private int user_id;
+        private int fabulous_num;
+        private String nickname;
+        private int id;
+        private int status;
+        private boolean isCheck;
+        private boolean isShow;
+        private List<PhotoAddressBean> photoAddress;
+        public boolean isCheck() {
+            return isCheck;
+        }
+
+        public void setCheck(boolean check) {
+            isCheck = check;
+        }
+
+        public boolean isShow() {
+            return isShow;
+        }
+
+        public void setShow(boolean show) {
+            isShow = show;
+        }
+        public int getComment_num() {
+            return comment_num;
+        }
+
+        public void setComment_num(int comment_num) {
+            this.comment_num = comment_num;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public int getConsultation_classify_id() {
+            return consultation_classify_id;
+        }
+
+        public void setConsultation_classify_id(int consultation_classify_id) {
+            this.consultation_classify_id = consultation_classify_id;
+        }
+
+        public int getModel_type() {
+            return model_type;
+        }
+
+        public void setModel_type(int model_type) {
+            this.model_type = model_type;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public int getIs_delete() {
+            return is_delete;
+        }
+
+        public void setIs_delete(int is_delete) {
+            this.is_delete = is_delete;
+        }
+
+        public int getUser_type() {
+            return user_type;
+        }
+
+        public void setUser_type(int user_type) {
+            this.user_type = user_type;
+        }
+
+        public int getUser_id() {
+            return user_id;
+        }
+
+        public void setUser_id(int user_id) {
+            this.user_id = user_id;
+        }
+
+        public int getFabulous_num() {
+            return fabulous_num;
+        }
+
+        public void setFabulous_num(int fabulous_num) {
+            this.fabulous_num = fabulous_num;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+
+        public void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        public List<PhotoAddressBean> getPhotoAddress() {
+            return photoAddress;
+        }
+
+        public void setPhotoAddress(List<PhotoAddressBean> photoAddress) {
+            this.photoAddress = photoAddress;
+        }
+
+        public static class PhotoAddressBean {
+            /**
+             * modelt : 2
+             * address : upload/consultationimg/20171017153300027952610.jpg
+             */
+
+            private int modelt;
+            private String address;
+
+            public int getModelt() {
+                return modelt;
+            }
+
+            public void setModelt(int modelt) {
+                this.modelt = modelt;
+            }
+
+            public String getAddress() {
+                return address;
+            }
+
+            public void setAddress(String address) {
+                this.address = address;
+            }
+        }
+    }
+}

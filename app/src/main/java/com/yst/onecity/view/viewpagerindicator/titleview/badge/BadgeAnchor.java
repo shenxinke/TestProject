@@ -1,0 +1,67 @@
+package com.yst.onecity.view.viewpagerindicator.titleview.badge;
+
+/**
+ * 角标的锚点
+ *
+ * @author luxuchang
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public enum BadgeAnchor {
+    /**
+     * 左
+     */
+    LEFT,
+    /**
+     * 上
+     */
+    TOP,
+    /**
+     * 右
+     */
+    RIGHT,
+    /**
+     * 下
+     */
+    BOTTOM,
+    /**
+     * 内容-左
+     */
+    CONTENT_LEFT,
+    /**
+     * 内容-上
+     */
+    CONTENT_TOP,
+    /**
+     * 内容-右
+     */
+    CONTENT_RIGHT,
+    /**
+     * 内容-下
+     */
+    CONTENT_BOTTOM,
+    /**
+     * 中心X
+     */
+    CENTER_X,
+    /**
+     * 中心Y
+     */
+    CENTER_Y,
+    /**
+     * 左边缘-中心X
+     */
+    LEFT_EDGE_CENTER_X,
+    /**
+     * 上边缘-中心Y
+     */
+    TOP_EDGE_CENTER_Y,
+    /**
+     * 右边缘-中心X
+     */
+    RIGHT_EDGE_CENTER_X,
+    /**
+     * 下边缘-中心Y
+     */
+    BOTTOM_EDGE_CENTER_Y
+}

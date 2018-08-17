@@ -1,0 +1,219 @@
+package com.yst.onecity.bean;
+
+import java.util.List;
+
+/**
+ * 本地直供
+ *
+ * @author Shenxinke
+ * @version 4.2.0
+ * @data 2018/6/13
+ */
+
+public class ShoppingLocalityBean {
+
+    /**
+     * code : 1
+     * msg : 查询成功
+     * content : [{"isScope":1,"salePrice":150,"memberImg":[{"headImg":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180502/20180502164909235931373.png","userType":0}],"saleNum":0,"type":1,"shareNum":0,"merchantName":"测试何春梅店铺","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180608/20180608171912893831649.jpg","fabulousNum":2,"name":"1","id":589,"views":0},{"isScope":0,"salePrice":5,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"测试旗舰店","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180613/20180613164416459168467.jpg","fabulousNum":0,"name":"清风抽纸","id":661,"views":0},{"isScope":0,"salePrice":2,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"花草树木","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180613/20180613110948352145417.jpg","fabulousNum":0,"name":"带刺的玫瑰","id":657,"views":0},{"isScope":0,"salePrice":11,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"测试旗舰店","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180613/20180613104406331052276.jpg","fabulousNum":0,"name":"煎饼果子大饼天天","id":656,"views":0},{"isScope":0,"salePrice":8,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"旗舰1122","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180612/20180612175423075292719.jpeg","fabulousNum":0,"name":"本地商品3","id":649,"views":0},{"isScope":0,"salePrice":8,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"旗舰1122","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180612/20180612154541116768106.jpg","fabulousNum":0,"name":"本地商品1","id":645,"views":0},{"isScope":0,"salePrice":1.43,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"跃跃店铺","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180611/20180611213145271233551.jpg","fabulousNum":0,"name":"1","id":639,"views":0},{"isScope":0,"salePrice":1.44,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"卫星12测试小申","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180607/20180607111709312627400.jpg","fabulousNum":0,"name":"天假111","id":613,"views":0},{"isScope":0,"salePrice":15,"memberImg":[],"saleNum":0,"type":1,"shareNum":0,"merchantName":"测试何春梅店铺","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180611/20180611101045402309926.jpg","fabulousNum":0,"name":"菊博士胎菊","id":605,"views":0},{"isScope":1,"salePrice":120,"memberImg":[],"saleNum":200,"type":1,"shareNum":0,"merchantName":"测试小申","commentNum":0,"imageurl":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180420/20180420134101392476127.jpg","fabulousNum":0,"name":"鸭舌帽","id":371,"views":0}]
+     */
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * isScope : 1
+         * salePrice : 150
+         * memberImg : [{"headImg":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180502/20180502164909235931373.png","userType":0}]
+         * saleNum : 0
+         * type : 1
+         * shareNum : 0
+         * merchantName : 测试何春梅店铺
+         * commentNum : 0
+         * imageurl : https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20180608/20180608171912893831649.jpg
+         * fabulousNum : 2
+         * name : 1
+         * id : 589
+         * views : 0
+         */
+
+        private int isScope;
+        private String salePrice;
+        private int saleNum;
+        private int type;
+        private int shareNum;
+        private String merchantName;
+        private int commentNum;
+        private String imageurl;
+        private int fabulousNum;
+        private String name;
+        private int id;
+        private int views;
+        private String consultaionNum;
+        private List<MemberImgBean> memberImg;
+
+        public String getConsultaionNum() {
+            return consultaionNum;
+        }
+
+        public void setConsultaionNum(String consultaionNum) {
+            this.consultaionNum = consultaionNum;
+        }
+
+        public int getIsScope() {
+            return isScope;
+        }
+
+        public void setIsScope(int isScope) {
+            this.isScope = isScope;
+        }
+
+        public String getSalePrice() {
+            return salePrice;
+        }
+
+        public void setSalePrice(String salePrice) {
+            this.salePrice = salePrice;
+        }
+
+        public int getSaleNum() {
+            return saleNum;
+        }
+
+        public void setSaleNum(int saleNum) {
+            this.saleNum = saleNum;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+
+        public int getShareNum() {
+            return shareNum;
+        }
+
+        public void setShareNum(int shareNum) {
+            this.shareNum = shareNum;
+        }
+
+        public String getMerchantName() {
+            return merchantName;
+        }
+
+        public void setMerchantName(String merchantName) {
+            this.merchantName = merchantName;
+        }
+
+        public int getCommentNum() {
+            return commentNum;
+        }
+
+        public void setCommentNum(int commentNum) {
+            this.commentNum = commentNum;
+        }
+
+        public String getImageurl() {
+            return imageurl;
+        }
+
+        public void setImageurl(String imageurl) {
+            this.imageurl = imageurl;
+        }
+
+        public int getFabulousNum() {
+            return fabulousNum;
+        }
+
+        public void setFabulousNum(int fabulousNum) {
+            this.fabulousNum = fabulousNum;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getViews() {
+            return views;
+        }
+
+        public void setViews(int views) {
+            this.views = views;
+        }
+
+        public List<MemberImgBean> getMemberImg() {
+            return memberImg;
+        }
+
+        public void setMemberImg(List<MemberImgBean> memberImg) {
+            this.memberImg = memberImg;
+        }
+
+        public static class MemberImgBean {
+            /**
+             * headImg : https://ph-images.oss-cn-shenzhen.aliyuncs.com/upload/member/20180502/20180502164909235931373.png
+             * userType : 0
+             */
+
+            private String headImg;
+            private int userType;
+
+            public String getHeadImg() {
+                return headImg;
+            }
+
+            public void setHeadImg(String headImg) {
+                this.headImg = headImg;
+            }
+
+            public int getUserType() {
+                return userType;
+            }
+
+            public void setUserType(int userType) {
+                this.userType = userType;
+            }
+        }
+    }
+}

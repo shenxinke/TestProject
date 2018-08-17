@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/x46"
+    android:background="@color/white" >
+
+
+    <ImageView
+        android:id="@+id/activity_back_iv"
+        android:layout_width="@dimen/x28"
+        android:layout_height="@dimen/x28"
+        android:layout_marginLeft="@dimen/x2"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/x5"
+        android:src="@drawable/img_head_income_back_gray" />
+
+    <TextView
+        android:id="@+id/activity_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text=""
+        android:textColor="@color/app_title_color"
+        android:textSize="@dimen/x16" />
+
+    <ImageView
+        android:id="@+id/activity_title_right_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/x10"
+        android:padding="@dimen/x5"
+        android:visibility="gone"
+        android:src="@mipmap/question" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_alignParentBottom="true"
+        android:background="@color/line_gray"
+        >
+    </View>
+
+</RelativeLayout>

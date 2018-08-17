@@ -1,0 +1,278 @@
+package com.yst.onecity.activity;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.UserFocusAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.CodeMsgBean;
+import com.yst.onecity.bean.UserFocusBean;
+import com.yst.onecity.callbacks.AbstractCodeMsgCallback;
+import com.yst.onecity.callbacks.AbstractFocusCallback;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.AbstractDeleteDialog;
+import com.yst.onecity.eventbus.GoServermberEvent;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.xlistview.XListView;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import okhttp3.Call;
+
+/**
+ * 我的关注界面
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class MyFocusActivity extends BaseActivity implements XListView.IXListViewListener, UserFocusAdapter.CancleFocus, AdapterView.OnItemClickListener, OnRefreshListener, OnLoadmoreListener {
+
+    @BindView(R.id.activity_back_iv1)
+    ImageView activityBackIv1;
+    @BindView(R.id.activity_back_iv)
+    ImageView activityBackIv;
+    @BindView(R.id.activity_title_tv)
+    TextView activityTitleTv;
+    @BindView(R.id.activity_title_right_img)
+    ImageView activityTitleRightImg;
+    @BindView(R.id.activity_title_right_chat_say_img)
+    ImageView activityTitleRightChatSayImg;
+    @BindView(R.id.activity_complete_tv)
+    TextView activityCompleteTv;
+    @BindView(R.id.img_empty_content)
+    ImageView imgEmptyContent;
+    @BindView(R.id.txt_empty_content)
+    TextView txtEmptyContent;
+    @BindView(R.id.txt_empty_handle)
+    TextView txtEmptyHandle;
+    @BindView(R.id.llayout_empty_content)
+    LinearLayout llayoutEmptyContent;
+    @BindView(R.id.xlist_focus_data)
+    XListView xlistFocusData;
+    @BindView(R.id.activity_my_focus)
+    LinearLayout activityMyFocus;
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
+
+    private UserFocusAdapter mAdapter;
+    private List<UserFocusBean.ContentBean> mdata;
+    private int page = 1;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_my_focus;
+    }
+
+    @Override
+    public void initData() {
+        activityTitleTv.setText(R.string.my_attention);
+        mdata = new ArrayList<>();
+        mAdapter = new UserFocusAdapter(this, mdata);
+        xlistFocusData.setAdapter(mAdapter);
+        xlistFocusData.setXListViewListener(this);
+        xlistFocusData.setPullLoadEnable(false);
+        xlistFocusData.setPullRefreshEnable(false);
+        smartRefreshLayout.setOnRefreshListener(this);
+        smartRefreshLayout.setOnLoadmoreListener(this);
+        smartRefreshLayout.setEnableRefresh(true);
+        smartRefreshLayout.setEnableLoadmore(true);
+        showInfoProgressDialog();
+        getFocusList();
+        mAdapter.setOnClickListener(this);
+        xlistFocusData.setOnItemClickListener(this);
+    }
+
+    @OnClick(R.id.activity_back_iv)
+    public void finishShowFocus() {
+        finish();
+    }
+
+    /**
+     * 获取用户的关注列表
+     */
+    private void getFocusList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "id", TianyiApplication.appCommonBean.getId(),
+                "timestamp", timestamp,
+                "page", String.valueOf(page));
+        OkHttpUtils
+                .post()
+                .url(Constants.URL_COLLECTION_HUNTER)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("id", TianyiApplication.appCommonBean.getId())
+                .addParams("page", String.valueOf(page))
+                .addParams("client_type", "A")
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .build().execute(new AbstractFocusCallback() {
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+                onLoad();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(UserFocusBean response, int id) {
+                if (response.getCode() == 1) {
+                    mdata.addAll(response.getContent());
+                }
+                mAdapter.notifyDataSetChanged();
+                if (mdata.size() < 1) {
+                    llayoutEmptyContent.setVisibility(View.VISIBLE);
+                    xlistFocusData.setVisibility(View.GONE);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onRefresh() {
+
+    }
+
+    @Override
+    public void onLoadMore() {
+
+    }
+
+    private void onLoad() {
+        smartRefreshLayout.finishRefresh(500);
+        smartRefreshLayout.finishLoadmore(500);
+    }
+
+    @OnClick(R.id.txt_empty_handle)
+    public void onViewClicked() {
+        //跳转到服务专业页面
+        EventBus.getDefault().post(new GoServermberEvent());
+        finish();
+    }
+
+    @Override
+    public void onClickListener() {
+
+
+    }
+
+    private AbstractDeleteDialog mDeleteDialog = null;
+
+    @Override
+    public void unFocusHunter(final int postion) {
+        mDeleteDialog = new AbstractDeleteDialog(this) {
+            @Override
+            public void onSureClick() {
+                mDeleteDialog.dismissDialog();
+                unfocushunter(postion);
+            }
+        };
+        mDeleteDialog.setText(getString(R.string.str_my_unfocus_dialog_message));
+        mDeleteDialog.setCancleStyle(R.drawable.shape_white_10, R.color.black, getString(R.string.cancel));
+        mDeleteDialog.setSureStyle(R.drawable.shape_gray_180dp_bg, R.color.black, getString(R.string.str_my_unfocus_dialog_sure_btn));
+        mDeleteDialog.showDialog();
+    }
+
+    /**
+     * 回调
+     * 取消关注
+     *
+     * @param postion 位置
+     */
+    private void unfocushunter(final int postion) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "id", TianyiApplication.appCommonBean.getId(),
+                "timestamp", timestamp,
+                "type", String.valueOf(1),
+                "hunterId", mdata.get(postion).getHunter_id());
+        OkHttpUtils
+                .post()
+                .url(Constants.URL_COLLECTION_CANCEL)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("type", String.valueOf(1))
+                .addParams("hunterId", mdata.get(postion).getHunter_id())
+                .addParams("id", TianyiApplication.appCommonBean.getId())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    mdata.remove(postion);
+                    mAdapter.notifyDataSetChanged();
+                    if (mdata.size() < 1) {
+                        llayoutEmptyContent.setVisibility(View.VISIBLE);
+                        xlistFocusData.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        int heard = xlistFocusData.getHeaderViewsCount();
+        int newposition = position - heard;
+        Bundle bundle = new Bundle();
+        bundle.putInt("hunterId", Integer.parseInt(mdata.get(newposition).getHunter_id()));
+    //    JumpIntent.jump(this, ServerMemberProductDetailActivity.class, bundle);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // TODO: add setContentView(...) invocation
+        ButterKnife.bind(this);
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = 1;
+        mdata.clear();
+        mAdapter.notifyDataSetChanged();
+        getFocusList();
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        getFocusList();
+    }
+}

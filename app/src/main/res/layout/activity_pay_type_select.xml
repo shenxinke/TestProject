@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <include layout="@layout/activity_title_layout_white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/x10"
+        android:background="@color/white"
+        android:padding="@dimen/x15">
+
+        <TextView
+            android:id="@+id/txt_pay_product_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="@dimen/x5"
+            android:text="支付金额"
+            android:textColor="@color/black"
+            android:textSize="@dimen/x14" />
+
+        <TextView
+            android:id="@+id/txt_pay_product_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/x5"
+            android:text=""
+            android:textColor="@color/red"
+            android:textSize="@dimen/x18" />
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_marginBottom="@dimen/x5"
+        android:layout_marginTop="@dimen/x5"
+        android:background="@color/color_eeeeee" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:padding="@dimen/x15">
+
+        <ImageView
+            android:layout_width="@dimen/x50"
+            android:layout_height="@dimen/x50"
+            android:src="@drawable/zhifubao" />
+
+        <RelativeLayout
+            android:id="@+id/rellayout_zhifubao_pay"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/x5"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/txt_zhifubao_pay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/x10"
+                android:background="@color/white"
+                android:text="支付宝支付"
+                android:textColor="@color/black"
+                android:textSize="@dimen/x16" />
+
+            <TextView
+                android:id="@+id/txt_zhifubao_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txt_zhifubao_pay"
+                android:layout_marginLeft="@dimen/x10"
+                android:layout_marginTop="@dimen/x6"
+                android:background="@color/white"
+                android:text="支付宝余额,银行卡支付"
+                android:textColor="@color/fragment_home_gary"
+                android:textSize="@dimen/x13" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/img_payselect_zfb"
+            android:layout_width="@dimen/x20"
+            android:layout_height="@dimen/x20"
+            android:layout_marginLeft="@dimen/x5"
+            android:src="@drawable/right_icon"
+            android:visibility="visible" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_marginBottom="@dimen/x5"
+        android:layout_marginTop="@dimen/x5"
+        android:background="@color/fragment_home_lable_001" />
+    <LinearLayout
+        android:id="@+id/llayout_pay_seclect_wx"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:padding="@dimen/x15">
+
+        <ImageView
+            android:id="@+id/img_pay_wx"
+            android:layout_width="@dimen/x50"
+            android:layout_height="@dimen/x50"
+            android:src="@drawable/wx_pay" />
+
+        <TextView
+            android:id="@+id/txt_pay_name_wx"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:text="微信支付"
+            android:textColor="@color/black"
+            android:textSize="@dimen/x16" />
+
+        <ImageView
+            android:id="@+id/img_payselect_wx"
+            android:layout_width="@dimen/x20"
+            android:layout_height="@dimen/x20"
+            android:layout_marginLeft="@dimen/x5"
+            android:src="@drawable/right_icon" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F4F5F7"
+        android:padding="@dimen/x15"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/select_zhifubao"
+            android:drawablePadding="@dimen/x5"
+            android:text="其他支付方式"
+            android:textColor="@color/black"
+            android:textSize="@dimen/x14" />
+    </LinearLayout>
+
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_marginBottom="@dimen/x5"
+        android:layout_marginTop="@dimen/x5"
+        android:background="@color/fragment_home_lable_001" />
+</LinearLayout>

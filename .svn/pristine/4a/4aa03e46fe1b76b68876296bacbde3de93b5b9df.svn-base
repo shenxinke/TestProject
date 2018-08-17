@@ -1,0 +1,254 @@
+package com.yst.tianyimember.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.bean.consult.ConsultListBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.utils.ConstUtils;
+import com.yst.tianyimember.view.roundedimageview.RoundedImageView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 咨询适配器
+ *
+ * @author luxuchang
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class InfomationAdapter extends BaseAdapter {
+
+    private Context context;
+    private List<ConsultListBean.ContentBean.ContentListBean> mDatas;
+    private LayoutInflater inflater;
+    /**
+     * 没有图片
+     */
+    private final int TYPE_NOP = 0;
+    /**
+     * 一张图片
+     */
+    private final int TYPE_ONEP = 1;
+    /**
+     * 三张图片
+     */
+    private final int TYPE_THREEP = 2;
+    private int type = 0;
+
+    public InfomationAdapter(Context context, List<ConsultListBean.ContentBean.ContentListBean> mDatas, int type) {
+        this.context = context;
+        this.mDatas = mDatas;
+        this.type = type;
+        inflater = LayoutInflater.from(context);
+    }
+
+    @Override
+    public int getCount() {
+        return mDatas.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return position;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    public void setData(List<ConsultListBean.ContentBean.ContentListBean> data) {
+        if (null != data) {
+            this.mDatas = data;
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        switch (mDatas.get(position).getModelType()) {
+            case TYPE_NOP:
+                return TYPE_NOP;
+            case TYPE_ONEP:
+                return TYPE_ONEP;
+            case TYPE_THREEP:
+                return TYPE_THREEP;
+            default:
+                break;
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        convertView = null;
+        switch (getItemViewType(position)) {
+            case TYPE_NOP:
+                NoPicViewHolder noPic = null;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.item_share_no_pic, null);
+                    noPic = new NoPicViewHolder(convertView);
+                    convertView.setTag(noPic);
+                } else {
+                    noPic = (NoPicViewHolder) convertView.getTag();
+                }
+
+                if (mDatas.get(position).getUserType() == Const.INTEGER_3) {
+                    Glide.with(context).load(R.drawable.icon_logo).error(R.mipmap.head_2).into(noPic.mItemIvShareHead);
+                    noPic.mItemTxtShareTitle.setText("普济一城资讯");
+                } else {
+                    Glide.with(context).load(ConstUtils.matchingImageUrl(mDatas.get(position).getHeadImg())).error(R.mipmap.head_2).into(noPic.mItemIvShareHead);
+                    noPic.mItemTxtShareTitle.setText(mDatas.get(position).getName());
+                }
+                noPic.mItemTxtShareContent.setText(mDatas.get(position).getTitle());
+                noPic.mItemPinglun.setText(String.valueOf(mDatas.get(position).getCommentNum()));
+                noPic.mItemDianzan.setText(String.valueOf(mDatas.get(position).getFabulousNum()));
+                noPic.mItemZhuanfa.setText(mDatas.get(position).getShareNum());
+                break;
+            case TYPE_ONEP:
+                OnePicViewHolder onePic = null;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.item_share_one_pic, null);
+                    onePic = new OnePicViewHolder(convertView);
+                    convertView.setTag(onePic);
+                } else {
+                    onePic = (OnePicViewHolder) convertView.getTag();
+                }
+
+                if (mDatas.get(position).getUserType() == Const.INTEGER_3) {
+                    Glide.with(context).load(R.drawable.icon_logo).error(R.mipmap.head_2).into(onePic.mItemIvShareHead);
+                    onePic.mItemTxtShareTitle.setText("普济一城资讯");
+                } else {
+                    Glide.with(context).load(ConstUtils.matchingImageUrl(mDatas.get(position).getHeadImg())).error(R.mipmap.head_2).into(onePic.mItemIvShareHead);
+                    onePic.mItemTxtShareTitle.setText(mDatas.get(position).getName());
+                }
+                onePic.mItemTxtShareContent.setText(mDatas.get(position).getTitle());
+
+                if (mDatas.get(position).getInfo() != null && mDatas.get(position).getInfo().size() > 0) {
+                    for (int i = 0; i < mDatas.get(position).getInfo().size(); i++) {
+                        if (mDatas.get(position).getInfo().get(i).getCover() == 1) {
+                            Glide.with(context).load(ConstUtils.matchingImageUrl(mDatas.get(position).getInfo().get(i).getAddress())).error(R.mipmap.img_default_bg).into(onePic.mItemIvShareCover);
+                        }
+                    }
+                }
+                onePic.mItemZhuanfa.setText(mDatas.get(position).getShareNum());
+                onePic.mItemPinglun.setText(String.valueOf(mDatas.get(position).getCommentNum()));
+                onePic.mItemDianzan.setText(String.valueOf(mDatas.get(position).getFabulousNum()));
+                break;
+            case TYPE_THREEP:
+                ThreeViewHolder threePic = null;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.item_share_three_pic, null);
+                    threePic = new ThreeViewHolder(convertView);
+                    convertView.setTag(threePic);
+                } else {
+                    threePic = (ThreeViewHolder) convertView.getTag();
+                }
+
+                if (mDatas.get(position).getUserType() == Const.INTEGER_3) {
+                    Glide.with(context).load(R.drawable.icon_logo).error(R.mipmap.head_2).into(threePic.mItemIvThreeHead);
+                    threePic.mItemTxtThreeTitle.setText("普济一城资讯");
+                } else {
+                    Glide.with(context).load(ConstUtils.matchingImageUrl(mDatas.get(position).getHeadImg())).error(R.mipmap.head_2).into(threePic.mItemIvThreeHead);
+                    threePic.mItemTxtThreeTitle.setText(mDatas.get(position).getName());
+                }
+                threePic.mItemTxtThreeContent.setText(mDatas.get(position).getTitle());
+
+                if (mDatas.get(position).getInfo() != null) {
+                    List<String> coverPath = new ArrayList<>();
+                    for (int i = 0; i < mDatas.get(position).getInfo().size(); i++) {
+                        if (mDatas.get(position).getInfo().get(i).getCover() == 1) {
+                            coverPath.add(ConstUtils.matchingImageUrl(mDatas.get(position).getInfo().get(i).getAddress()));
+                        }
+                    }
+
+                    Glide.with(context).load(coverPath.get(0)).error(R.mipmap.img_default_p).into(threePic.mItemIvThreePic1);
+                    Glide.with(context).load(coverPath.get(1)).error(R.mipmap.img_default_p).into(threePic.mItemIvThreePic2);
+                    Glide.with(context).load(coverPath.get(2)).error(R.mipmap.img_default_p).into(threePic.mItemIvThreePic3);
+                }
+                threePic.mItemZhuanfa.setText(mDatas.get(position).getShareNum());
+                threePic.mItemPinglun.setText(String.valueOf(mDatas.get(position).getCommentNum()));
+                threePic.mItemDianzan.setText(String.valueOf(mDatas.get(position).getFabulousNum()));
+                break;
+            default:
+                break;
+        }
+        return convertView;
+    }
+
+    class NoPicViewHolder {
+        @BindView(R.id.item_iv_share_head)
+        RoundedImageView mItemIvShareHead;
+        @BindView(R.id.item_txt_share_title)
+        TextView mItemTxtShareTitle;
+        @BindView(R.id.item_txt_share_content)
+        TextView mItemTxtShareContent;
+        @BindView(R.id.item_zhuanfa)
+        TextView mItemZhuanfa;
+        @BindView(R.id.item_pinglun)
+        TextView mItemPinglun;
+        @BindView(R.id.item_dianzan)
+        TextView mItemDianzan;
+
+        NoPicViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    class OnePicViewHolder {
+        @BindView(R.id.item_iv_share_head)
+        RoundedImageView mItemIvShareHead;
+        @BindView(R.id.item_txt_share_title)
+        TextView mItemTxtShareTitle;
+        @BindView(R.id.item_txt_share_content)
+        TextView mItemTxtShareContent;
+        @BindView(R.id.item_iv_share_cover)
+        RoundedImageView mItemIvShareCover;
+        @BindView(R.id.item_zhuanfa)
+        TextView mItemZhuanfa;
+        @BindView(R.id.item_pinglun)
+        TextView mItemPinglun;
+        @BindView(R.id.item_dianzan)
+        TextView mItemDianzan;
+
+        OnePicViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    class ThreeViewHolder {
+        @BindView(R.id.item_iv_three_head)
+        RoundedImageView mItemIvThreeHead;
+        @BindView(R.id.item_txt_three_title)
+        TextView mItemTxtThreeTitle;
+        @BindView(R.id.item_txt_three_content)
+        TextView mItemTxtThreeContent;
+        @BindView(R.id.item_iv_three_pic1)
+        RoundedImageView mItemIvThreePic1;
+        @BindView(R.id.item_iv_three_pic2)
+        RoundedImageView mItemIvThreePic2;
+        @BindView(R.id.item_iv_three_pic3)
+        RoundedImageView mItemIvThreePic3;
+        @BindView(R.id.item_zhuanfa)
+        TextView mItemZhuanfa;
+        @BindView(R.id.item_pinglun)
+        TextView mItemPinglun;
+        @BindView(R.id.item_dianzan)
+        TextView mItemDianzan;
+
+        ThreeViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

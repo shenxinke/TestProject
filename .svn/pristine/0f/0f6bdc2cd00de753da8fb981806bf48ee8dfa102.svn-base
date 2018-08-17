@@ -1,0 +1,316 @@
+package com.yst.onecity.fragment;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ListView;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.activity.tickets.TkNoLotteryDetailActivity;
+import com.yst.onecity.adapter.AbstractCommonAdapter;
+import com.yst.onecity.adapter.CommonViewHolder;
+import com.yst.onecity.base.BaseFragment;
+import com.yst.onecity.bean.tickets.TicketsBean;
+import com.yst.onecity.bean.tickets.TicketsBroadcastBean;
+import com.yst.onecity.bean.tickets.TicketsContent;
+import com.yst.onecity.callbacks.AbstractTicketsListCallback;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.AutoTextView;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.Callback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import gorden.rxbus2.RxBus;
+import okhttp3.Call;
+import okhttp3.Request;
+import okhttp3.Response;
+
+/**
+ * 我的奖券（未开奖订单页面）
+ *
+ * @version 4.0.0
+ * @author WangJingWei
+ * @date 2018/3/20.
+ */
+public class TkNoLotteryFragment extends BaseFragment {
+    @BindView(R.id.listView)
+    ListView listView;
+    @BindView(R.id.mSmartRefresh)
+    SmartRefreshLayout mSmartRefresh;
+    @BindView(R.id.img_empty)
+    ImageView imgEmpty;
+    @BindView(R.id.mAutoTextView)
+    AutoTextView mAutoTextView;
+
+    private int pageSize = 1;
+    private int rows = 10;
+    private List<TicketsContent> mData = new ArrayList<>();
+    private List<TicketsBroadcastBean.BroadcastInfo> messageList = new ArrayList<>();
+    private AbstractCommonAdapter<TicketsContent> mCommonAdapter;
+    private static final int AUTO_MESSAGE = 1;
+    /** 滚动时间间隔*/
+    private static final int AUTO_TIME = 4000;
+    private boolean isFirstScroll = true;
+    private int broadcastCount = 1;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_no_lottery_order;
+    }
+
+    @Override
+    public void initData() {
+        RxBus.get().register(this);
+        initListener();
+        initTicketsData();
+        requestTicketsBroadcast();
+        requestTicketsList();
+    }
+
+    /**
+     * 实例化监听事件
+     */
+    private void initListener() {
+        mSmartRefresh.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+                pageSize++;
+                requestTicketsList();
+                mSmartRefresh.finishLoadmore(500);
+            }
+
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                mData.clear();
+                pageSize = 1;
+                requestTicketsList();
+                mSmartRefresh.finishRefresh(500);
+            }
+        });
+    }
+
+    /**
+     * 接收activity传递过来的页面切换监听
+     * @param position
+     */
+    public void onSelectPosition(int position) {
+        switch (position) {
+            /**
+             * 未开奖
+             */
+            case 0:
+                if (!isFirstScroll && messageList.size() > 0) {
+                    loopScrollNews();
+                }
+                break;
+            /**
+             * 已开奖
+             */
+            case 1:
+                isFirstScroll = false;
+                mHandler.removeMessages(AUTO_MESSAGE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        RxBus.get().unRegister(this);
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
+    /**
+     * 设置奖券数据
+     */
+    private void initTicketsData() {
+
+        mCommonAdapter = new AbstractCommonAdapter<TicketsContent>(TianyiApplication.instance, mData, R.layout.item_tickets_no_lottery) {
+            @Override
+            public void convert(CommonViewHolder holder, final int position, final TicketsContent item) {
+                holder.setText(R.id.tv_money, Utils.changeEmptyStringToZero(item.getTkMoney()));
+                holder.setText(R.id.tv_ordernum,"订单号: " + Utils.getStringNoEmpty(item.getOrderNum()));
+                holder.setText(R.id.tv_packagenum, "(" + Utils.changeEmptyStringToZero(item.getTkNum()) + ")");
+                holder.setText(R.id.tv_time, "开奖日期: " + Utils.getStringNoEmpty(item.getDate()));
+
+                holder.setButtonListener(R.id.ll_root, view -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("orderNo", Utils.changeEmptyStringToZero(item.getOrderNum()));
+                    bundle.putString("packagenum",Utils.changeEmptyStringToZero(item.getTkNum()));
+                    JumpIntent.jump(getActivity(), TkNoLotteryDetailActivity.class, bundle);
+                });
+            }
+        };
+        listView.setAdapter(mCommonAdapter);
+    }
+
+    /**
+     * 请求开奖广播消息
+     */
+    private void requestTicketsBroadcast() {
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils
+                .post()
+                .url(Constants.TICKETS_NOTIFICATION)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new Callback<TicketsBroadcastBean>() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+
+            }
+
+            @Override
+            public TicketsBroadcastBean parseNetworkResponse(Response response, int id) throws Exception {
+                String string = response.body().string();
+                TicketsBroadcastBean bean = new Gson().fromJson(string, TicketsBroadcastBean.class);
+                return bean;
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(TicketsBroadcastBean response, int id) {
+                if (response.getCode() == 1) {
+                    if (response.getContent() != null && response.getContent().size() > 0) {
+                        messageList.addAll(response.getContent());
+                        loopScrollNews();
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 请求某一订单下未开奖的奖券
+     */
+    private void requestTicketsList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "rows", String.valueOf(rows),
+                "timestamp", timestamp,
+                "page", String.valueOf(pageSize));
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils
+                .post()
+                .url(Constants.TICKETS_NO_LOTTERY_LIST)
+                .addParams("page", String.valueOf(pageSize))
+                .addParams("rows", String.valueOf(rows))
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid"   , TianyiApplication.appCommonBean.getUuid())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractTicketsListCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(TicketsBean response, int id) {
+                if (response.getCode() == 1) {
+                    if (response.getContent() != null && response.getContent().size() > 0) {
+                        mData.addAll(response.getContent());
+                    }
+
+                    if (mData.size() > 0) {
+                        imgEmpty.setVisibility(View.GONE);
+                    } else {
+                        imgEmpty.setVisibility(View.VISIBLE);
+                    }
+
+                    mCommonAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    /**
+     * 轮播消息
+     */
+    private void loopScrollNews() {
+
+        mHandler.postDelayed(() -> mHandler.sendEmptyMessage(AUTO_MESSAGE), 500);
+    }
+
+    /**
+     * 定时处理广播消息
+     */
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AUTO_MESSAGE:
+                    mAutoTextView.setText("恭喜" + messageList.get(broadcastCount % messageList.size()).getNickname()
+                            + "获得" + Utils.getStringNoEmpty(messageList.get(broadcastCount % messageList.size()).getWinAPrizeName()));
+                    mAutoTextView.next();
+                    broadcastCount++;
+                    mHandler.sendEmptyMessageDelayed(AUTO_MESSAGE, AUTO_TIME);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+}

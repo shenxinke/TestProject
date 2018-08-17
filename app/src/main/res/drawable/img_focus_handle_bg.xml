@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <padding
+        android:bottom="@dimen/x8"
+        android:left="@dimen/x12"
+        android:right="@dimen/x12"
+        android:top="@dimen/x8" />
+
+    <corners android:radius="@dimen/x60" />
+
+    <solid android:color="@color/color_my_focus_handle" />
+
+    <stroke
+        android:width="@dimen/x1"
+        android:color="@color/color_my_focus_handle" />
+</shape>

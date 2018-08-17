@@ -1,0 +1,102 @@
+package com.yst.onecity.view;
+
+import android.app.Activity;
+import android.graphics.drawable.ColorDrawable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+
+import com.amap.api.services.core.PoiItem;
+import com.yst.onecity.R;
+import com.yst.onecity.utils.WindowUtils;
+
+import java.util.List;
+
+/**
+ * 搜索地址结果弹框
+ *
+ * @author jiaofan
+ * @version 4.2.0
+ * @date 2018/6/8
+ */
+public class SearchResultPopWindow extends PopupWindow {
+
+    private Activity context;
+    private List<PoiItem> list;
+
+    public SearchResultPopWindow(Activity context, List<PoiItem> list, AdapterView.OnItemClickListener clickListener) {
+        this.context = context;
+        this.list = list;
+        View popView = LayoutInflater.from(context).inflate(R.layout.pop_search_lv, null);
+        this.setContentView(popView);
+        this.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        this.setHeight((int) (WindowUtils.getScreenHeight(context)*0.8));
+        this.setFocusable(true);
+        this.setOutsideTouchable(true);
+        this.update();
+        ColorDrawable dw = new ColorDrawable(10222222);
+        this.setBackgroundDrawable(dw);
+        ListView popLv = (ListView) popView.findViewById(R.id.pop_lv);
+        MyAdapter adapter = new MyAdapter();
+        popLv.setAdapter(adapter);
+        popLv.setOnItemClickListener(clickListener);
+    }
+
+    /**
+     * 显示的位置
+     *
+     * @param parent 某个控件
+     */
+    public void showPopupWindow(View parent) {
+        if (!this.isShowing()) {
+            this.showAsDropDown(parent);
+        } else {
+            this.dismiss();
+        }
+    }
+
+    private class MyAdapter extends BaseAdapter {
+        @Override
+        public int getCount() {
+            return list.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return list.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder = null;
+            if (convertView == null) {
+                holder = new ViewHolder();
+                convertView = LayoutInflater.from(context).inflate(R.layout.item_map, null);
+                holder.tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
+                holder.tvAddress = (TextView) convertView.findViewById(R.id.tv_address);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.tvTitle.setText(list.get(position).getTitle());
+            holder.tvAddress.setText(list.get(position).getSnippet());
+            return convertView;
+        }
+    }
+
+    private class ViewHolder {
+        private TextView tvTitle;
+        private TextView tvAddress;
+    }
+
+}

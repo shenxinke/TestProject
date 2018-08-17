@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/ConstraintLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_scrollFlags="scroll|enterAlways"
+               >
+
+                <ImageView
+                    android:id="@+id/head_pic"
+                    android:layout_width="0dp"
+                    android:layout_height="150dp"
+                    android:background="@mipmap/include_background"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:background="@color/white"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/head_pic"
+                    />
+
+                <TextView
+                    android:id="@+id/position"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="@dimen/margin_10dp"
+                    android:layout_marginStart="@dimen/margin_10dp"
+                    android:drawableLeft="@mipmap/locate_icon_mall"
+                    android:drawablePadding="@dimen/margin_5dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:maxEms="10"
+                    android:text=""
+                    android:textColor="@color/white"
+                    android:textSize="12dp"
+                    app:layout_constraintLeft_toLeftOf="@+id/head_pic"
+                    app:layout_constraintTop_toTopOf="@+id/head_pic" />
+
+                <LinearLayout
+                    android:id="@+id/searchBarLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:layout_marginLeft="@dimen/margin_10dp"
+                    android:layout_marginRight="@dimen/margin_10dp"
+                    android:layout_marginStart="@dimen/margin_10dp"
+                    android:background="@drawable/shape_search_mall"
+                    android:gravity="center"
+                    app:layout_constraintLeft_toLeftOf="@+id/head_pic"
+                    app:layout_constraintRight_toRightOf="@+id/head_pic"
+                    app:layout_constraintTop_toBottomOf="@+id/position">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/margin_20dp"
+                        android:src="@mipmap/icon_search" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/margin_10dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/search_text"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/zhuanyuan_information"
+                    android:layout_width="0dp"
+                    android:layout_height="180dp"
+                    android:background="@mipmap/zhuanyuan_information"
+                    android:scaleType="fitXY"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/searchBarLayout"
+                    tools:layout_editor_absoluteX="0dp" />
+
+                <com.yst.onecity.view.roundedimageview.RoundedImageView
+                    android:id="@+id/iv_head"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="30dp"
+                    android:scaleType="fitXY"
+                    android:src="@mipmap/member_head"
+                    app:border_color="@color/color_dddddd"
+                    app:layout_constraintLeft_toLeftOf="@+id/zhuanyuan_information"
+                    app:layout_constraintTop_toTopOf="@+id/zhuanyuan_information" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:gravity="center"
+                    android:text=""
+                    android:maxEms="5"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    app:layout_constraintRight_toRightOf="@+id/iv_head"
+                    app:layout_constraintLeft_toLeftOf="@+id/zhuanyuan_address"
+                    app:layout_constraintTop_toBottomOf="@+id/iv_head" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_address"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:gravity="center"
+                    android:text=""
+                    android:textSize="12sp"
+                    app:layout_constraintLeft_toLeftOf="@+id/zhuanyuan_information"
+                    app:layout_constraintTop_toBottomOf="@+id/zhuanyuan_name" />
+
+                <ImageView
+                    android:id="@+id/text_backgroud"
+                    android:layout_width="220dp"
+                    android:layout_height="75dp"
+                    android:layout_marginEnd="@dimen/margin_25dp"
+                    android:layout_marginRight="@dimen/margin_25dp"
+                    android:layout_marginTop="23dp"
+                    android:background="@color/color_F9F9F9"
+                    app:layout_constraintRight_toRightOf="@+id/zhuanyuan_information"
+                    app:layout_constraintTop_toTopOf="@+id/zhuanyuan_information" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_text"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    android:text="该专员还没有上传内容哦~请您耐心等待"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_backgroud"
+                    app:layout_constraintLeft_toLeftOf="@+id/text_backgroud"
+                    app:layout_constraintTop_toTopOf="@+id/text_backgroud" />
+
+                <ImageView
+                    android:id="@+id/zhuanyuan_pic"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="@dimen/margin_5dp"
+                    android:layout_marginStart="@dimen/margin_5dp"
+                    android:background="@mipmap/member_back"
+                    android:scaleType="fitXY"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_backgroud"
+                    app:layout_constraintLeft_toRightOf="@+id/zhuanyuan_text"
+                    app:layout_constraintTop_toTopOf="@+id/text_backgroud" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_fenxiang"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginRight="@dimen/margin_20dp"
+                    android:drawableLeft="@mipmap/zhuanyuan_fenxiang"
+                    android:drawablePadding="5dp"
+                    android:text="7287"
+                    android:textSize="11sp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/zhuanyuan_pinglun"
+                    app:layout_constraintRight_toLeftOf="@+id/zhuanyuan_pinglun" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_pinglun"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginRight="@dimen/margin_20dp"
+                    android:layout_marginTop="8dp"
+                    android:drawableLeft="@mipmap/zhuanyuan_pinglun"
+                    android:drawablePadding="5dp"
+                    android:text="365"
+                    android:textSize="11sp"
+                    android:visibility="invisible"
+                    app:layout_constraintRight_toLeftOf="@+id/zhuanyuan_zan"
+                    app:layout_constraintTop_toBottomOf="@+id/text_backgroud" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_zan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@mipmap/zhuanyuan_zan"
+                    android:drawablePadding="5dp"
+                    android:text="1200"
+                    android:textSize="11sp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/zhuanyuan_pinglun"
+                    app:layout_constraintRight_toRightOf="@+id/text_backgroud" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_sale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginRight="@dimen/margin_20dp"
+                    android:drawableLeft="@mipmap/sale"
+                    android:drawablePadding="5dp"
+                    android:text="7287"
+                    android:textSize="11sp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/zhuanyuan_comment"
+                    app:layout_constraintRight_toLeftOf="@+id/zhuanyuan_comment" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_comment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginRight="@dimen/margin_20dp"
+                    android:drawableLeft="@mipmap/zhuanyuan_pinglun"
+                    android:drawablePadding="5dp"
+                    android:text="365"
+                    android:textSize="11sp"
+                    android:visibility="invisible"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintRight_toLeftOf="@+id/zhuanyuan_collect"
+                    app:layout_constraintTop_toBottomOf="@+id/text_backgroud" />
+
+                <TextView
+                    android:id="@+id/zhuanyuan_collect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@mipmap/collect"
+                    android:drawablePadding="5dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/zhuanyuan_comment"
+                    app:layout_constraintRight_toRightOf="@+id/text_backgroud"
+                    android:text="1200"
+                    android:textSize="11sp" />
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="118dp"
+                    tools:layout_editor_absoluteX="118dp"
+                    tools:layout_editor_absoluteY="0dp" />
+
+                <TextView
+                    android:id="@+id/zhuanyan_gengduo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableRight="@mipmap/zhuanyan_gengduo"
+                    android:gravity="center"
+                    android:text="更多服务专员"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:layout_marginTop="@dimen/margin_15dp"
+                    app:layout_constraintRight_toRightOf="@+id/text_backgroud"
+                    app:layout_constraintTop_toBottomOf="@+id/zhuanyuan_comment" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <LinearLayout
+                android:id="@+id/headConstraintLayout"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="@mipmap/include_background"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/text_position"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="@dimen/margin_10dp"
+                    android:layout_marginStart="@dimen/margin_10dp"
+                    android:drawableLeft="@mipmap/locate_icon_mall"
+                    android:gravity="center"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="霄云路润鹏大厦"
+                    android:textColor="@color/white"
+                    android:textSize="12dp"
+                    app:layout_constraintLeft_toLeftOf="@+id/head_picture"
+                    app:layout_constraintTop_toTopOf="@+id/head_picture" />
+
+                <LinearLayout
+                    android:id="@+id/searchLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:layout_marginStart="@dimen/margin_10dp"
+                    android:background="@drawable/shape_search_mall"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/margin_20dp"
+                        android:src="@mipmap/icon_search" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/margin_10dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/search_text"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.yst.onecity.view.viewpagerindicator.ViewPagerIndicator
+                    android:id="@+id/indicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="41dp"
+                    android:layout_weight="1"
+                    android:background="@color/white" />
+
+                <ImageView
+                    android:id="@+id/shopping_mall_arrows"
+                    android:layout_width="40dp"
+                    android:layout_height="41dp"
+                    android:background="@color/white"
+                    android:scaleType="center"
+                    android:src="@mipmap/zhuanyuan_jiantou" />
+
+            </LinearLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                >
+
+            </android.support.v4.view.ViewPager>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>

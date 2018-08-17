@@ -1,0 +1,198 @@
+package com.yst.tianyimember.fragment.commissoner;
+
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.adapter.commissoner.CommentAdapter;
+import com.yst.tianyimember.base.BaseFragment;
+import com.yst.tianyimember.bean.commissioner.CommentBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.SpaceItemDecoration;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.Unbinder;
+import okhttp3.Call;
+
+/**
+ * 商品页面
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/1
+ */
+
+public class CommentFragment extends BaseFragment implements OnRefreshListener, OnRefreshLoadmoreListener {
+    @BindView(R.id.recycler)
+    RecyclerView recycler;
+    @BindView(R.id.refreshlayout)
+    SmartRefreshLayout refreshlayout;
+    @BindView(R.id.iv_empty)
+    ImageView ivEmpty;
+    Unbinder unbinder;
+    private boolean isVisiable;
+    private boolean isPrepared;
+    private boolean isFirst = true;
+    private String hunterId;
+    private int page = Const.INTEGER_1;
+    private CommentAdapter adapter;
+    private List<CommentBean.ContentBean> commentList = new ArrayList<>();
+    private String hid;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_goods;
+    }
+
+    @Override
+    public void initData() {
+        isPrepared = true;
+        init();
+        lazyLoad();
+    }
+
+    /**
+     * 初始化
+     */
+    private void init() {
+        refreshlayout.setOnRefreshLoadmoreListener(this);
+        adapter = new CommentAdapter(getActivity());
+        recycler.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        recycler.addItemDecoration(new SpaceItemDecoration(0, 20));
+        recycler.setAdapter(adapter);
+        Bundle arguments = getArguments();
+        if (null != arguments) {
+            hid = arguments.getString("hid");
+        }
+    }
+
+    public static CommentFragment newInstance(String hid) {
+        CommentFragment fragment = new CommentFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("hid", hid);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    /**
+     * 懒加载
+     */
+    public void lazyLoad() {
+        MyLog.e("sss", "isFirst: " + isFirst + "-isRepared: " + isPrepared + "_isVisible: " + isVisiable);
+        if (!isPrepared || !isVisiable || !isFirst) {
+            return;
+        }
+        getCommentList();
+        isFirst = false;
+    }
+
+
+    /**
+     * 获取评论列表
+     */
+    private void getCommentList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "hunterId", hid,
+                "page", String.valueOf(page),
+                "rows", String.valueOf(Const.INTEGER_10),
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GET_COMMISSONER_COMMENT_LIST)
+                .addParams("hunterId", hid)
+                .addParams("page", String.valueOf(page))
+                .addParams("rows", String.valueOf(Const.INTEGER_10))
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(e.getMessage());
+                List<CommentBean.ContentBean> emptyList = new ArrayList<>();
+                setVisiableGone(emptyList);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                if (null != response) {
+                    CommentBean customerBean = new Gson().fromJson(response, CommentBean.class);
+                    if (null != customerBean) {
+                        if (customerBean.getCode() == Const.INTEGER_1 && null != customerBean.getContent()) {
+                            if (page == Const.INTEGER_1) {
+                                commentList.clear();
+                            } else {
+                                if (customerBean.getContent().isEmpty()) {
+                                    ToastUtils.show("已加载全部");
+                                }
+                            }
+                            commentList.addAll(customerBean.getContent());
+                            adapter.addData(commentList);
+                            setVisiableGone(commentList);
+                        } else {
+                            ToastUtils.show(customerBean.getMsg());
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            isVisiable = true;
+            lazyLoad();
+        } else {
+            isVisiable = false;
+        }
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = Const.INTEGER_1;
+        getCommentList();
+        refreshlayout.finishRefresh(500);
+    }
+
+    /**
+     * 设置数据和图片的展示
+     *
+     * @param list 集合
+     */
+    public void setVisiableGone(List<CommentBean.ContentBean> list) {
+        if (null != list) {
+            if (list.isEmpty()) {
+                ivEmpty.setVisibility(View.VISIBLE);
+            } else {
+                ivEmpty.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        getCommentList();
+        refreshlayout.finishLoadmore(500);
+    }
+}
+

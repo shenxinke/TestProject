@@ -1,0 +1,774 @@
+package com.yst.onecity.activity.member;
+
+import android.Manifest;
+import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.alipay.Alipay;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.AlipayBean;
+import com.yst.onecity.bean.BalanceNumBean;
+import com.yst.onecity.bean.CodeMsgBean;
+import com.yst.onecity.bean.EventBean;
+import com.yst.onecity.bean.IsPayPwdBean;
+import com.yst.onecity.bean.MyAccountBean;
+import com.yst.onecity.callbacks.AbstractBalanceNumCallback;
+import com.yst.onecity.callbacks.AbstractCodeMsgCallback;
+import com.yst.onecity.callbacks.AbstractIsPayPwdCallback;
+import com.yst.onecity.callbacks.AbstractWechatPayCallBack;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.AbstractEditPwdDialog;
+import com.yst.onecity.dialog.AbstractLogoutDialog;
+import com.yst.onecity.dialog.AbstractSetPasswordSuccessDialog;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.wechat.WeChatInfoEntry;
+import com.yst.onecity.wechat.WeChatPay;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+import pub.devrel.easypermissions.EasyPermissions;
+
+import static com.yst.onecity.config.Const.STR0;
+import static com.yst.onecity.config.Const.STR1;
+
+/**
+ * 支付中心
+ *
+ * @author jiaofan
+ * @version 4.0.0
+ * @date 2018/3/22
+ */
+public class PayCenterActivity extends BaseActivity {
+
+    @BindView(R.id.tv_pay_money)
+    TextView tvPayMoney;
+    @BindView(R.id.txt_pay_jifen)
+    TextView mTxtPayJifen;
+    @BindView(R.id.rel_pay_balance)
+    RelativeLayout mRelPayBalance;
+    @BindView(R.id.txt_pay_mybalance)
+    TextView mTxtPayMyBalance;
+    @BindView(R.id.rel_pay_jifen)
+    RelativeLayout mRelPayJifen;
+    @BindView(R.id.txt_pay_myjifen)
+    TextView mTxtPayMyjifen;
+    @BindView(R.id.txt_balance)
+    TextView mTxtBalance;
+    @BindView(R.id.txt_jifen)
+    TextView mTxtJifen;
+    @BindView(R.id.isHasWeChat)
+    TextView isHasWeChat;
+    @BindView(R.id.txt_huo)
+    TextView txtHuo;
+    @BindView(R.id.iv_huo)
+    ImageView ivHuo;
+
+    private String orderIds;
+
+    private int flag = 0;
+    private String pwd;
+    /**
+     * 0为普济余额支付，1为积分支付
+     */
+    private int payType;
+    private String price;
+    private String integral;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_pay_center;
+    }
+
+    @Override
+    public void initData() {
+        setTitleBarTitle("支付中心");
+        EventBus.getDefault().register(this);
+        EasyPermissions.requestPermissions(this, getString(R.string.read_phone_state_permission),
+                Const.INTEGER_300, Manifest.permission.READ_PHONE_STATE);
+
+        if (!ConstUtils.isWeixinAvilible(context)) {
+            isHasWeChat.setVisibility(View.VISIBLE);
+        } else {
+            isHasWeChat.setVisibility(View.INVISIBLE);
+        }
+
+        //需支付的金额
+        price = getIntent().getExtras().getString("price");
+        //需支付的积分
+        integral = getIntent().getExtras().getString("score");
+        //订单号
+        orderIds = getIntent().getExtras().getString("orderIds");
+        tvPayMoney.setText(String.format(getString(R.string.string_money), String.format("%.2f", Double.parseDouble(ConstUtils.changeEmptyStringToZero(price)))));
+
+        if (Const.ISNEWYETAI == Const.INTEGER_1) {
+            txtHuo.setVisibility(View.GONE);
+            ivHuo.setVisibility(View.GONE);
+            mTxtPayJifen.setVisibility(View.GONE);
+
+            mTxtPayMyjifen.setText(Const.CONS_STR_ZERO);
+            mTxtJifen.setTextColor(ContextCompat.getColor(context, R.color.color_999999));
+            mRelPayJifen.setEnabled(false);
+            mRelPayJifen.setBackgroundColor(ContextCompat.getColor(context, R.color.color_E5E5E5));
+        } else {
+            txtHuo.setVisibility(View.VISIBLE);
+            ivHuo.setVisibility(View.VISIBLE);
+            mTxtPayJifen.setVisibility(View.VISIBLE);
+            mTxtPayJifen.setText(String.format("%.2f", Double.parseDouble(ConstUtils.changeEmptyStringToZero(integral))));
+        }
+        requestMyZYYJInfo();
+
+        MyLog.e("zzz", "price==" + price);
+        MyLog.e("zzz", "integral==" + integral);
+        MyLog.e("zzz", "orderIds==" + orderIds);
+    }
+
+    /**
+     * 获取普济余额
+     */
+    private void getBalanceNum() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "timestamp", timestamp
+        );
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.MYACCOUNT_MAIN)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractBalanceNumCallback() {
+            @Override
+            public void onResponse(BalanceNumBean response, int id) {
+                if (response.getCode() == Const.INTEGER_1) {
+                    if (STR0.equals(response.getContent().getScore())) {
+                        mTxtBalance.setTextColor(ContextCompat.getColor(context, R.color.color_999999));
+                        mRelPayBalance.setEnabled(false);
+                        mRelPayBalance.setBackgroundColor(ContextCompat.getColor(context, R.color.color_E5E5E5));
+                    } else {
+                        mRelPayBalance.setEnabled(true);
+                        if (Double.parseDouble(ConstUtils.changeEmptyStringToZero(response.getContent().getScore()))
+                                < Double.parseDouble(ConstUtils.changeEmptyStringToZero(price))) {
+                            mTxtBalance.setTextColor(ContextCompat.getColor(context, R.color.color_999999));
+                            mRelPayBalance.setEnabled(false);
+                            mRelPayBalance.setBackgroundColor(ContextCompat.getColor(context, R.color.color_E5E5E5));
+                        }
+                    }
+                    mTxtPayMyBalance.setText(String.format("%.2f", Double.parseDouble(ConstUtils.changeEmptyStringToZero(response.getContent().getScore()))));
+                } else {
+                    ToastUtils.show(response.getMsg());
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取可用余额
+     */
+    public void requestMyZYYJInfo() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "timestamp", timestamp
+        );
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils.post()
+                .url(Constants.MYACCOUNT_MAIN)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                Gson gson = new Gson();
+                MyAccountBean myAccountBean = gson.fromJson(response, MyAccountBean.class);
+                if (myAccountBean != null && myAccountBean.getCode() == 1 && myAccountBean.getContent() != null) {
+                    MyAccountBean.ContentBean content = myAccountBean.getContent();
+                    if (content.getIsXyt() == Const.INTEGER_1) {
+                        mTxtPayMyBalance.setText(String.format("%.2f", Double.parseDouble(ConstUtils.changeEmptyStringToZero(String.valueOf(content.getXytBalance())))));
+                    }
+                    if (myAccountBean.getContent().getIsXyt()== Const.INTEGER_1) {
+                        mRelPayBalance.setVisibility(View.VISIBLE);
+                    } else {
+                        mRelPayBalance.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+    }
+
+    @OnClick({R.id.ll_back, R.id.ll_alipay, R.id.ll_weichat, R.id.rel_pay_balance, R.id.rel_pay_jifen})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            //返回
+            case R.id.ll_back:
+                onBackPressed();
+                break;
+            //支付宝
+            case R.id.ll_alipay:
+                if (ConstUtils.isClickable()) {
+                    getAlipaySign();
+                }
+                break;
+            //微信
+            case R.id.ll_weichat:
+                if (!ConstUtils.isWeixinAvilible(context)) {
+                    ToastUtils.show(Const.CONS_STR_WECHAT);
+                    return;
+                }
+                if (ConstUtils.isClickable()) {
+                    getWechatSign();
+                }
+                break;
+            //普济余额支付
+            case R.id.rel_pay_balance:
+                payType = Const.INTEGER_0;
+                if (mRelPayBalance.isEnabled()) {
+                    requestIsPwd();
+                } else {
+                    ToastUtils.show(Const.CONS_STR_BALANCEEMPTY);
+                }
+                break;
+            //积分支付
+            case R.id.rel_pay_jifen:
+                payType = Const.INTEGER_1;
+                if (mRelPayJifen.isEnabled()) {
+                    requestIsPwd();
+                } else {
+                    ToastUtils.show(Const.CONS_STR_INTEGRALEMPTY);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 普济余额支付
+     *
+     * @param pwd 支付密码
+     */
+    private void balancePay(String pwd, final AbstractEditPwdDialog dialog) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "orderIds", orderIds,
+                "payPassword", pwd,
+                "timestamp", timestamp
+        );
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.BALANCE_PAY)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("orderIds", orderIds)
+                .addParams("payPassword", pwd)
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(R.string.app_on_request_error_msg, Toast.LENGTH_SHORT);
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == Const.INTEGER_1) {
+                    ToastUtils.show(response.getMsg());
+                    dialog.cleanPassword();
+                    dialog.dismissDialog();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("flag", 0);
+                    bundle.putString("jumpOnLineFragment", "jumpOnLineFragment");
+                    JumpIntent.jump(PayCenterActivity.this, MyOrderActivity.class, bundle, true);
+                } else {
+                    dialog.cleanPassword();
+                    ToastUtils.show(response.getMsg());
+                }
+            }
+        });
+    }
+
+    /**
+     * 积分支付
+     *
+     * @param pwd 支付密码
+     */
+    private void scorePay(String pwd, final AbstractEditPwdDialog dialog) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "orderIds", orderIds,
+                "payPassword", pwd,
+                "timestamp", timestamp
+        );
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.SCORE_PAY)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("orderIds", orderIds)
+                .addParams("payPassword", pwd)
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(R.string.app_on_request_error_msg, Toast.LENGTH_SHORT);
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == Const.INTEGER_1) {
+                    ToastUtils.show(response.getMsg());
+                    dialog.cleanPassword();
+                    dialog.dismissDialog();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("flag", 0);
+                    bundle.putString("jumpOnLineFragment", "jumpOnLineFragment");
+                    JumpIntent.jump(PayCenterActivity.this, MyOrderActivity.class, bundle, true);
+                } else {
+                    dialog.cleanPassword();
+                    ToastUtils.show(response.getMsg());
+                }
+            }
+        });
+    }
+
+    /**
+     * 判断是否设置过支付密码
+     */
+    private void requestIsPwd() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.ISSETPASSWORD)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractIsPayPwdCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onResponse(IsPayPwdBean response, int id) {
+                if (response.getCode() == Const.INTEGER_1) {
+                    if (response.getContent() == Const.INTEGER_1) {
+                        //设置支付密码
+                        showSetPwdDialog();
+                    } else {
+                        //输入支付密码
+                        showEditPayPwdDialog();
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 输入支付密码弹框
+     */
+    private void showEditPayPwdDialog() {
+        final AbstractEditPwdDialog dialog = new AbstractEditPwdDialog(PayCenterActivity.this) {
+            @Override
+            public void forgetClick() {
+                JumpIntent.jump(PayCenterActivity.this, SetPaymentPasswordActivity.class);
+            }
+
+            @Override
+            public void closeClick() {
+
+            }
+        };
+        dialog.setText("请输入支付密码");
+        dialog.showDialog();
+        dialog.setOnFinishInput(new AbstractEditPwdDialog.OnPasswordInputFinish() {
+            @Override
+            public void inputFinish(String password) {
+                if (payType == Const.INTEGER_0) {
+                    //普济余额支付
+                    balancePay(password, dialog);
+                } else if (payType == Const.INTEGER_1) {
+                    //积分支付
+                    scorePay(password, dialog);
+                }
+            }
+        });
+    }
+
+    /**
+     * 如果没有设置过支付密码就弹此框
+     */
+    private void showSetPwdDialog() {
+        final AbstractEditPwdDialog dialog = new AbstractEditPwdDialog(this) {
+            @Override
+            public void forgetClick() {
+
+            }
+
+            @Override
+            public void closeClick() {
+                flag = Const.INTEGER_0;
+            }
+        };
+        if (Const.CONS_STR_FORGET_PASSWARD.equals(dialog.getTextView().getText().toString())) {
+            dialog.getTextView().setVisibility(View.GONE);
+        }
+        dialog.showDialog();
+        dialog.setOnFinishInput(new AbstractEditPwdDialog.OnPasswordInputFinish() {
+            @Override
+            public void inputFinish(String password) {
+                if (flag == Const.INTEGER_1) {
+                    if (password.equals(pwd)) {
+                        dialog.cleanPassword();
+                        dialog.setText("请输入短信验证码");
+                        getSmsCode();
+                    } else {
+                        dialog.cleanPassword();
+                        ToastUtils.show("密码不一致，请重新输入");
+                    }
+                } else if (flag == Const.INTEGER_0) {
+                    //保存第一次输入的密码
+                    pwd = password;
+                    flag = Const.INTEGER_1;
+                    dialog.cleanPassword();
+                    dialog.setText("请再输入一次");
+                } else {
+                    //设置支付密码接口
+                    requestSetPayPassword(password, pwd, dialog);
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取短信验证码
+     */
+    private void getSmsCode() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GETSMSCODE)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractCodeMsgCallback() {
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(R.string.app_on_request_error_msg, Toast.LENGTH_SHORT);
+                flag = Const.INTEGER_0;
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == Const.INTEGER_1) {
+                    ToastUtils.show(response.getMsg());
+                    flag = Const.INTEGER_2;
+                } else {
+                    ToastUtils.show(response.getMsg());
+                    flag = Const.INTEGER_0;
+                }
+            }
+        });
+    }
+
+    /**
+     * 设置支付密码接口
+     *
+     * @param password   短信验证码
+     * @param pwd        两次效验都一致的支付密码
+     * @param editDialog dialog
+     */
+    private void requestSetPayPassword(String password, final String pwd, final AbstractEditPwdDialog editDialog) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "smsCode", password,
+                "newPassword", pwd,
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.SETPASSWORD)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("smsCode", password)
+                .addParams("newPassword", pwd)
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(R.string.app_on_request_error_msg, Toast.LENGTH_SHORT);
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == Const.INTEGER_1) {
+                    editDialog.dismissDialog();
+                    //支付密码设置成功弹框
+                    AbstractSetPasswordSuccessDialog dialog = new AbstractSetPasswordSuccessDialog(PayCenterActivity.this) {
+                        @Override
+                        public void onSureClick() {
+                            if (payType == Const.INTEGER_0) {
+                                //普济余额支付
+                                balancePay(pwd, editDialog);
+                            } else if (payType == Const.INTEGER_1) {
+                                //积分支付
+                                scorePay(pwd, editDialog);
+                            }
+                        }
+                    };
+                    dialog.showDialog();
+                } else {
+                    ToastUtils.show(response.getMsg());
+                    editDialog.cleanPassword();
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取微信签名
+     */
+    private void getWechatSign() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "orderids", orderIds,
+                "type", String.valueOf(0),
+                "ip", ConstUtils.getIPAddress(context),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        OkHttpUtils.post()
+                .url(Constants.WECHAT_PAY)
+                .addParams("orderids", orderIds)
+                .addParams("type", String.valueOf(0))
+                .addParams("ip", ConstUtils.getIPAddress(context))
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractWechatPayCallBack() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(WeChatInfoEntry response, int id) {
+                if (response.getCode() == Const.INTEGER_1) {
+                    new WeChatPay().pay(PayCenterActivity.this, response.getContent());
+                    PayCenterActivity.this.finish();
+                } else {
+                    ToastUtils.show(response.getMsg());
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取支付宝签名
+     */
+    private void getAlipaySign() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "orderids", orderIds,
+                "type", String.valueOf(1),
+                "ip", ConstUtils.getIPAddress(context),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        OkHttpUtils.post()
+                .url(Constants.WECHAT_PAY)
+                .addParams("orderids", orderIds)
+                .addParams("type", String.valueOf(1))
+                .addParams("ip", ConstUtils.getIPAddress(context))
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("Alipay\n", response);
+                AlipayBean bean = new Gson().fromJson(response, AlipayBean.class);
+                if (bean.getCode() == Const.INTEGER_1) {
+                    new Alipay().pay(bean.getContent(), PayCenterActivity.this,
+                            new Alipay.IPayResult() {
+                                @Override
+                                public void result(boolean success) {
+                                    Bundle bundle = new Bundle();
+                                    if (success) {
+                                        bundle.putInt("flag", Constants.ORDER_ISMEMBER);
+                                        bundle.putString("pay", "success");
+                                    } else {
+                                        bundle.putInt("flag", 0);
+                                        bundle.putString("pay", "pay");
+                                    }
+                                    JumpIntent.jump(PayCenterActivity.this, MyOrderActivity.class, bundle);
+                                    PayCenterActivity.this.finish();
+                                }
+                            });
+                } else {
+                    ToastUtils.show(bean.getMsg());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        showTipsDialog();
+    }
+
+    /**
+     * 显示退出支付中心页面的提示弹框
+     */
+    private void showTipsDialog() {
+        AbstractLogoutDialog dialog = new AbstractLogoutDialog(this) {
+            @Override
+            public void onSureClick() {
+                PayCenterActivity.this.finish();
+            }
+
+            @Override
+            public void onCancelClick() {
+
+            }
+        };
+        dialog.setText("", Const.CONS_STR_LOGOUTPAYCENTER);
+        dialog.showDialog();
+    }
+
+    @Subscribe
+    public void onEventMainThread(EventBean bean) {
+        if (STR1.equals(bean.getMsg())) {
+            PayCenterActivity.this.finish();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+}

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_root"
+    android:layout_width="match_parent"
+    android:layout_height="350dp"
+    android:layout_marginLeft="@dimen/margin_5dp"
+    android:layout_marginRight="@dimen/margin_5dp">
+
+    <ImageView
+        android:id="@+id/mall_item_background"
+        android:layout_width="0dp"
+        android:layout_height="310dp"
+        android:background="@drawable/shape_mall_title"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/mall_item_image"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="1dp"
+        android:background="@mipmap/brand_default"
+        android:scaleType="centerCrop"
+        app:corner_radius="@dimen/margin_5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="1dp" />
+
+    <TextView
+        android:id="@+id/mall_item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_15dp"
+        android:layout_marginStart="@dimen/margin_15dp"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:ellipsize="end"
+        android:maxEms="17"
+        android:maxLines="1"
+        android:text="赫莲娜是欧莱雅集团旗下的顶极奢侈的美容养颜"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mall_item_image" />
+
+    <TextView
+        android:id="@+id/mall_item_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_15dp"
+        android:layout_marginStart="@dimen/margin_15dp"
+        android:layout_marginTop="5dp"
+        android:text="¥1200"
+        android:textColor="@color/red"
+        android:textSize="16sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mall_item_title" />
+
+    <TextView
+        android:id="@+id/mall_item_goumai"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginStart="@dimen/margin_10dp"
+        android:layout_marginTop="10dp"
+        android:text="255人购买"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toRightOf="@+id/mall_item_price"
+        app:layout_constraintTop_toBottomOf="@+id/mall_item_title" />
+
+    <TextView
+        android:id="@+id/mall_item_pingjia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginStart="@dimen/margin_10dp"
+        android:layout_marginTop="10dp"
+        android:text="350人评价"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toRightOf="@+id/mall_item_goumai"
+        app:layout_constraintTop_toBottomOf="@+id/mall_item_title" />
+
+    <TextView
+        android:id="@+id/mall_item_liulan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginStart="@dimen/margin_10dp"
+        android:layout_marginTop="10dp"
+        android:text="1500人浏览"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toRightOf="@+id/mall_item_pingjia"
+        app:layout_constraintTop_toBottomOf="@+id/mall_item_title" />
+
+    <ImageView
+        android:id="@+id/mall_item_gouwuche"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_10dp"
+        android:layout_marginRight="@dimen/margin_10dp"
+        android:src="@mipmap/zhuanyuan_gouwuche"
+        app:layout_constraintBottom_toBottomOf="@+id/mall_item_liulan"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:background="@color/color_dddddd"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mall_item_liulan"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/mall_item_head"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="@dimen/margin_15dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/head_2"
+        app:border_color="@color/color_dddddd"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view" />
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/mall_item_head2"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="@dimen/margin_15dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/head_2"
+        app:border_color="@color/color_dddddd"
+        app:layout_constraintLeft_toLeftOf="@+id/mall_item_head"
+        app:layout_constraintTop_toTopOf="@+id/view" />
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/mall_item_head3"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="@dimen/margin_15dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/head_2"
+        app:border_color="@color/color_dddddd"
+        app:layout_constraintLeft_toLeftOf="@+id/mall_item_head2"
+        app:layout_constraintTop_toTopOf="@+id/view" />
+
+    <TextView
+        android:id="@+id/tv_story"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginStart="@dimen/margin_10dp"
+        android:ellipsize="end"
+        android:maxEms="6"
+        android:maxLines="1"
+        android:text="10个产品故事情节"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/zhuanyuan_zan"
+        app:layout_constraintLeft_toRightOf="@+id/mall_item_head3" />
+
+    <TextView
+        android:id="@+id/zhuanyuan_zan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_20dp"
+        android:layout_marginRight="@dimen/margin_20dp"
+        android:layout_marginTop="20dp"
+        android:drawableLeft="@mipmap/zhuanyuan_zan"
+        android:drawablePadding="5dp"
+        android:text="1200"
+        android:textSize="11sp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view" />
+
+    <TextView
+        android:id="@+id/zhuanyuan_fenxiang"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_20dp"
+        android:layout_marginRight="@dimen/margin_20dp"
+        android:layout_marginTop="20dp"
+        android:drawableLeft="@mipmap/zhuanyuan_fenxiang"
+        android:drawablePadding="5dp"
+        android:text="7287"
+        android:textSize="11sp"
+        app:layout_constraintRight_toLeftOf="@+id/zhuanyuan_zan"
+        app:layout_constraintTop_toTopOf="@+id/view" />
+
+    <ImageView
+        android:id="@+id/mall_item_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@mipmap/zhuanyuan_label"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

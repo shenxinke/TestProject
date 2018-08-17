@@ -1,0 +1,359 @@
+package com.yst.tianyimember.activity.publish;
+
+import android.content.Intent;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.adapter.AddProductAdapter;
+import com.yst.tianyimember.adapter.CommomFragmentPagerAdapter;
+import com.yst.tianyimember.adapter.common.AbstractCommonRcyAdapter;
+import com.yst.tianyimember.adapter.common.CommonRcyHolder;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.bean.EventBean;
+import com.yst.tianyimember.bean.ShoppingMallBean;
+import com.yst.tianyimember.bean.mall.ClassfityBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.fragment.AddProductListFragment;
+import com.yst.tianyimember.fragment.AllProductFragment;
+import com.yst.tianyimember.fragment.LocalProductFragment;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.SpaceItemDecoration;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.yst.tianyimember.view.ContainsEmojiEditText;
+import com.yst.tianyimember.view.viewpagerindicator.ViewPagerIndicator;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+import static com.yst.tianyimember.activity.publish.EditShareActivity.mAllData;
+import static com.yst.tianyimember.config.Const.CONS_STR_DELETE;
+import static com.yst.tianyimember.config.Const.CONS_STR_REFRESH;
+
+/**
+ * 添加商品页面
+ *
+ * @author jiaofan
+ * @version 4.2.0
+ * @date 2018/6/5
+ */
+public class AddProductActivity extends BaseActivity implements OnLoadmoreListener, TextWatcher {
+
+    @BindView(R.id.rel_cancel)
+    RelativeLayout mRelCancel;
+    @BindView(R.id.rel_finish)
+    LinearLayout mRelFinish;
+    @BindView(R.id.et_product)
+    ContainsEmojiEditText mEtProduct;
+    @BindView(R.id.indicator_product)
+    ViewPagerIndicator mIndicatorProduct;
+    @BindView(R.id.vp_product)
+    ViewPager mVpProduct;
+    @BindView(R.id.view_no)
+    View mViewLine;
+    @BindView(R.id.recyclerView_click)
+    RecyclerView mRecyclerViewClick;
+    @BindView(R.id.txt_clickNum)
+    TextView mTxtClickNum;
+    @BindView(R.id.lv_search)
+    ListView mLvSearch;
+    @BindView(R.id.refresh_product)
+    SmartRefreshLayout mRefreshProduct;
+    @BindView(R.id.ll_click)
+    LinearLayout mLlClick;
+
+    private ArrayList<String> sortList = new ArrayList<>();
+    private ArrayList<Fragment> fragments = new ArrayList<>();
+    private CommomFragmentPagerAdapter adapter;
+    private List<ShoppingMallBean.ContentBean> mList = new ArrayList<>();
+    private List<ShoppingMallBean.ContentBean> mSearchData = new ArrayList<>();
+    private AbstractCommonRcyAdapter<ShoppingMallBean.ContentBean> rlvAdapter;
+    private int page = 1;
+    private String search;
+    private AddProductAdapter mProductAdapter;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_add_product;
+    }
+
+    @Override
+    public void initData() {
+        EventBus.getDefault().register(this);
+        mRefreshProduct.setEnableRefresh(false);
+        mRefreshProduct.setOnLoadmoreListener(this);
+        mEtProduct.addTextChangedListener(this);
+        getClassify();
+        initAdapter();
+        if (mAllData.size() != Const.INTEGER_0) {
+            mViewLine.setVisibility(View.VISIBLE);
+            mRecyclerViewClick.setVisibility(View.VISIBLE);
+            rlvAdapter.setData(mAllData);
+            mRecyclerViewClick.scrollToPosition(mAllData.size() - 1);
+            mTxtClickNum.setText(String.valueOf(mAllData.size()));
+        }
+
+        mProductAdapter = new AddProductAdapter(mSearchData, this, 1);
+        mLvSearch.setAdapter(mProductAdapter);
+
+        mEtProduct.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        mEtProduct.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    search = mEtProduct.getText().toString().trim();
+                    if (TextUtils.isEmpty(search)) {
+                        ToastUtils.show("请输入搜索内容");
+                    } else {
+                        page = 1;
+                        mSearchData.clear();
+                        mLlClick.setVisibility(View.GONE);
+                        mRefreshProduct.setVisibility(View.VISIBLE);
+                        requestSearchData(search);
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    /**
+     * 获取搜索的数据
+     *
+     * @param search 关键字
+     */
+    private void requestSearchData(String search) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "type", "3",
+                "info", search,
+                "page", String.valueOf(page),
+                "pageSize", "10",
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.COMMISSIONER_PRODUCT_LIST)
+                .addParams("type", "3")
+                .addParams("info", search)
+                .addParams("page", String.valueOf(page))
+                .addParams("pageSize", "10")
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+                mRefreshProduct.finishLoadmore(500);
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("response", "response+++++++++++"+response);
+                if (response != null) {
+                    ShoppingMallBean bean = new Gson().fromJson(response, ShoppingMallBean.class);
+                    if (bean.getCode() == Const.INTEGER_1) {
+                        if (bean.getContent().size() > 0) {
+                            mSearchData.addAll(bean.getContent());
+                            mProductAdapter.notifyDataSetChanged();
+                        } else {
+                            if (page == 1) {
+                                ToastUtils.show("暂无搜索内容");
+                            } else {
+                                ToastUtils.show("已加载全部数据");
+                            }
+                        }
+                    } else {
+                        ToastUtils.show(bean.getMsg());
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        requestSearchData(search);
+    }
+
+    @Subscribe
+    public void onEventMainThread(EventBean event) {
+        if (CONS_STR_REFRESH.equals(event.getMsg())) {
+            mViewLine.setVisibility(View.VISIBLE);
+            mRecyclerViewClick.setVisibility(View.VISIBLE);
+
+            rlvAdapter.setData(mAllData);
+            mRecyclerViewClick.scrollToPosition(mAllData.size() - 1);
+            mTxtClickNum.setText(String.valueOf(mAllData.size()));
+            if (mAllData.size() == Const.INTEGER_0) {
+                mViewLine.setVisibility(View.GONE);
+                mRecyclerViewClick.setVisibility(View.GONE);
+                mTxtClickNum.setText(String.valueOf(0));
+            }
+        } else if (CONS_STR_DELETE.equals(event.getMsg())) {
+            if (!TextUtils.isEmpty(event.getContent())) {
+                for (int i = 0; i < mAllData.size(); i++) {
+                    if (String.valueOf(mAllData.get(i).getId()).equals(event.getContent())) {
+                        mAllData.remove(mAllData.get(i));
+                        rlvAdapter.notifyDataSetChanged();
+                        if (mAllData.size() == 0) {
+                            mViewLine.setVisibility(View.GONE);
+                            mRecyclerViewClick.setVisibility(View.GONE);
+                            mTxtClickNum.setText(String.valueOf(0));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取分类
+     */
+    private void getClassify() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GET_MALL_CLASSFITY)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                ClassfityBean sortBean = new Gson().fromJson(response, ClassfityBean.class);
+                List<ClassfityBean.ContentBean.ProductTypeBean> content = sortBean.getContent().getProductType();
+                if (sortBean.getCode() == Const.INTEGER_1) {
+                    if (content.size() > Const.INTEGER_0) {
+                        addCustomTab();
+                        for (int i = 0; i < content.size(); i++) {
+                            sortList.add(content.get(i).getClassifyName());
+                            fragments.add(AddProductListFragment.newInstance(String.valueOf(content.get(i).getId())));
+                        }
+                        adapter = new CommomFragmentPagerAdapter(getSupportFragmentManager(), fragments, sortList);
+                        mVpProduct.setAdapter(adapter);
+                        mIndicatorProduct.bindViewPager(mVpProduct, false);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 添加自定义tab栏
+     */
+    private void addCustomTab() {
+        sortList.add("全部");
+        sortList.add("本地直供");
+        fragments.add(AllProductFragment.newInstance());
+        fragments.add(LocalProductFragment.newInstance());
+    }
+
+    @OnClick({R.id.rel_cancel, R.id.rel_finish})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.rel_cancel:
+                finish();
+                break;
+            case R.id.rel_finish:
+                Intent intent = new Intent(this, EditShareActivity.class);
+                intent.putExtra("mAllData", (Serializable) mAllData);
+                MyLog.e("zzz", "size===" + mAllData.size());
+                setResult(RESULT_OK, intent);
+                finish();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 初始化适配器
+     */
+    private void initAdapter() {
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mRecyclerViewClick.setLayoutManager(llm);
+        mRecyclerViewClick.addItemDecoration(new SpaceItemDecoration(Const.INTEGER_1, Const.INTEGER_0));
+        rlvAdapter = new AbstractCommonRcyAdapter<ShoppingMallBean.ContentBean>(this, mList, R.layout.item_preview) {
+            @Override
+            public void convert(CommonRcyHolder holder, int position, ShoppingMallBean.ContentBean item) {
+                holder.setText(R.id.item_txt_num, String.valueOf(position + 1));
+                holder.setImageView(AddProductActivity.this, R.id.item_iv_preview, item.getImageurl(), R.mipmap.img_default_p);
+            }
+        };
+        mRecyclerViewClick.setAdapter(rlvAdapter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        if (TextUtils.isEmpty(s.toString().trim())) {
+            page = 1;
+            mSearchData.clear();
+            mLlClick.setVisibility(View.VISIBLE);
+            mRefreshProduct.setVisibility(View.GONE);
+        }
+    }
+}

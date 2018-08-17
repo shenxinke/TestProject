@@ -1,0 +1,108 @@
+package com.yst.onecity.adapter.chatadapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.bean.order.MemberOrderBean;
+import com.yst.onecity.utils.ConstUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 服务专员先下订单adapter
+ *
+ * @author chenxiaowei
+ * @version 3.2.1
+ * @date 2017/3/14.
+ */
+public class ServiceOffLineOrderAdapter extends BaseAdapter {
+
+    private Context context;
+    private List<MemberOrderBean> data;
+
+    public ServiceOffLineOrderAdapter(Context context, List<MemberOrderBean> data) {
+        this.context = context;
+        this.data = data;
+    }
+
+    public void onRefresh(List<MemberOrderBean> mList) {
+        if (mList != null) {
+            this.data.clear();
+            this.data.addAll(mList);
+            notifyDataSetChanged();
+        } else {
+            this.data = new ArrayList<>();
+            notifyDataSetChanged();
+        }
+    }
+
+    public void addData(List<MemberOrderBean> mList) {
+        if (mList != null) {
+            this.data.addAll(mList);
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return data.size();
+    }
+
+    @Override
+    public MemberOrderBean getItem(int i) {
+        return data.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if (view == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.item_line_listview, null);
+            holder = new ViewHolder(view);
+            view.setTag(holder);
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+        MemberOrderBean item = getItem(i);
+        holder.head.setVisibility(View.GONE);
+        holder.desName.setText(ConstUtils.getStringNoEmpty(item.getMerchant_name()));
+        holder.orderNum.setText(ConstUtils.getStringNoEmpty(item.getOrder_no()));
+        holder.time.setText(ConstUtils.getStringNoEmpty(item.getCreated_time()));
+        holder.price.setText("¥" + item.getTotalMoney());
+        return view;
+    }
+
+    class ViewHolder {
+        @BindView(R.id.item_line_order_number)
+        TextView orderNum;
+        @BindView(R.id.item_line_state)
+        TextView state;
+        @BindView(R.id.item_line_time)
+        TextView time;
+        @BindView(R.id.item_line_header)
+        ImageView head;
+        @BindView(R.id.item_line_name)
+        TextView desName;
+        @BindView(R.id.item_line_price)
+        TextView price;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

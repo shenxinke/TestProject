@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
+
+            <android.support.constraint.ConstraintLayout
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:orientation="vertical"
+                app:layout_scrollFlags="scroll|enterAlways">
+
+                <ImageView
+                    android:id="@+id/iv_head"
+                    android:layout_width="0dp"
+                    android:layout_height="200dp"
+                    android:background="@mipmap/brand_default"
+                    android:scaleType="fitXY"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/activity_back_iv"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="@dimen/margin_5dp"
+                    android:padding="6dp"
+                    android:src="@mipmap/payment_back"
+                    app:layout_constraintStart_toStartOf="@+id/iv_head"
+                    app:layout_constraintTop_toTopOf="@+id/iv_head"
+                    tools:layout_editor_absoluteX="0dp" />
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:text="路易威登"
+                    android:textColor="@color/white"
+                    android:textSize="23sp"
+                    app:layout_constraintLeft_toLeftOf="@+id/activity_back_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_back_iv" />
+
+                <TextView
+                    android:id="@+id/tv_describe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_15dp"
+                    android:text="这里是一句话介绍介绍介绍介绍"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    app:layout_constraintLeft_toLeftOf="@+id/tv_title"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+                <com.yst.onecity.view.roundedimageview.RoundedImageView
+                    android:id="@+id/riv_head"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:layout_marginRight="@dimen/margin_10dp"
+                    android:scaleType="fitXY"
+                    android:src="@color/black"
+                    app:border_color="@color/color_dddddd"
+                    app:corner_radius="@dimen/margin_5dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tv_title" />
+
+                <TextView
+                    android:id="@+id/tv_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_15dp"
+                    android:text="0"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    app:layout_constraintLeft_toLeftOf="@+id/riv_head"
+                    app:layout_constraintRight_toRightOf="@+id/riv_head"
+                    app:layout_constraintTop_toBottomOf="@+id/riv_head" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_5dp"
+                    android:text="销量"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    app:layout_constraintLeft_toLeftOf="@+id/riv_head"
+                    app:layout_constraintRight_toRightOf="@+id/riv_head"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_num" />
+
+                <TextView
+                    android:id="@+id/tv_story"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_15dp"
+                    android:layout_marginStart="@dimen/margin_15dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:text="品牌故事"
+                    android:textSize="14sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/iv_head" />
+
+                <TextView
+                    android:id="@+id/tv_story_text"
+                    android:layout_width="320dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="这里是品牌故事话介绍介绍介，介绍话介绍介绍介绍到这里也就转 行话介，介绍介绍介 介绍介绍介介绍介绍介介绍介绍介介介绍介绍介介"
+                    android:textSize="12sp"
+                    app:layout_constraintLeft_toLeftOf="@+id/tv_story"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_story" />
+
+                <ImageView
+                    android:id="@+id/more_server_arrows"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:layout_marginRight="@dimen/margin_10dp"
+                    android:padding="@dimen/margin_10dp"
+                    android:src="@mipmap/down_arrows"
+                    app:layout_constraintBottom_toBottomOf="@+id/tv_story_text"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+                <View
+                    android:id="@+id/view_trademark_top"
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:background="@color/color_f0f0f0"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_story_text" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/scrollView"
+                android:background="@color/white">
+
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tl_tablayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:tabIndicatorColor="@color/white"
+                    app:tabMode="fixed"
+                    tools:layout_editor_absoluteY="100dp" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/color_ededed"
+                    app:layout_constraintLeft_toRightOf="parent"
+                    app:layout_constraintRight_toLeftOf="parent"
+                    tools:layout_editor_absoluteY="100dp" />
+
+                <View
+                    android:id="@+id/view_trademark_bottom"
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:background="@color/color_f0f0f0"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tl_tablayout" />
+
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+
+        </android.support.v4.view.ViewPager>
+
+    </android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

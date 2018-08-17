@@ -1,0 +1,13 @@
+package com.yst.onecity.wxapi;
+
+import com.umeng.socialize.weixin.view.WXCallbackActivity;
+
+/**
+ * 分享回调
+ *
+ * @author qinchaoshuai
+ * @date 2017/07/06
+ */
+
+public class WXEntryActivity extends WXCallbackActivity {
+}

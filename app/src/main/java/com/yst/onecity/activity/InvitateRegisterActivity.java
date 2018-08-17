@@ -1,0 +1,210 @@
+package com.yst.onecity.activity;
+
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.InvitzteFriendAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.FriendBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.fragment.popfragment.ShareCommonDialog;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.MyListView;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+
+/**
+ * 邀请注册页面
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/13
+ */
+
+public class InvitateRegisterActivity extends BaseActivity implements OnLoadmoreListener, OnRefreshListener {
+
+
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.iv_right)
+    ImageView ivRight;
+    @BindView(R.id.view2)
+    View view2;
+    @BindView(R.id.ll_invitate_now)
+    TextView llInvitateNow;
+    @BindView(R.id.rl_back)
+    RelativeLayout rlBack;
+    @BindView(R.id.lv_friend)
+    MyListView lvFriend;
+    @BindView(R.id.iv_empty)
+    ImageView ivEmpty;
+    @BindView(R.id.scroller)
+    ScrollView scroller;
+    @BindView(R.id.refresh)
+    SmartRefreshLayout refresh;
+    @BindView(R.id.iv_friend)
+    ImageView ivFriend;
+    @BindView(R.id.rl_lv_friend)
+    RelativeLayout rlLvFriend;
+    private ShareCommonDialog dialog;
+    private String invitateDtr = Constants.SHARE_CONSULT + "zhuce.html?phone=" + TianyiApplication.appCommonBean.getPhone() + "&uuid=" + TianyiApplication.appCommonBean.getUuid();
+    private InvitzteFriendAdapter adapter;
+    private int page = Const.INTEGER_1;
+    List<FriendBean.ContentBean> friendList = new ArrayList<>();
+
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_invitate_register;
+    }
+
+
+    @OnClick({R.id.ll_invitate_now, R.id.ll_back, R.id.iv_right})
+    public void onViewBack(View view) {
+        if (!Utils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            //返回
+            case R.id.ll_back:
+                finish();
+                break;
+            //分享
+            case R.id.iv_right:
+                //立即邀请
+            case R.id.ll_invitate_now:
+                if (null == dialog) {
+                    dialog = ShareCommonDialog.openShareDialog(this, "普济一城", "邀请注册", invitateDtr, "", true);
+                }
+                dialog.show(getFragmentManager(), "invitate");
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void initData() {
+        tvMainTitle.setText("邀请好友得福利");
+        refresh.setOnRefreshListener(this);
+        rlBack.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        adapter = new InvitzteFriendAdapter(this);
+        lvFriend.setAdapter(adapter);
+        getFriendList();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getFriendList();
+    }
+
+    /**
+     * 获取好友列表
+     */
+    private void getFriendList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp,
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "page", String.valueOf(page),
+                "rows", Const.STR10,
+                "uuid", TianyiApplication.appCommonBean.getUuid());
+        OkHttpUtils.post().url(Constants.GET_FRIEND_LIST)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("page", String.valueOf(page))
+                .addParams("rows", Const.STR10)
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+                MyLog.e("sss", "---" + e.getMessage());
+                ivEmpty.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                if (null != response) {
+                    FriendBean bean = new Gson().fromJson(response, FriendBean.class);
+                    if (null != bean) {
+                        if (bean.getCode() == Const.INTEGER_1 && null != bean.getContent()) {
+                            if (page == Const.INTEGER_1) {
+                                friendList.clear();
+                            } else {
+                                if (bean.getContent().isEmpty()) {
+                                    ToastUtils.show(getString(R.string.xlist_add_all_msg));
+                                }
+                            }
+                            friendList.addAll(bean.getContent());
+                            adapter.addData(friendList);
+                            setVisiableGone(friendList);
+                        } else {
+                            ToastUtils.show(bean.getMsg());
+                            ivEmpty.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 设置数据和图片的展示
+     *
+     * @param list 集合
+     */
+    public void setVisiableGone(List<FriendBean.ContentBean> list) {
+        if (null != list) {
+            if (list.isEmpty()) {
+                ivEmpty.setVisibility(View.VISIBLE);
+                ivFriend.setVisibility(View.GONE);
+                rlLvFriend.setVisibility(View.GONE);
+            } else {
+                ivEmpty.setVisibility(View.GONE);
+                ivFriend.setVisibility(View.VISIBLE);
+                rlLvFriend.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        getFriendList();
+        refresh.finishLoadmore(1000);
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = Const.INTEGER_1;
+        getFriendList();
+        refresh.finishRefresh(1000);
+    }
+}

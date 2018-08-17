@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_header"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_collapseMode="parallax">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/background"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/layout_width_120dp"
+            android:src="@mipmap/bg_list_default"
+            android:scaleType="centerCrop"
+            app:layout_collapseMode="parallax"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/layout_height_90dp"
+            android:layout_marginTop="70dp">
+            <com.yst.onecity.view.roundedimageview.RoundedImageView
+                android:id="@+id/serverMemberHeadView"
+                android:layout_width="@dimen/layout_height_80dp"
+                android:layout_height="@dimen/layout_height_80dp"
+                android:src="@mipmap/head_2"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginLeft="@dimen/margin_10dp"
+                android:scaleType="fitXY"
+                app:oval="true"/>
+            <ImageView
+                android:id="@+id/iv_attention"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/serverMemberHeadView"
+                android:background="@drawable/selector_attention"/>
+        </RelativeLayout>
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/serverMemberName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="80dp"
+            android:textColor="@color/color_1b1b1b"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/margin_10dp"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:textSize="16dp"
+            android:text=""/>
+
+        <TextView
+            android:id="@+id/now_contact_ta1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="立即找Ta"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/margin_10dp"
+            android:background="@drawable/shape_black_180dp_bg"
+            android:padding="@dimen/margin_5dp"
+            android:textSize="12dp"
+            android:textColor="@color/white"/>
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/contact_comment_num"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_5dp"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:textSize="12dp"
+        android:text=""/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginRight="@dimen/margin_10dp">
+        <com.yst.onecity.view.FlowLayout
+            android:id="@+id/flow_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/serverMemberIntroduce"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_5dp"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginBottom="@dimen/margin_10dp"
+        android:textSize="12dp"
+        android:text=""/>
+
+</LinearLayout>

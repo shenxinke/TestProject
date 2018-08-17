@@ -1,0 +1,24 @@
+package com.yst.tianyimember.bean.order;
+
+import com.yst.tianyimember.bean.CodeMsgBean;
+
+import java.util.List;
+
+/**
+ * 会员线下订单
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class MemberOffLineBean extends CodeMsgBean {
+    private List<MemberOrderBean> content;
+
+    public List<MemberOrderBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<MemberOrderBean> content) {
+        this.content = content;
+    }
+}

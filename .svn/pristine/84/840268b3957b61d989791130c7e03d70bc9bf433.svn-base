@@ -1,0 +1,97 @@
+package com.yst.tianyimember.activity.servermember;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.widget.ImageView;
+
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.activity.ShareActivity;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.utils.BitmapUtil;
+import com.yst.tianyimember.utils.JumpIntent;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+
+/**
+ * 邀请下载app 页面
+ *
+ * @author Chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class InvatationActivity extends BaseActivity {
+    @BindView(R.id.pic)
+    ImageView pic;
+    private String url;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_invatation;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("邀请下载APP");
+        url = Constants.SHARE_REGISTER + "hphone=" + TianyiApplication.appCommonBean.getPhone() + "&hunterId=" + TianyiApplication.appCommonBean.getHunter_id();
+        makeErweimaMethod(url);
+    }
+
+
+    /**
+     * 点击生成带图片的二维码
+     */
+    public void makeErweimaMethod(String content) {
+        create2Qr2(content, pic);
+    }
+
+    /**
+     * 生成二维码的方法
+     *
+     * @param urls      路径
+     * @param imageView 图片
+     */
+    private void create2Qr2(String urls, ImageView imageView) {
+        String uri = urls;
+        int mScreenWidth = 0;
+        Bitmap bitmap;
+        try {
+            DisplayMetrics dm = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(dm);
+            mScreenWidth = dm.widthPixels;
+
+            bitmap = BitmapUtil.createQRImage(uri, mScreenWidth,
+                    //自己写的方法
+                    BitmapFactory.decodeResource(getResources(), R.drawable.icon_logo));
+
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @OnClick({R.id.ll_back, R.id.share})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.ll_back:
+                finish();
+                break;
+            case R.id.share:
+                Bundle bundle = new Bundle();
+                bundle.putInt("type", 3);
+                bundle.putString("url", url);
+                JumpIntent.jump(InvatationActivity.this, ShareActivity.class, bundle);
+                break;
+            default:
+                break;
+        }
+    }
+}

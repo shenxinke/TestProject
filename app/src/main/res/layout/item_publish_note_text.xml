@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_margin="@dimen/margin_20px"
+    android:background="@drawable/shape_f4_bg">
+
+    <EditText
+        android:id="@+id/content_edt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="12dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_above="@+id/bottom_linear"
+        android:background="@null"
+        android:gravity="top"
+        android:maxLength="4000"
+        android:hint="请填写内容"
+        android:inputType="textMultiLine"
+        android:padding="12dp"
+        android:textSize="15sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:gravity="right"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:paddingRight="10dp"
+        android:background="@drawable/shape_edit_menu_bg"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/move_up"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:gravity="center"
+            android:paddingLeft="5dp"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:drawableLeft="@mipmap/icon_up"
+            android:text="上移" />
+        <TextView
+            android:id="@+id/delete"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:gravity="center"
+            android:paddingLeft="5dp"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:drawableLeft="@mipmap/icon_de22"
+            android:layout_marginLeft="5dp"
+            android:text="删除" />
+
+        <TextView
+            android:id="@+id/insert"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:gravity="center"
+            android:paddingLeft="5dp"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:drawableLeft="@mipmap/icon_c"
+            android:layout_marginLeft="5dp"
+            android:text="插入" />
+    </LinearLayout>
+
+</LinearLayout>
+
+
+

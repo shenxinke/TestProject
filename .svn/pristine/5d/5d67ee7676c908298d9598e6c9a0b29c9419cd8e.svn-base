@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    >
+
+    <TextView
+        android:id="@+id/position"
+        android:layout_marginLeft="8dp"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:drawableLeft="@mipmap/shouye_position"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="@color/color_1b1b1b"
+        android:textSize="15sp"
+        />
+
+    <LinearLayout
+        android:id="@+id/searchBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/shape_search_2_gray"
+        android:clickable="true"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/icon_search"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:gravity="center_vertical"
+            android:text="@string/search_text"
+            android:textColor="@color/color_A8A8A8"
+            />
+    </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/messagesRL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:layout_marginRight="@dimen/margin_10dp">
+
+        <ImageView
+            android:id="@+id/messages"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:visibility="invisible"
+            android:src="@mipmap/message_icon" />
+
+        <!-- 消息数量小圆点 -->
+        <TextView
+            android:id="@+id/messageTagTV"
+            android:layout_width="@dimen/layout_height_7.5dp"
+            android:layout_height="@dimen/layout_height_7.5dp"
+            android:layout_alignRight="@+id/messages"
+            android:background="@drawable/shape_circle_red"
+            android:gravity="center"
+            android:textSize="@dimen/textSize_16dp"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/layout_height_0.5dp"
+        android:background="@color/color_dddddd" />
+</LinearLayout>

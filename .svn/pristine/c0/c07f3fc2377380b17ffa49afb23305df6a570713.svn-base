@@ -1,0 +1,201 @@
+package com.yst.onecity.bean;
+
+import java.io.Serializable;
+
+/**
+ * 会员基本信息
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class MemberInfoBean implements Serializable {
+
+    /**
+     * code : 1
+     * msg : 查询成功
+     * content : {"address":null,"collectionproduct":0,"dfh":0,"tk":0,"nickname":null,"dfk":0,"dsh":0,"checkhunter":0,"id":27,"yfdj":0,"collectionhunter":0,"dpj":0}
+     */
+
+    private int code;
+    private String msg;
+    private ContentBean content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * address : null
+         * collectionproduct : 0
+         * dfh : 0
+         * tk : 0
+         * nickname : null
+         * dfk : 0
+         * dsh : 0
+         * checkhunter : 0
+         * id : 27
+         * yfdj : 0
+         * collectionhunter : 0
+         * dpj : 0
+         */
+
+        private String address;
+        private String collectionproduct;
+        private String dfh;
+        private String tk;
+        private String nickname;
+        private String dfk;
+        private String dsh;
+        private String checkhunter;
+        private String id;
+        private String yfdj;
+        private String collectionhunter;
+        private String hid;
+        private String servicearea;
+
+        public String getServicearea() {
+            return servicearea;
+        }
+
+        public void setServicearea(String servicearea) {
+            this.servicearea = servicearea;
+        }
+
+        public String getHid() {
+            return hid;
+        }
+
+        public void setHid(String hid) {
+            this.hid = hid;
+        }
+
+        public String getCheckMemCard() {
+            return checkMemCard;
+        }
+
+        public void setCheckMemCard(String checkMemCard) {
+            this.checkMemCard = checkMemCard;
+        }
+
+        private String checkMemCard;
+        private String dpj;
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public String getCollectionproduct() {
+            return collectionproduct;
+        }
+
+        public void setCollectionproduct(String collectionproduct) {
+            this.collectionproduct = collectionproduct;
+        }
+
+        public String getDfh() {
+            return dfh;
+        }
+
+        public void setDfh(String dfh) {
+            this.dfh = dfh;
+        }
+
+        public String getTk() {
+            return tk;
+        }
+
+        public void setTk(String tk) {
+            this.tk = tk;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+
+        public void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+
+        public String getDfk() {
+            return dfk;
+        }
+
+        public void setDfk(String dfk) {
+            this.dfk = dfk;
+        }
+
+        public String getDsh() {
+            return dsh;
+        }
+
+        public void setDsh(String dsh) {
+            this.dsh = dsh;
+        }
+
+        public String getCheckhunter() {
+            return checkhunter;
+        }
+
+        public void setCheckhunter(String checkhunter) {
+            this.checkhunter = checkhunter;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getYfdj() {
+            return yfdj;
+        }
+
+        public void setYfdj(String yfdj) {
+            this.yfdj = yfdj;
+        }
+
+        public String getCollectionhunter() {
+            return collectionhunter;
+        }
+
+        public void setCollectionhunter(String collectionhunter) {
+            this.collectionhunter = collectionhunter;
+        }
+
+        public String getDpj() {
+            return dpj;
+        }
+
+        public void setDpj(String dpj) {
+            this.dpj = dpj;
+        }
+    }
+}

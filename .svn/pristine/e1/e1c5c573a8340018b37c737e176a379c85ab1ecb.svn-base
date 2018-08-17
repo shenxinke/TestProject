@@ -1,0 +1,108 @@
+package com.yst.onecity.adapter;
+
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.viewholder.AbstractTypeViewHolder;
+import com.yst.onecity.bean.TrademarkShoppingBean;
+import com.yst.onecity.interfaces.BaseAdapterListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 品牌主页适配器
+ *
+ * @author Shenxinke
+ * @version 4.2.0
+ * @data 2018/6/12
+ */
+
+public class TrademarkMallAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private LayoutInflater mLayoutInflater;
+    private List<TrademarkShoppingBean.ContentBean.ProductListBean> mData = new ArrayList<>();
+    private ShoppingMallListener shoppingMallListener;
+
+    public void setTrademarkMallListener( ShoppingMallListener shoppingMallListener) {
+        this.shoppingMallListener = shoppingMallListener;
+    }
+
+    public TrademarkMallAdapter() {
+        mLayoutInflater = LayoutInflater.from(TianyiApplication.getContext());
+    }
+
+    public void addList(List<TrademarkShoppingBean.ContentBean.ProductListBean> data) {
+        if (data != null) {
+            mData = data;
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new TrademarkMallHolder(mLayoutInflater.inflate(R.layout.shopping_mall_item, parent, false));
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return super.getItemViewType(position);
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        ((AbstractTypeViewHolder) holder).bindHolder(mData.get(position));
+        setAdapterListener(position, holder);
+    }
+
+    public void setAdapterListener(final int position, final RecyclerView.ViewHolder holder) {
+        if (holder instanceof TrademarkMallHolder) {
+            if (shoppingMallListener != null) {
+                //购物车点击事件
+                ((TrademarkMallHolder) holder).imgShoppingCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String state = String.valueOf(((TrademarkMallHolder) holder).id);
+                        shoppingMallListener.btShoppingCart(position, state);
+                    }
+                });
+
+                //故事点击事件
+                ((TrademarkMallHolder) holder).tvStory.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String state = String.valueOf(((TrademarkMallHolder) holder).id);
+                        shoppingMallListener.btShoppingStory(position,state);
+                    }
+                });
+            }
+            //条目点击事件
+            ((TrademarkMallHolder) holder).clParent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    shoppingMallListener.onItemClick(position);
+                }
+            });
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return mData.size();
+    }
+
+    public interface ShoppingMallListener extends BaseAdapterListener {
+        /**
+         * 多种状态的按钮点击监听回调
+         *
+         * @param position
+         * @param status
+         */
+        void btShoppingCart(int position, String status);
+
+        void btShoppingStory(int position, String status);
+    }
+}

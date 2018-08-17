@@ -1,0 +1,99 @@
+package com.yst.tianyimember.adapter;
+
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.adapter.viewholder.OnLineOrderViewHolder;
+import com.yst.tianyimember.adapter.viewholder.AbstractTypeViewHolder;
+import com.yst.tianyimember.bean.order.MemberOnLineOrderBean;
+import com.yst.tianyimember.interfaces.BaseAdapterListener;
+
+import java.util.List;
+
+/**
+ * 线上订单列表适配器
+ *
+ * @author Shenxinke
+ * @version 4.0.2
+ * @data 2018/4/24
+ */
+public class OnLineOrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private List<MemberOnLineOrderBean.OnLineBean> mData;
+    private LayoutInflater mLayoutInflater;
+
+    public OnLineOrderAdapter() {
+        mLayoutInflater = LayoutInflater.from(TianyiApplication.getContext());
+    }
+
+    private OnLineAdapterListener onLineAdapterListener;
+
+    public void setOnLineAdapterListener(OnLineAdapterListener onLineAdapterListener) {
+        this.onLineAdapterListener = onLineAdapterListener;
+    }
+
+    public void addList(List<MemberOnLineOrderBean.OnLineBean> data) {
+        if (data != null) {
+            mData = data;
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new OnLineOrderViewHolder(mLayoutInflater.inflate(R.layout.item_order_list, parent, false));
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        ((AbstractTypeViewHolder) holder).bindHolder(mData.get(position));
+        setAdapterListener(position, holder);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return super.getItemViewType(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mData.size();
+    }
+
+
+    public void setAdapterListener(final int position, final RecyclerView.ViewHolder holder) {
+        if (holder instanceof OnLineOrderViewHolder) {
+            //按钮点击事件
+            if (onLineAdapterListener != null) {
+                ((OnLineOrderViewHolder) holder).tvBtState.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String state = String.valueOf(((OnLineOrderViewHolder) holder).state);
+                        onLineAdapterListener.btStateClick(position, state);
+                    }
+                });
+            }
+            //条目点击事件
+            ((OnLineOrderViewHolder) holder).llRoot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onLineAdapterListener.onItemClick(position);
+                }
+            });
+
+        }
+    }
+
+    public interface OnLineAdapterListener extends BaseAdapterListener {
+        /**
+         * 多种状态的按钮点击监听回调
+         *
+         * @param position
+         * @param status
+         */
+        void btStateClick(int position, String status);
+    }
+}

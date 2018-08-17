@@ -1,0 +1,530 @@
+package com.yst.tianyimember.bean.addorder;
+
+import java.util.List;
+
+/**
+ * 订单实体类
+ *
+ * @author jiaofan
+ * @version 1.0.1
+ * @date 2018/3/22
+ */
+
+public class OrderBean {
+
+    /**
+     * code : 1
+     * msg : 成功
+     * content : {"address":{"address":{"cityName":"吕梁","districtName":"离石区","detail_address":"我们自己也","user_name":"我的","latitude":"39.959225","mobile":"15544432178","id":601,"proName":"山西","longitude":"116.465240","defAdd":1}},"merchantList":[{"isNyt":0,"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/merchant/20171204/20171204144105665316857.jpg","merchantId":"72","productDetail":[{"hunter_id":null,"pspcification":"胡萝卜","scorePrice":222.22,"pname":"鲜果汁","pimg":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171201/20171201140109973638773.jpg","num":7,"weight":"23.5","spid":160,"buy_num":1,"price":6,"product_id":117,"is_free_shipping":null,"phtype":1,"status":1}],"totalPrice":6,"freight":34,"totalWeight":23.5,"title2":"当前购买商品店铺缺货，已为您就近匹配店铺发货","title":"单个店铺满100.00元包邮","totalScorePrice":222.22,"merchantName":"AS"}]}
+     */
+
+    private int code;
+    private String msg;
+    private ContentBean content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * address : {"address":{"cityName":"吕梁","districtName":"离石区","detail_address":"我们自己也","user_name":"我的","latitude":"39.959225","mobile":"15544432178","id":601,"proName":"山西","longitude":"116.465240","defAdd":1}}
+         * merchantList : [{"isNyt":0,"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/merchant/20171204/20171204144105665316857.jpg","merchantId":"72","productDetail":[{"hunter_id":null,"pspcification":"胡萝卜","scorePrice":222.22,"pname":"鲜果汁","pimg":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171201/20171201140109973638773.jpg","num":7,"weight":"23.5","spid":160,"buy_num":1,"price":6,"product_id":117,"is_free_shipping":null,"phtype":1,"status":1}],"totalPrice":6,"freight":34,"totalWeight":23.5,"title2":"当前购买商品店铺缺货，已为您就近匹配店铺发货","title":"单个店铺满100.00元包邮","totalScorePrice":222.22,"merchantName":"AS"}]
+         */
+
+        private AddressBeanX address;
+        private List<MerchantListBean> merchantList;
+
+        public AddressBeanX getAddress() {
+            return address;
+        }
+
+        public void setAddress(AddressBeanX address) {
+            this.address = address;
+        }
+
+        public List<MerchantListBean> getMerchantList() {
+            return merchantList;
+        }
+
+        public void setMerchantList(List<MerchantListBean> merchantList) {
+            this.merchantList = merchantList;
+        }
+
+        public static class AddressBeanX {
+            /**
+             * address : {"cityName":"吕梁","districtName":"离石区","detail_address":"我们自己也","user_name":"我的","latitude":"39.959225","mobile":"15544432178","id":601,"proName":"山西","longitude":"116.465240","defAdd":1}
+             */
+
+            private AddressBean address;
+
+            public AddressBean getAddress() {
+                return address;
+            }
+
+            public void setAddress(AddressBean address) {
+                this.address = address;
+            }
+
+            public static class AddressBean {
+                /**
+                 * cityName : 吕梁
+                 * districtName : 离石区
+                 * detail_address : 我们自己也
+                 * user_name : 我的
+                 * latitude : 39.959225
+                 * mobile : 15544432178
+                 * id : 601
+                 * proName : 山西
+                 * longitude : 116.465240
+                 * defAdd : 1
+                 */
+
+                private String cityName;
+                private String districtName;
+                private String detail_address;
+                private String user_name;
+                private String latitude;
+                private String mobile;
+                private int id;
+                private String proName;
+                private String longitude;
+                private int defAdd;
+
+                public String getCityName() {
+                    return cityName;
+                }
+
+                public void setCityName(String cityName) {
+                    this.cityName = cityName;
+                }
+
+                public String getDistrictName() {
+                    return districtName;
+                }
+
+                public void setDistrictName(String districtName) {
+                    this.districtName = districtName;
+                }
+
+                public String getDetail_address() {
+                    return detail_address;
+                }
+
+                public void setDetail_address(String detail_address) {
+                    this.detail_address = detail_address;
+                }
+
+                public String getUser_name() {
+                    return user_name;
+                }
+
+                public void setUser_name(String user_name) {
+                    this.user_name = user_name;
+                }
+
+                public String getLatitude() {
+                    return latitude;
+                }
+
+                public void setLatitude(String latitude) {
+                    this.latitude = latitude;
+                }
+
+                public String getMobile() {
+                    return mobile;
+                }
+
+                public void setMobile(String mobile) {
+                    this.mobile = mobile;
+                }
+
+                public int getId() {
+                    return id;
+                }
+
+                public void setId(int id) {
+                    this.id = id;
+                }
+
+                public String getProName() {
+                    return proName;
+                }
+
+                public void setProName(String proName) {
+                    this.proName = proName;
+                }
+
+                public String getLongitude() {
+                    return longitude;
+                }
+
+                public void setLongitude(String longitude) {
+                    this.longitude = longitude;
+                }
+
+                public int getDefAdd() {
+                    return defAdd;
+                }
+
+                public void setDefAdd(int defAdd) {
+                    this.defAdd = defAdd;
+                }
+            }
+        }
+
+        public static class MerchantListBean {
+            /**
+             * isNyt : 0
+             * address : https://ph-images.oss-cn-shenzhen.aliyuncs.com/merchant/20171204/20171204144105665316857.jpg
+             * merchantId : 72
+             * productDetail : [{"hunter_id":null,"pspcification":"胡萝卜","scorePrice":222.22,"pname":"鲜果汁","pimg":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171201/20171201140109973638773.jpg","num":7,"weight":"23.5","spid":160,"buy_num":1,"price":6,"product_id":117,"is_free_shipping":null,"phtype":1,"status":1}]
+             * totalPrice : 6
+             * freight : 34
+             * totalWeight : 23.5
+             * title2 : 当前购买商品店铺缺货，已为您就近匹配店铺发货
+             * title : 单个店铺满100.00元包邮
+             * totalScorePrice : 222.22
+             * merchantName : AS
+             */
+
+            private int isNyt;
+            private int isScope;
+            private String address;
+            private String merchantId;
+            private double totalPrice;
+            private double freight;
+            private double totalWeight;
+            private String title2;
+            private String title;
+            private double totalScorePrice;
+            private String merchantName;
+            public String message;
+            private String fapiao;
+            private String invoiceType;
+            private String invoiceName;
+            private String invoiceMark;
+            private List<ProductDetailBean> productDetail;
+
+            public int getIsScope() {
+                return isScope;
+            }
+
+            public void setIsScope(int isScope) {
+                this.isScope = isScope;
+            }
+
+            public String getMessage() {
+                return message;
+            }
+
+            public void setMessage(String message) {
+                this.message = message;
+            }
+
+            public String getFapiao() {
+                return fapiao;
+            }
+
+            public void setFapiao(String fapiao) {
+                this.fapiao = fapiao;
+            }
+
+            public String getInvoiceType() {
+                return invoiceType;
+            }
+
+            public void setInvoiceType(String invoiceType) {
+                this.invoiceType = invoiceType;
+            }
+
+            public String getInvoiceName() {
+                return invoiceName;
+            }
+
+            public void setInvoiceName(String invoiceName) {
+                this.invoiceName = invoiceName;
+            }
+
+            public String getInvoiceMark() {
+                return invoiceMark;
+            }
+
+            public void setInvoiceMark(String invoiceMark) {
+                this.invoiceMark = invoiceMark;
+            }
+
+            public int getIsNyt() {
+                return isNyt;
+            }
+
+            public void setIsNyt(int isNyt) {
+                this.isNyt = isNyt;
+            }
+
+            public String getAddress() {
+                return address;
+            }
+
+            public void setAddress(String address) {
+                this.address = address;
+            }
+
+            public String getMerchantId() {
+                return merchantId;
+            }
+
+            public void setMerchantId(String merchantId) {
+                this.merchantId = merchantId;
+            }
+
+            public double getTotalPrice() {
+                return totalPrice;
+            }
+
+            public void setTotalPrice(double totalPrice) {
+                this.totalPrice = totalPrice;
+            }
+
+            public double getFreight() {
+                return freight;
+            }
+
+            public void setFreight(double freight) {
+                this.freight = freight;
+            }
+
+            public double getTotalWeight() {
+                return totalWeight;
+            }
+
+            public void setTotalWeight(double totalWeight) {
+                this.totalWeight = totalWeight;
+            }
+
+            public String getTitle2() {
+                return title2;
+            }
+
+            public void setTitle2(String title2) {
+                this.title2 = title2;
+            }
+
+            public String getTitle() {
+                return title;
+            }
+
+            public void setTitle(String title) {
+                this.title = title;
+            }
+
+            public double getTotalScorePrice() {
+                return totalScorePrice;
+            }
+
+            public void setTotalScorePrice(double totalScorePrice) {
+                this.totalScorePrice = totalScorePrice;
+            }
+
+            public String getMerchantName() {
+                return merchantName;
+            }
+
+            public void setMerchantName(String merchantName) {
+                this.merchantName = merchantName;
+            }
+
+            public List<ProductDetailBean> getProductDetail() {
+                return productDetail;
+            }
+
+            public void setProductDetail(List<ProductDetailBean> productDetail) {
+                this.productDetail = productDetail;
+            }
+
+            public static class ProductDetailBean {
+                /**
+                 * hunter_id : null
+                 * pspcification : 胡萝卜
+                 * scorePrice : 222.22
+                 * pname : 鲜果汁
+                 * pimg : https://ph-images.oss-cn-shenzhen.aliyuncs.com/product/20171201/20171201140109973638773.jpg
+                 * num : 7
+                 * weight : 23.5
+                 * spid : 160
+                 * buy_num : 1
+                 * price : 6
+                 * product_id : 117
+                 * is_free_shipping : null
+                 * phtype : 1
+                 * status : 1
+                 */
+
+                private String authorid;
+                private String pspcification;
+                private double scorePrice;
+                private String pname;
+                private String pimg;
+                private int num;
+                private String weight;
+                private int spid;
+                private int buy_num;
+                private double price;
+                private int product_id;
+                private String is_free_shipping;
+                private int phtype;
+                private int status;
+                private String hunterid;
+                private int isScope;
+
+                public int getIsScope() {
+                    return isScope;
+                }
+
+                public void setIsScope(int isScope) {
+                    this.isScope = isScope;
+                }
+
+                public String getAuthorid() {
+                    return authorid;
+                }
+
+                public void setAuthorid(String authorid) {
+                    this.authorid = authorid;
+                }
+
+                public String getHunterid() {
+                    return hunterid;
+                }
+
+                public void setHunterid(String hunterid) {
+                    this.hunterid = hunterid;
+                }
+
+                public String getPspcification() {
+                    return pspcification;
+                }
+
+                public void setPspcification(String pspcification) {
+                    this.pspcification = pspcification;
+                }
+
+                public double getScorePrice() {
+                    return scorePrice;
+                }
+
+                public void setScorePrice(double scorePrice) {
+                    this.scorePrice = scorePrice;
+                }
+
+                public String getPname() {
+                    return pname;
+                }
+
+                public void setPname(String pname) {
+                    this.pname = pname;
+                }
+
+                public String getPimg() {
+                    return pimg;
+                }
+
+                public void setPimg(String pimg) {
+                    this.pimg = pimg;
+                }
+
+                public int getNum() {
+                    return num;
+                }
+
+                public void setNum(int num) {
+                    this.num = num;
+                }
+
+                public String getWeight() {
+                    return weight;
+                }
+
+                public void setWeight(String weight) {
+                    this.weight = weight;
+                }
+
+                public int getSpid() {
+                    return spid;
+                }
+
+                public void setSpid(int spid) {
+                    this.spid = spid;
+                }
+
+                public int getBuy_num() {
+                    return buy_num;
+                }
+
+                public void setBuy_num(int buy_num) {
+                    this.buy_num = buy_num;
+                }
+
+                public double getPrice() {
+                    return price;
+                }
+
+                public void setPrice(double price) {
+                    this.price = price;
+                }
+
+                public int getProduct_id() {
+                    return product_id;
+                }
+
+                public void setProduct_id(int product_id) {
+                    this.product_id = product_id;
+                }
+
+                public String getIs_free_shipping() {
+                    return is_free_shipping;
+                }
+
+                public void setIs_free_shipping(String is_free_shipping) {
+                    this.is_free_shipping = is_free_shipping;
+                }
+
+                public int getPhtype() {
+                    return phtype;
+                }
+
+                public void setPhtype(int phtype) {
+                    this.phtype = phtype;
+                }
+
+                public int getStatus() {
+                    return status;
+                }
+
+                public void setStatus(int status) {
+                    this.status = status;
+                }
+            }
+        }
+    }
+}

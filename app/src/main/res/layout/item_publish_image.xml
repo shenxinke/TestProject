@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:minHeight="180dp"
+    android:layout_marginBottom="@dimen/margin_10dp"
+    android:orientation="vertical">
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:scaleType="centerCrop"
+        app:riv_oval="false"
+        app:riv_corner_radius="@dimen/margin_5dp"
+        android:src="@mipmap/top_backgroud" />
+</LinearLayout>

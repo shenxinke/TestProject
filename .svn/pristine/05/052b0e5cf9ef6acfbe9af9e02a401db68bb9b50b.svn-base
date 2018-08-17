@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--字体大小-->
+    <dimen name="Max1TextSize">20sp</dimen>
+    <dimen name="mainTextSize">16sp</dimen>
+    <dimen name="text_size_18px">9sp</dimen>
+    <dimen name="text_size_20px">10sp</dimen>
+    <dimen name="text_size_22px">11sp</dimen>
+    <dimen name="text_size_40px">20sp</dimen>
+    <dimen name="text_size_28px">14sp</dimen>
+    <dimen name="text_size_30px">15sp</dimen>
+    <dimen name="text_size_24px">12sp</dimen>
+    <dimen name="text_size_26px">13sp</dimen>
+    <dimen name="text_size_32px">16sp</dimen>
+    <dimen name="text_size_34px">17sp</dimen>
+
+    <dimen name="margin_16px">8dp</dimen>
+    <dimen name="margin_20px">10dp</dimen>
+    <dimen name="margin_22px">11dp</dimen>
+    <dimen name="margin_24px">12dp</dimen>
+    <dimen name="margin_25px">12.5dp</dimen>
+    <dimen name="margin_40px">20dp</dimen>
+    <dimen name="margin_80px">40dp</dimen>
+    <dimen name="margin_60px">30dp</dimen>
+    <dimen name="margin_30px">15dp</dimen>
+    <dimen name="margin_12px">6dp</dimen>
+    <dimen name="margin_15px">7.5dp</dimen>
+    <dimen name="margin_10px">5dp</dimen>
+    <dimen name="margin_5px">2.5dp</dimen>
+    <dimen name="margin_50px">25dp</dimen>
+    <dimen name="margin_150px">75dp</dimen>
+
+    <dimen name="padding_6px">3dp</dimen>
+
+    <dimen name="padding_8px">4dp</dimen>
+    <dimen name="padding_10px">5dp</dimen>
+    <dimen name="padding_20px">10dp</dimen>
+    <dimen name="padding_30px">15dp</dimen>
+
+    <dimen name="padding_40px">20dp</dimen>
+
+
+    <dimen name="height_1px">0.5dp</dimen>
+    <dimen name="height_10px">5dp</dimen>
+    <dimen name="height_15px">7.5dp</dimen>
+    <dimen name="height_20px">10dp</dimen>
+    <dimen name="height_40px">20dp</dimen>
+    <dimen name="height_60px">30dp</dimen>
+    <dimen name="height_70px">35dp</dimen>
+    <dimen name="height_100px">50dp</dimen>
+    <dimen name="height_438px">219dp</dimen>
+
+    <dimen name="height_80px">40dp</dimen>
+    <dimen name="height_86px">43dp</dimen>
+    <dimen name="height_90px">45dp</dimen>
+    <dimen name="height_50px">25dp</dimen>
+    <dimen name="height_180px">90dp</dimen>
+    <dimen name="height_140px">70dp</dimen>
+    <dimen name="height_160px">80dp</dimen>
+    <dimen name="height_240px">120dp</dimen>
+    <dimen name="height_300px">150dp</dimen>
+    <dimen name="height_30px">15dp</dimen>
+    <dimen name="height_214px">107dp</dimen>
+    <dimen name="height_280px">140dp</dimen>
+    <dimen name="height_440px">220dp</dimen>
+
+
+    <dimen name="width_200px">100dp</dimen>
+    <dimen name="width_240px">120dp</dimen>
+    <dimen name="width_10px">5dp</dimen>
+    <dimen name="width_20px">10dp</dimen>
+    <dimen name="width_26px">13dp</dimen>
+    <dimen name="width_40px">20dp</dimen>
+    <dimen name="width_50px">25dp</dimen>
+
+    <dimen name="width_85px">42.5dp</dimen>
+    <dimen name="width_80px">40dp</dimen>
+    <dimen name="width_90px">45dp</dimen>
+    <dimen name="width_100px">50dp</dimen>
+    <dimen name="width_120px">60dp</dimen>
+    <dimen name="width_160px">80dp</dimen>
+    <dimen name="width_140px">70dp</dimen>
+    <dimen name="width_330px">165dp</dimen>
+    <dimen name="width_130px">65dp</dimen>
+    <dimen name="width_400px">200dp</dimen>
+
+    <dimen name="heigh_search_layout">50dp</dimen>
+    <dimen name="heigh_fenge">1px</dimen>
+    <dimen name="actionBarHeight">48dp</dimen>
+    <dimen name="editTextViewMinHeight">33dp</dimen>
+    <dimen name="drawablePadding">12dp</dimen>
+    <dimen name="maxPadding">26dp</dimen>
+    <dimen name="indicatorH">40dp</dimen>
+    <dimen name="normalPadding">16dp</dimen>
+    <dimen name="smallPadding">12dp</dimen>
+    <dimen name="ninePadding">9dp</dimen>
+    <dimen name="sixPadding">6dp</dimen>
+
+
+
+</resources>

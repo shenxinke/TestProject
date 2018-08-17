@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:drawable="@mipmap/collection_s"/>
+    <item android:state_selected="true" android:drawable="@mipmap/collection_s"/>
+    //正常状态下的图标
+    <item android:drawable="@mipmap/collection_n"/>
+</selector>

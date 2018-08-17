@@ -1,0 +1,199 @@
+package com.yst.tianyimember.adapter;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.activity.member.RedPackageActivity;
+import com.yst.tianyimember.bean.order.MemberOrderBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.utils.ConstUtils;
+import com.yst.tianyimember.utils.JumpIntent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 线上订单适配器
+ *
+ * @author chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class LineOrderAdapter extends BaseAdapter {
+
+    private Activity context;
+    private List<MemberOrderBean> data;
+    private OnRewardListener listener;
+
+    public LineOrderAdapter(Activity context, List<MemberOrderBean> data, OnRewardListener listener) {
+        this.context = context;
+        this.data = data;
+        this.listener = listener;
+    }
+
+    public void onRefresh(List<MemberOrderBean> mList) {
+        if (mList != null) {
+            this.data.clear();
+            this.data.addAll(mList);
+            notifyDataSetChanged();
+        } else {
+            this.data = new ArrayList<>();
+            notifyDataSetChanged();
+        }
+    }
+
+    public void addData(List<MemberOrderBean> mList) {
+        this.data.addAll(mList);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getCount() {
+        return data.size();
+    }
+
+    @Override
+    public MemberOrderBean getItem(int i) {
+        return data.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if (view == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.item_line_listview, null);
+            holder = new ViewHolder(view);
+            view.setTag(holder);
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+        final MemberOrderBean memberOrderBean = data.get(i);
+        if (Const.STR0.equals(memberOrderBean.getFenRunType())) {
+            //0天天奖
+            holder.llReward.setVisibility(View.GONE);
+            holder.tvEveryDarReward.setBackgroundResource(R.drawable.shape_red_package_gray);
+            holder.tvOpenRedReward.setBackgroundResource(R.drawable.shape_red_package_gray);
+            holder.tvEveryDarReward.setEnabled(false);
+            holder.tvOpenRedReward.setEnabled(false);
+            holder.tvEveryDarReward.setTextColor(0xFFCCCCCC);
+            holder.tvOpenRedReward.setTextColor(0xFFCCCCCC);
+            holder.ivReward.setVisibility(View.GONE);
+            holder.ivReward.setImageResource(R.mipmap.tiantianjiang);
+        } else if (Const.STR1.equals(memberOrderBean.getFenRunType())) {
+            holder.llReward.setVisibility(View.GONE);
+            holder.tvEveryDarReward.setBackgroundResource(R.drawable.shape_red_package_gray);
+            holder.tvOpenRedReward.setBackgroundResource(R.drawable.shape_red_package_gray);
+            holder.tvEveryDarReward.setEnabled(false);
+            holder.tvOpenRedReward.setEnabled(false);
+            holder.tvEveryDarReward.setTextColor(0xFFCCCCCC);
+            holder.tvOpenRedReward.setTextColor(0xFFCCCCCC);
+            holder.ivReward.setVisibility(View.GONE);
+            holder.ivReward.setImageResource(R.mipmap.red_package);
+        } else {
+            //是空说明没开过
+            //0不显示按钮1显示
+            if (memberOrderBean.getFlag() == 0) {
+                holder.llReward.setVisibility(View.GONE);
+                holder.ivReward.setVisibility(View.GONE);
+            } else {
+                holder.llReward.setVisibility(View.GONE);
+                holder.tvEveryDarReward.setBackgroundResource(R.drawable.shape_red_package);
+                holder.tvOpenRedReward.setBackgroundResource(R.drawable.shape_red_package);
+                holder.tvEveryDarReward.setEnabled(true);
+                holder.tvOpenRedReward.setEnabled(true);
+                holder.tvEveryDarReward.setTextColor(0xFFFFFFFF);
+                holder.tvOpenRedReward.setTextColor(0xFFFFFFFF);
+                holder.ivReward.setVisibility(View.GONE);
+            }
+        }
+        //天天奖
+        holder.tvEveryDarReward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.reward(memberOrderBean.getId());
+                }
+            }
+        });
+        //开红包
+        holder.tvOpenRedReward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Bundle bundle = new Bundle();
+                bundle.putString("id", memberOrderBean.getId());
+                JumpIntent.jump(context, RedPackageActivity.class, bundle);
+            }
+        });
+        holder.orderNum.setText(ConstUtils.getStringNoEmpty(memberOrderBean.getOrder_no()));
+        holder.time.setText(ConstUtils.getStringNoEmpty(memberOrderBean.getCreated_time()));
+        holder.desName.setText(ConstUtils.getStringNoEmpty(memberOrderBean.getNickname()));
+
+        Glide.with(context).load(memberOrderBean.getHimg()).error(R.mipmap.head_2).into(holder.header);
+        if(Const.CONS_STR_JIFENZHIFU.equals(memberOrderBean.getPayType())){
+            holder.ivJifen.setVisibility(View.VISIBLE);
+            holder.tvMoney.setVisibility(View.GONE);
+            holder.price.setText(""+memberOrderBean.getScorePrice());
+        }else {
+            holder.ivJifen.setVisibility(View.GONE);
+            holder.tvMoney.setVisibility(View.VISIBLE);
+            holder.price.setText(""+memberOrderBean.getTotal_price());
+        }
+        return view;
+    }
+
+    class ViewHolder {
+        @BindView(R.id.item_line_order_number)
+        TextView orderNum;
+        @BindView(R.id.item_line_state)
+        TextView state;
+        @BindView(R.id.item_line_time)
+        TextView time;
+        @BindView(R.id.item_line_header)
+        ImageView header;
+        @BindView(R.id.item_line_name)
+        TextView desName;
+        @BindView(R.id.item_line_price)
+        TextView price;
+        @BindView(R.id.ll_reward)
+        LinearLayout llReward;
+        @BindView(R.id.tv_everyday_reward)
+        TextView tvEveryDarReward;
+        @BindView(R.id.tv_open_red_package)
+        TextView tvOpenRedReward;
+        @BindView(R.id.un_jifen)
+        ImageView ivJifen;
+        @BindView(R.id.iv_reward)
+        ImageView ivReward;
+        @BindView(R.id.tv_¥)
+        TextView tvMoney;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    public interface OnRewardListener {
+        /**
+         * 天天奖
+         * @param id
+         */
+        void reward(String id);
+    }
+}

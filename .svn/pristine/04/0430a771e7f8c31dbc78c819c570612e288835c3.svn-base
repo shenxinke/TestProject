@@ -1,0 +1,783 @@
+package com.yst.tianyimember.activity;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.shuyu.gsyvideoplayer.utils.FileUtils;
+import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
+import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer;
+import com.umeng.socialize.UMShareAPI;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.activity.login.LoginActivity;
+import com.yst.tianyimember.activity.video.GSYSampleCallBack;
+import com.yst.tianyimember.activity.video.LandLayoutVideo;
+import com.yst.tianyimember.adapter.AbstractCommonAdapter;
+import com.yst.tianyimember.adapter.CommonViewHolder;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.bean.CodeMsgBean;
+import com.yst.tianyimember.bean.livevideo.VideoComment;
+import com.yst.tianyimember.bean.livevideo.VideoDetailInfo;
+import com.yst.tianyimember.callbacks.AbstractVideoCommentListCallback;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.dialog.SendCommentDialog;
+import com.yst.tianyimember.fragment.popfragment.ShareCommonDialog;
+import com.yst.tianyimember.fragment.popfragment.TransDialogFragment;
+import com.yst.tianyimember.interfaces.AbstractCodeMsgCallBack;
+import com.yst.tianyimember.interfaces.AbstractVideoDetailsCallBack;
+import com.yst.tianyimember.utils.CircleTransFrom;
+import com.yst.tianyimember.utils.ConstUtils;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.KeyBoardUtils;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.RxCode;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.builder.PostFormBuilder;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import gorden.rxbus2.RxBus;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 视频播放页面
+ *
+ * @author WangJingWei
+ * @version 4.1.0
+ * @date 2018/5/14.
+ */
+public class VideoPlayerActivity extends BaseActivity implements View.OnClickListener, SendCommentDialog.OnSendListener,SendCommentDialog.OnShowOrDismissLinstener {
+    @BindView(R.id.gsy_video_player)
+    LandLayoutVideo videoPlayer;
+    @BindView(R.id.listView_comment)
+    ListView listViewComment;
+    @BindView(R.id.mSmartRefresh)
+    SmartRefreshLayout mSmartRefresh;
+    @BindView(R.id.img_empty)
+    ImageView imgEmpty;
+    @BindView(R.id.tv_comment)
+    TextView tvComment;
+    @BindView(R.id.rl_root)
+    RelativeLayout rlRoot;
+
+    /**
+     * 视屏详情信息头布局
+     */
+    private TextView tvTitle;
+    private TextView tvDzNum;
+    private TextView tvLookNum;
+    private ImageView ivShare;
+    private ImageView ivDz;
+    private View headerView;
+
+    private OrientationUtils orientationUtils;
+    private String videoUrl = "";
+    private String videoTitle = "";
+    private String imgUrl;
+
+    private AbstractCommonAdapter<VideoComment.Comment> commentAdapter;
+    private List<VideoComment.Comment> mCommentData = new ArrayList<>();
+    private VideoDetailInfo.DataBean videoInfo;
+
+    private boolean isPlay;
+    private boolean isPause;
+
+    private int page = 1;
+    private int size = 5;
+    private String id = "";
+
+    private SendCommentDialog editDialog;
+    private ShareCommonDialog mShareCommonDialog;
+    private TransDialogFragment transDialogFragment;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_video_detail;
+    }
+
+    /**
+     * 跳转视频播放详情页面
+     *
+     * @param context
+     * @param id
+     */
+    public static void openActivity(Context context, String id, String imgUrl) {
+        Bundle bundle = new Bundle();
+        bundle.putString("id", id);
+        bundle.putString("imgUrl", imgUrl);
+        JumpIntent.jump((Activity) context, VideoPlayerActivity.class, bundle);
+    }
+
+    @Override
+    public void initData() {
+        RxBus.get().register(this);
+        initHeadView();
+        initComment();
+        initListener();
+
+        requestVideoInfo();
+        requestVideoComment();
+    }
+
+    private void initListener() {
+        ivShare.setOnClickListener(this);
+        ivDz.setOnClickListener(this);
+        tvComment.setOnClickListener(this);
+
+        mSmartRefresh.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+                page++;
+                requestVideoComment();
+                mSmartRefresh.finishLoadmore(1000);
+            }
+
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                page = 1;
+                mCommentData.clear();
+                requestVideoComment();
+                mSmartRefresh.finishRefresh(500);
+            }
+        });
+    }
+
+    private void initVideo() {
+
+        if (null != videoUrl) {
+            videoPlayer.setUp(videoUrl, true, new File(FileUtils.getPath()), "");
+        }
+        //增加title
+///        videoPlayer.getTitleTextView().setVisibility(View.VISIBLE);
+//        videoPlayer.getTitleTextView().setText(videoTitle);
+        //设置返回键
+        videoPlayer.getBackButton().setVisibility(View.VISIBLE);
+        //设置旋转
+        orientationUtils = new OrientationUtils(this, videoPlayer);
+        orientationUtils.setEnable(false);
+
+        videoPlayer.setShowFullAnimation(false);
+        //是否可以滑动调整
+        videoPlayer.setIsTouchWiget(true);
+
+
+        videoPlayer.setVideoAllCallBack(new GSYSampleCallBack() {
+            @Override
+            public void onPrepared(String url, Object... objects) {
+                super.onPrepared(url, objects);
+                //开始播放了才能旋转和全屏
+                orientationUtils.setEnable(true);
+                isPlay = true;
+            }
+
+            @Override
+            public void onEnterFullscreen(String url, Object... objects) {
+                super.onEnterFullscreen(url, objects);
+                videoPlayer.getCurrentPlayer().getTitleTextView().setText(videoTitle);
+            }
+
+            @Override
+            public void onQuitFullscreen(String url, Object... objects) {
+                super.onQuitFullscreen(url, objects);
+                if (orientationUtils != null) {
+                    orientationUtils.backToProtVideo();
+                }
+            }
+        });
+
+        videoPlayer.getFullscreenButton().setOnClickListener(v -> {
+            orientationUtils.resolveByClick();
+            videoPlayer.startWindowFullscreen(VideoPlayerActivity.this, true, true);
+        });
+
+        videoPlayer.getBackButton().setOnClickListener(v -> onBackPressed());
+        videoPlayer.startPlayLogic();
+    }
+
+    /**
+     * 初始化头布局
+     */
+    private void initHeadView() {
+        headerView = LayoutInflater.from(this).inflate(R.layout.include_video_details, null);
+        tvTitle = (TextView) headerView.findViewById(R.id.tv_title);
+        tvDzNum = (TextView) headerView.findViewById(R.id.tv_dzNum);
+        tvLookNum = (TextView) headerView.findViewById(R.id.tv_lookNum);
+        ivShare = (ImageView) headerView.findViewById(R.id.iv_share);
+        ivDz = (ImageView) headerView.findViewById(R.id.iv_dz);
+    }
+
+    /**
+     * 初始化评论列表
+     */
+    private void initComment() {
+        commentAdapter = new AbstractCommonAdapter<VideoComment.Comment>(TianyiApplication.instance, mCommentData, R.layout.item_video_comment) {
+            @Override
+            public void convert(CommonViewHolder holder, int position, VideoComment.Comment item) {
+                ImageView imgHead = holder.getView(R.id.iv_head);
+                ImageView ivDz = holder.getView(R.id.iv_commentdz);
+                TextView tvItemDz = holder.getView(R.id.tv_itemdz);
+
+                holder.setText(R.id.tv_name, ConstUtils.getStringNoEmpty(item.getName()));
+                holder.setText(R.id.tv_date, ConstUtils.getStringNoEmpty(item.getDate()));
+                holder.setText(R.id.tv_itemdz, ConstUtils.getStringNoEmpty(item.getDzNum()));
+                holder.setText(R.id.tv_item_desc, ConstUtils.getStringNoEmpty(item.getCommentDesc()));
+
+                switch (ConstUtils.changeEmptyStringToZero(item.getIsFabulous())) {
+                    case Const.STR1:
+                        ivDz.setImageResource(R.drawable.item_zan_press);
+                        break;
+                    case Const.STR2:
+                        ivDz.setImageResource(R.drawable.item_zan_unpress);
+                        break;
+                    default:
+                        break;
+                }
+
+                Glide.with(TianyiApplication.getInstance())
+                        .load(ConstUtils.matchingImageUrl(ConstUtils.getStringNoEmpty(item.getHeadUrl())))
+                        .asBitmap()
+                        .transform(new CircleTransFrom(TianyiApplication.getInstance()))
+                        .error(R.mipmap.head_2)
+                        .into(imgHead);
+
+                ivDz.setOnClickListener(v -> {
+                    if (!TianyiApplication.isLogin) {
+                        JumpIntent.jump(VideoPlayerActivity.this, LoginActivity.class);
+                        return;
+                    }
+                    if (Utils.isClickable()) {
+                        commentLike(mCommentData.get(position), ivDz, tvItemDz);
+                    }
+                });
+
+            }
+        };
+        listViewComment.addHeaderView(headerView);
+        listViewComment.setAdapter(commentAdapter);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (!ConstUtils.isClickable()) {
+            return;
+        }
+
+        switch (v.getId()) {
+            case R.id.iv_share:
+                if (mShareCommonDialog == null) {
+                    mShareCommonDialog = ShareCommonDialog.openShareDialog(VideoPlayerActivity.this, "普济一城", videoTitle, videoUrl, imgUrl);
+                }
+                mShareCommonDialog.show(getFragmentManager(), ShareCommonDialog.class.toString());
+
+                break;
+            case R.id.iv_dz:
+                if (!TianyiApplication.isLogin) {
+                    JumpIntent.jump((Activity) context, LoginActivity.class);
+                    return;
+                }
+
+                videoGoodLike();
+                break;
+            case R.id.tv_comment:
+                if (!TianyiApplication.isLogin) {
+                    JumpIntent.jump((Activity) context, LoginActivity.class);
+                    return;
+                }
+
+                if (editDialog == null) {
+                    editDialog = SendCommentDialog.creat(this, 0);
+                    editDialog.setmOnShowOrDismissLinstener(this);
+                }
+                editDialog.show(getSupportFragmentManager());
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 视频点赞接口
+     */
+    private void videoGoodLike() {
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "vidoeId", id,
+                "timestamp", timestamp);
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils.post()
+                .url(Constants.VIDEO_GOODLIKE)
+                .addParams("vidoeId", id)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build()
+                .execute(new StringCallback() {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        ToastUtils.show(getString(R.string.str_net_error_message));
+                    }
+
+                    @Override
+                    public void onResponse(String response, int id) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+
+                            if (Const.INTEGER_1 == jsonObject.getInt(Const.CONS_STR_CODE)) {
+                                if (jsonObject.has(Const.CONS_STR_CONTENT)) {
+                                    JSONObject data = jsonObject.getJSONObject(Const.CONS_STR_CONTENT);
+                                    if (data.has(Const.CONS_STR_TYPE)) {
+                                        String type = data.getString(Const.CONS_STR_TYPE);
+                                        switch (type) {
+                                            case Const.STR1:
+                                                ToastUtils.show(getResources().getString(R.string.dianzan_success));
+                                                ivDz.setImageResource(R.mipmap.yizan);
+                                                break;
+                                            case Const.STR2:
+                                                ToastUtils.show(getResources().getString(R.string.dianzan_cancel));
+                                                ivDz.setImageResource(R.mipmap.dianzan);
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                    if (data.has(Const.CONS_STR_FABULOUSNUM)) {
+                                        tvDzNum.setText(ConstUtils.getStringNoEmpty(data.getString(Const.CONS_STR_FABULOUSNUM)));
+                                    }
+                                }
+                            } else {
+                                ToastUtils.show(jsonObject.getString(Const.CONS_STR_MESSAGE));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 获取视频详情信息数据
+     */
+    private void requestVideoInfo() {
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            id = bundle.getString("id");
+            imgUrl = bundle.getString("imgUrl");
+            MyLog.e("sss","--id: "+id);
+            MyLog.e("sss","--imageUr: "+imgUrl);
+        }
+        String timestamp = SignUtils.getTimeStamp();
+        String[] strings;
+        String sign;
+        if (TianyiApplication.isLogin) {
+            strings = new String[]{"memberId", TianyiApplication.appCommonBean.getId(), "id", id, "timestamp", timestamp};
+        } else {
+            strings = new String[]{"id", id, "timestamp", timestamp};
+        }
+        sign = Utils.getSign(strings);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        PostFormBuilder post = OkHttpUtils.post();
+        post.url(Constants.VIDEO_GET_INFO);
+        post.addParams("timestamp", timestamp);
+        post.addParams("sign", sign);
+        post.addParams("client_type", "A");
+        post.addParams("id", id);
+        if (TianyiApplication.isLogin) {
+            post.addParams("memberId", TianyiApplication.appCommonBean.getId());
+        }
+
+        post.build()
+                .execute(new AbstractVideoDetailsCallBack() {
+
+                    @Override
+                    public void onBefore(Request request, int id) {
+                        super.onBefore(request, id);
+                        showInfoProgressDialog();
+                    }
+
+                    @Override
+                    public void onAfter(int id) {
+                        super.onAfter(id);
+                        dismissInfoProgressDialog();
+                    }
+
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        ToastUtils.show(getString(R.string.str_net_error_message));
+                    }
+
+                    @Override
+                    public void onResponse(VideoDetailInfo response, int id) {
+                        if (Const.INTEGER_1 == response.getCode()) {
+                            videoInfo = response.getData();
+                            videoUrl = videoInfo.getAddress();
+                            videoTitle = videoInfo.getTitle();
+                            tvDzNum.setText(ConstUtils.changeEmptyStringToZero(videoInfo.getFabulousNum()));
+                            tvLookNum.setText(ConstUtils.changeEmptyStringToZero(videoInfo.getViews()));
+                            tvTitle.setText(ConstUtils.getStringNoEmpty(videoTitle));
+                            switch (ConstUtils.changeEmptyStringToZero(videoInfo.getIsFabulous())) {
+                                case Const.STR1:
+                                    ivDz.setImageResource(R.mipmap.yizan);
+                                    break;
+                                case Const.STR2:
+                                    ivDz.setImageResource(R.mipmap.dianzan);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            initVideo();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 获取视频评论列表数据
+     */
+    private void requestVideoComment() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "size", String.valueOf(size),
+                "page", String.valueOf(page),
+                "memberId", TianyiApplication.appCommonBean.getId(),
+                "id", id,
+                "timestamp", timestamp
+        );
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils
+                .post()
+                .url(Constants.VIDEO_COMMENT_LIST)
+                .addParams("page", String.valueOf(page))
+                .addParams("size)", String.valueOf(size))
+                .addParams("memberId", TianyiApplication.appCommonBean.getId())
+                .addParams("id", id)
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractVideoCommentListCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(VideoComment response, int id) {
+                if (response.getCode() == 1) {
+                    if (response.getContent() != null && response.getContent().size() > 0) {
+                        mCommentData.addAll(response.getContent());
+                    }
+
+                    if (mCommentData.size() > 0) {
+                        imgEmpty.setVisibility(View.GONE);
+                    } else {
+                        imgEmpty.setVisibility(View.VISIBLE);
+                    }
+                    commentAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    /**
+     * 评论条目点赞数据
+     *
+     * @param comment
+     * @param ivDz
+     */
+    private void commentLike(VideoComment.Comment comment, ImageView ivDz, TextView tvItemDz) {
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "videoCommentId", comment.getId(),
+                "timestamp", timestamp);
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils.post()
+                .url(Constants.VIDEO_COMMENT_GOODLIKE)
+                .addParams("videoCommentId", comment.getId())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build()
+                .execute(new StringCallback() {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+
+                    }
+
+                    @Override
+                    public void onResponse(String response, int id) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+
+                            if (Const.INTEGER_1 == jsonObject.getInt(Const.CONS_STR_CODE)) {
+                                if (jsonObject.has(Const.CONS_STR_CONTENT)) {
+                                    JSONObject data = jsonObject.getJSONObject(Const.CONS_STR_CONTENT);
+                                    if (data.has(Const.CONS_STR_TYPE)) {
+                                        String type = data.getString(Const.CONS_STR_TYPE);
+                                        switch (type) {
+                                            case Const.STR1:
+                                                ToastUtils.show(getResources().getString(R.string.dianzan_success));
+                                                ivDz.setImageResource(R.drawable.item_zan_press);
+                                                break;
+                                            case Const.STR2:
+                                                ToastUtils.show(getResources().getString(R.string.dianzan_cancel));
+                                                ivDz.setImageResource(R.drawable.item_zan_unpress);
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                    if (data.has(Const.CONS_STR_FABULOUSNUM)) {
+                                        tvItemDz.setText(ConstUtils.getStringNoEmpty(data.getString(Const.CONS_STR_FABULOUSNUM)));
+                                    }
+                                }
+                            } else {
+                                ToastUtils.show(jsonObject.getString(Const.CONS_STR_MESSAGE));
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 视频评论接口
+     *
+     * @param comment
+     */
+    @Override
+    public void editSend(String comment, final EditText editText) {
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "content", comment,
+                "videoId", id,
+                "timestamp", timestamp);
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils.post()
+                .url(Constants.VIDEO_SEND_COMMENT)
+                .addParams("content", comment)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("videoId", id)
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build()
+                .execute(new AbstractCodeMsgCallBack() {
+                    @Override
+                    public void onBefore(Request request, int id) {
+                        super.onBefore(request, id);
+                        showInfoProgressDialog();
+                    }
+
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        ToastUtils.show(getString(R.string.str_net_error_message));
+                    }
+
+                    @Override
+                    public void onResponse(CodeMsgBean response, int id) {
+                        if (Const.INTEGER_1 == response.getCode()) {
+                            KeyBoardUtils.closeKeybord(editText, VideoPlayerActivity.this);
+                            ToastUtils.show(response.getMsg());
+                            page = 1;
+                            mCommentData.clear();
+                            requestVideoComment();
+                        }
+                    }
+
+                    @Override
+                    public void onAfter(int id) {
+                        super.onAfter(id);
+                        dismissInfoProgressDialog();
+                    }
+                });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (orientationUtils != null) {
+            orientationUtils.backToProtVideo();
+        }
+        super.onBackPressed();
+    }
+
+    private GSYVideoPlayer getCurPlay() {
+        if (videoPlayer.getFullWindowPlayer() != null) {
+            return videoPlayer.getFullWindowPlayer();
+        }
+        return videoPlayer;
+    }
+
+    /**
+     * 监听屏幕横竖屏状态
+     *
+     * @param newConfig
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (isPlay && !isPause) {
+            videoPlayer.onConfigurationChanged(this, newConfig, orientationUtils);
+        }
+
+        if (!videoPlayer.isIfCurrentIsFullscreen()) {
+            videoPlayer.getTitleTextView().setVisibility(View.VISIBLE);
+            mImmersionBar.fitsSystemWindows(true).statusBarDarkFont(true).statusBarColor(R.color.color_99000000).barAlpha(0.4f).init();
+        } else {
+            mImmersionBar.fullScreen(true).init();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        getCurPlay().onVideoResume();
+        super.onResume();
+        isPause = false;
+    }
+
+    @Override
+    protected void onPause() {
+        getCurPlay().onVideoPause();
+        super.onPause();
+        isPause = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isPlay) {
+            if (videoPlayer != null) {
+                videoPlayer.release();
+            }
+        }
+
+        if (orientationUtils != null) {
+            orientationUtils.releaseListener();
+        }
+
+        if (editDialog != null) {
+            editDialog.dismiss();
+            editDialog = null;
+        }
+
+        mHandler.removeCallbacksAndMessages(null);
+        RxBus.get().unRegister(this);
+    }
+
+    @gorden.rxbus2.Subscribe(code = RxCode.CODE_SHARE_SUCCESS, threadMode = gorden.rxbus2.ThreadMode.MAIN)
+    public void dismissShare() {
+        if (mShareCommonDialog != null) {
+            mShareCommonDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onDialogShow() {
+        if (transDialogFragment == null) {
+            transDialogFragment = TransDialogFragment.newInstance();
+        }
+        transDialogFragment.show(getSupportFragmentManager(), TransDialogFragment.class.toString());
+    }
+
+    @Override
+    public void onDialogDimiss() {
+        mHandler.sendEmptyMessageDelayed(Const.INTEGER_1000,500);
+    }
+
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case Const.INTEGER_1000:
+                    if(transDialogFragment != null){
+                        transDialogFragment.dismiss();
+                    }
+                    break;
+                default:
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        UMShareAPI.get(VideoPlayerActivity.this).onActivityResult(requestCode, resultCode, data);
+    }
+}

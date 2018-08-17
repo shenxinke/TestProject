@@ -1,0 +1,135 @@
+package com.yst.tianyimember.adapter;
+
+import android.app.Activity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.bean.mycount.FineBean;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 零钱余额明细adapter
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/3/14.
+ */
+public class BalanceDetailMemberMonthAdapter extends BaseExpandableListAdapter {
+
+    private List<FineBean.ContentBean> fineBeanList = null;
+    private Activity context;
+    private int tag = 1;
+
+    public BalanceDetailMemberMonthAdapter(List<FineBean.ContentBean> fineBeanList, Activity context) {
+        this.fineBeanList = fineBeanList;
+        this.context = context;
+    }
+
+    public void setFineBeanList(List<FineBean.ContentBean> fineBeanList) {
+        if (fineBeanList != null) {
+            this.fineBeanList = fineBeanList;
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public int getGroupCount() {
+        return fineBeanList.size();
+    }
+
+    @Override
+    public int getChildrenCount(int i) {
+        return fineBeanList.get(i).getConsultationChidList().size();
+
+    }
+
+    @Override
+    public Object getGroup(int i) {
+        return 4;
+    }
+
+    @Override
+    public Object getChild(int i, int i1) {
+        return fineBeanList.get(i).getConsultationChidList().get(i1);
+    }
+
+    @Override
+    public long getGroupId(int i) {
+        return i;
+    }
+
+    @Override
+    public long getChildId(int i, int i1) {
+        return i1;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    @Override
+    public View getGroupView(int i, boolean b, View convertView, ViewGroup viewGroup) {
+        InterHolder interHolder = null;
+        if (convertView == null) {
+            convertView = View.inflate(context, R.layout.item_parent_expendlist, null);
+            interHolder = new InterHolder(convertView);
+            convertView.setTag(interHolder);
+        } else {
+            interHolder = (InterHolder) convertView.getTag();
+        }
+        final InterHolder finalInterHolder = interHolder;
+
+        return convertView;
+    }
+
+    @Override
+    public View getChildView(int i, int i1, boolean b, View convertView, ViewGroup viewGroup) {
+        InterItemHolder interItemHolder = null;
+        if (convertView == null) {
+            convertView = View.inflate(context, R.layout.item_item_item_balance_detail, null);
+            interItemHolder = new InterItemHolder(convertView);
+            convertView.setTag(interItemHolder);
+        } else {
+            interItemHolder = (InterItemHolder) convertView.getTag();
+        }
+        return convertView;
+    }
+
+    @Override
+    public boolean isChildSelectable(int i, int i1) {
+        return false;
+    }
+
+    class InterHolder {
+        @BindView(R.id.tv_month)
+        TextView tvMonth;
+
+        InterHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    class InterItemHolder {
+        @BindView(R.id.iv_state)
+        ImageView ivState;
+        @BindView(R.id.tv_name)
+        TextView tvName;
+        @BindView(R.id.tv_time)
+        TextView tvTime;
+        @BindView(R.id.tv_price)
+        TextView tvPrice;
+
+        InterItemHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

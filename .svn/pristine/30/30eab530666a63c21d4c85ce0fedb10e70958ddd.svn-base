@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/layout_height_45dp"
+    android:background="@color/white"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/ll_locate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/margin_15dp"
+            android:src="@mipmap/location_edit" />
+
+        <TextView
+            android:id="@+id/tv_locate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="北京" />
+
+        <ImageView
+            android:layout_width="20px"
+            android:layout_height="20px"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/margin_5dp"
+            android:src="@mipmap/arrow" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/searchBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/layout_height_25dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginRight="@dimen/margin_10dp"
+        android:layout_toLeftOf="@+id/searchRL"
+        android:layout_toRightOf="@+id/back"
+        android:background="@drawable/shape_search_bag"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_10dp"
+            android:src="@mipmap/icon_search" />
+
+        <EditText
+            android:id="@+id/et_input_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_10dp"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="查找校区/大厦/学校等"
+            android:textSize="@dimen/textSize_14dp" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/layout_height_0.5dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/color_dddddd" />
+</LinearLayout>

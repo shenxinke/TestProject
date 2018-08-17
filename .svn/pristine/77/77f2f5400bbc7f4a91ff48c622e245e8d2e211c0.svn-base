@@ -1,0 +1,248 @@
+package com.yst.tianyimember.fragment;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.activity.NewDetailActivity;
+import com.yst.tianyimember.adapter.InfomationAdapter;
+import com.yst.tianyimember.base.BaseFragment;
+import com.yst.tianyimember.bean.consult.ConsultListBean;
+import com.yst.tianyimember.callbacks.AbstractConsultListCallback;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.eventbus.UpdateEvent;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 首页资讯
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class InformationContentFragment extends BaseFragment {
+    /**
+     * 首页创建
+     */
+    public static final int TYPE_HOMEPAGE = 1;
+    private InfomationAdapter adapter;
+    private ArrayList<ConsultListBean.ContentBean.ContentListBean> datas = new ArrayList<>();
+    private int pageNum = 1;
+    private int rows = 10;
+    private String userId;
+    /**
+     * 资讯分类下的id
+     */
+    private String id;
+    private boolean isRefresh = true;
+
+    @BindView(R.id.empty)
+    TextView empty;
+    @BindView(R.id.lv_information)
+    ListView lvInformation;
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            userId = bundle.containsKey("userId") ? bundle.get("userId").toString() : "";
+            id = bundle.containsKey("id") ? bundle.get("id").toString() : "";
+        }
+
+        if (empty != null) {
+            empty.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_infomation_content;
+    }
+
+    @Override
+    public void initData() {
+        smartRefreshLayout.autoRefresh(100);
+        if (datas != null) {
+            datas.clear();
+        }
+        initListener();
+        adapter = new InfomationAdapter(getContext(), datas, 1);
+        lvInformation.setAdapter(adapter);
+        lvInformation.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (!Utils.isClickable()) {
+                    return;
+                }
+                Bundle bundle = new Bundle();
+                bundle.putString("id", String.valueOf(datas.get(position).getId()));
+                JumpIntent.jump(getActivity(), NewDetailActivity.class, bundle);
+            }
+        });
+    }
+
+    /**
+     * 列表刷新、加载监听
+     */
+    private void initListener() {
+        smartRefreshLayout.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+                if (datas.size() < 1) {
+                    pageNum = 1;
+                } else {
+                    pageNum++;
+                }
+                isRefresh = false;
+                getData(id);
+            }
+
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                pageNum = 1;
+                isRefresh = true;
+                if (datas != null) {
+                    datas.clear();
+                }
+                getData(id);
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
+    public void onEventMainThread(UpdateEvent event) {
+        smartRefreshLayout.autoRefresh();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (smartRefreshLayout.isRefreshing()) {
+            smartRefreshLayout.finishRefresh();
+        }
+    }
+
+    /**
+     * 首页咨询列表数据
+     *
+     * @param id 分类id
+     */
+    private void getData(String id) {
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "page", String.valueOf(pageNum),
+                "rows", String.valueOf(rows),
+                "flag","0",
+                "id" , id,
+                "timestamp", timestamp);
+
+        OkHttpUtils.post().url(Constants.GET_HOME_CONSULT_LIST)
+                .addParams("page", String.valueOf(pageNum))
+                .addParams("rows", String.valueOf(rows))
+                .addParams("id", id)
+                .addParams("flag", "0")
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractConsultListCallback() {
+
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                if (isRefresh) {
+                    if (datas != null) {
+                        datas.clear();
+                    }
+                }
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                if (isRefresh) {
+                    smartRefreshLayout.finishRefresh(500);
+                } else {
+                    smartRefreshLayout.finishLoadmore(1000);
+                }
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                empty.setVisibility(View.VISIBLE);
+                empty.setText("暂无资讯内容");
+            }
+
+            @Override
+            public void onResponse(ConsultListBean consultListBean, int id) {
+                if (consultListBean.getCode() == Const.INTEGER_1) {
+                    if (consultListBean.getContent() != null || consultListBean.getContent().getConsultationInfoList() != null) {
+                        List<ConsultListBean.ContentBean.ContentListBean> consultationInfoList = consultListBean.getContent().getConsultationInfoList();
+                        if (pageNum == 1 && consultationInfoList.size() < 1) {
+                            empty.setVisibility(View.VISIBLE);
+                            empty.setText("暂无资讯内容");
+                        } else {
+                            empty.setVisibility(View.GONE);
+                        }
+                        datas.addAll(consultationInfoList);
+                        adapter.setData(datas);
+                    }
+                } else {
+                    ToastUtils.show(consultListBean.getMsg());
+                }
+
+            }
+        });
+    }
+
+    /**
+     * 创建一个资讯fragment的实例，传入资讯类型id
+     *
+     * @param id 类别id、
+     * @return 具体fragment
+     */
+    public static InformationContentFragment newInstance(String id) {
+        Bundle args = new Bundle();
+        args.putString("id", id);
+        args.putInt("type", TYPE_HOMEPAGE);
+        InformationContentFragment fragment = new InformationContentFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
+}

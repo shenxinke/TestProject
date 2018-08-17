@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/collection_message_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/x15"
+    android:paddingRight="@dimen/x15">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x50">
+
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/img_collection_header"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/head_2"
+            android:scaleType="fitXY"
+            app:oval="true" />
+
+        <TextView
+            android:id="@+id/txt_collection_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_toRightOf="@id/img_collection_header"
+            android:text="hei" />
+
+        <ImageView
+            android:id="@+id/img_collection_message_check"
+            android:layout_width="@dimen/x25"
+            android:layout_height="@dimen/x25"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/collection_edit_select_n" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/txt_collection_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="@dimen/x5"
+        android:layout_toRightOf="@id/img_collection_header"
+        android:text="hei" />
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:visibility="visible"
+        android:id="@+id/img_collection_content"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="@dimen/margin_5dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/brand_default"
+        app:corner_radius="@dimen/margin_10dp"
+        app:oval="false" />
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:visibility="gone"
+        android:id="@+id/img_collection_content2"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="@dimen/margin_5dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/brand_default"
+        app:corner_radius="@dimen/margin_10dp"
+        app:oval="false" />
+    <LinearLayout
+        android:id="@+id/three_img"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:orientation="horizontal">
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/iv_cover"
+            android:layout_width="0dp"
+            android:visibility="gone"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginLeft="@dimen/margin_10dp"
+            android:layout_marginRight="@dimen/margin_10dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/img_default_p"
+            app:corner_radius="@dimen/margin_10dp"
+            app:oval="false" />
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/iv_cover1"
+            android:layout_width="0dp"
+            android:visibility="gone"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginLeft="@dimen/margin_10dp"
+            android:layout_marginRight="@dimen/margin_10dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/img_default_p"
+            app:corner_radius="@dimen/margin_10dp"
+            app:oval="false" />
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/iv_cover2"
+            android:layout_width="0dp"
+            android:visibility="gone"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginLeft="@dimen/margin_10dp"
+            android:layout_marginRight="@dimen/margin_10dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/img_default_p"
+            app:corner_radius="@dimen/margin_10dp"
+            app:oval="false" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/llayout_collection_message_multi_image"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x120"
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/margin_5dp"
+        android:orientation="horizontal">
+
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/img_collection_content_pic1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:scaleType="center"
+            android:src="@mipmap/head_2"
+            app:corner_radius="@dimen/margin_10dp"
+            app:oval="false" />
+
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/img_collection_content_pic2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="@dimen/x5"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:scaleType="center"
+            android:src="@mipmap/head_2"
+            app:corner_radius="@dimen/margin_10dp"
+            app:oval="false" />
+
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/img_collection_content_pic3"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="@dimen/x5"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:scaleType="center"
+            android:src="@mipmap/head_2"
+            app:corner_radius="@dimen/margin_10dp"
+            app:oval="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x40"
+        android:layout_marginTop="@dimen/x10"
+        android:gravity="right|center_vertical">
+
+        <TextView
+            android:id="@+id/txt_collection_love_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@mipmap/collection"
+            android:drawablePadding="@dimen/x5"
+            android:text="200"
+            android:textColor="#CCCCCC" />
+
+        <TextView
+            android:id="@+id/txt_collection_message_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/x15"
+            android:drawableLeft="@mipmap/comment"
+            android:drawablePadding="@dimen/x5"
+            android:text="200"
+            android:textColor="#CCCCCC" />
+
+    </LinearLayout>
+
+</LinearLayout>

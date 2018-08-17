@@ -1,0 +1,385 @@
+package com.yst.tianyimember.fragment;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.tencent.TIMConversation;
+import com.tencent.TIMConversationType;
+import com.tencent.TIMFriendFutureItem;
+import com.tencent.TIMFriendshipManager;
+import com.tencent.TIMGroupCacheInfo;
+import com.tencent.TIMGroupPendencyItem;
+import com.tencent.TIMManager;
+import com.tencent.TIMMessage;
+import com.tencent.TIMUserProfile;
+import com.tencent.TIMValueCallBack;
+import com.tencent.qcloud.presentation.presenter.ConversationPresenter;
+import com.tencent.qcloud.presentation.presenter.FriendshipManagerPresenter;
+import com.tencent.qcloud.presentation.presenter.GroupManagerPresenter;
+import com.tencent.qcloud.presentation.viewfeatures.ConversationView;
+import com.tencent.qcloud.presentation.viewfeatures.FriendshipMessageView;
+import com.tencent.qcloud.presentation.viewfeatures.GroupManageMessageView;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.adapter.chatadapter.ConversationAdapter;
+import com.yst.tianyimember.bean.chatmodel.AbstractConversation;
+import com.yst.tianyimember.bean.chatmodel.CustomMessage;
+import com.yst.tianyimember.bean.chatmodel.FriendshipConversation;
+import com.yst.tianyimember.bean.chatmodel.GroupManageConversation;
+import com.yst.tianyimember.bean.chatmodel.MessageFactory;
+import com.yst.tianyimember.bean.chatmodel.NomalConversation;
+import com.yst.tianyimember.dialog.AbstractDeleteDialog;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.yst.tianyimember.view.slidingswipemenu.SwipeMenu;
+import com.yst.tianyimember.view.slidingswipemenu.SwipeMenuCreator;
+import com.yst.tianyimember.view.slidingswipemenu.SwipeMenuItem;
+import com.yst.tianyimember.view.slidingswipemenu.SwipeMenuListView;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 线下订单(服务专员)
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class ServiceSpecialistInteractionFragment extends Fragment implements ConversationView, FriendshipMessageView, GroupManageMessageView, SwipeMenuListView.Interpolatora {
+    public static long unReadMessageNum = 0;
+    private List<AbstractConversation> conversationList = new LinkedList<AbstractConversation>();
+    private ConversationAdapter adapter;
+    private ConversationPresenter presenter;
+    private FriendshipManagerPresenter friendshipManagerPresenter;
+    private GroupManagerPresenter groupManagerPresenter;
+    private List<String> groupList;
+    private FriendshipConversation friendshipConversation;
+    private GroupManageConversation groupManageConversation;
+
+    private ImageView mBackIv;
+    private TextView mTitleTv;
+    @BindView(R.id.list)
+    SwipeMenuListView listView;
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
+    @BindView(R.id.tv_empty)
+    TextView empty;
+
+    public View rootView;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        rootView = inflater.inflate(bindLayout(), container, false);
+        ButterKnife.bind(this, rootView);
+        initData();
+        return rootView;
+    }
+
+    public int bindLayout() {
+        return R.layout.fragment_service_specialist_interaction;
+    }
+
+    public void initData() {
+        listView.setInterpolatora(this);
+        adapter = new ConversationAdapter(getActivity(), R.layout.item_conversation, conversationList);
+        listView.setAdapter(adapter);
+        initSwipeList();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                conversationList.get(position).navToDetail(getActivity());
+                if (conversationList.get(position) instanceof GroupManageConversation) {
+                    groupManagerPresenter.getGroupManageLastMessage();
+                }
+            }
+        });
+        friendshipManagerPresenter = new FriendshipManagerPresenter(this);
+        groupManagerPresenter = new GroupManagerPresenter(this);
+        presenter = new ConversationPresenter(this);
+        presenter.getConversation();
+        registerForContextMenu(listView);
+
+        smartRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                conversationList.clear();
+                presenter.getConversation();
+                refresh();
+                smartRefreshLayout.finishRefresh(500);
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        conversationList.clear();
+        presenter.getConversation();
+        refresh();
+    }
+
+    @Override
+    public void initView(List<TIMConversation> conversationList) {
+        this.conversationList.clear();
+        groupList = new ArrayList<String>();
+        for (TIMConversation item : conversationList) {
+            switch (item.getType()) {
+                case C2C:
+                case Group:
+                    this.conversationList.add(new NomalConversation(item));
+                    groupList.add(item.getPeer());
+                    break;
+                default:
+                    break;
+            }
+        }
+        friendshipManagerPresenter.getFriendshipLastMessage();
+        groupManagerPresenter.getGroupManageLastMessage();
+
+        if (conversationList.size() == 0) {
+            empty.setVisibility(View.VISIBLE);
+        } else {
+            empty.setVisibility(View.GONE);
+        }
+
+
+    }
+
+    @Override
+    public void updateMessage(TIMMessage message) {
+        if (message == null) {
+            adapter.notifyDataSetChanged();
+            return;
+        }
+        if (message.getConversation().getType() == TIMConversationType.System) {
+            groupManagerPresenter.getGroupManageLastMessage();
+            return;
+        }
+        if (MessageFactory.getMessage(message) instanceof CustomMessage) {
+            return;
+        }
+        NomalConversation conversation = new NomalConversation(message.getConversation());
+        Iterator<AbstractConversation> iterator = conversationList.iterator();
+        while (iterator.hasNext()) {
+            AbstractConversation c = iterator.next();
+            if (conversation.equals(c)) {
+                conversation = (NomalConversation) c;
+                iterator.remove();
+                break;
+            }
+        }
+        conversation.setLastMessage(MessageFactory.getMessage(message));
+        conversationList.add(conversation);
+        Collections.sort(conversationList);
+
+    }
+
+    @Override
+    public void updateFriendshipMessage() {
+        friendshipManagerPresenter.getFriendshipLastMessage();
+    }
+
+    @Override
+    public void removeConversation(String identify) {
+        Iterator<AbstractConversation> iterator = conversationList.iterator();
+        while (iterator.hasNext()) {
+            AbstractConversation conversation = iterator.next();
+            if (conversation.getIdentify() != null && conversation.getIdentify().equals(identify)) {
+                iterator.remove();
+                adapter.notifyDataSetChanged();
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void updateGroupInfo(TIMGroupCacheInfo info) {
+        for (AbstractConversation conversation : conversationList) {
+            if (conversation.getIdentify() != null && conversation.getIdentify().equals(info.getGroupInfo().getGroupId())) {
+                adapter.notifyDataSetChanged();
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void refresh() {
+        Collections.sort(conversationList);
+
+        if (conversationList.size() == 0) {
+            empty.setVisibility(View.VISIBLE);
+        } else {
+            empty.setVisibility(View.GONE);
+        }
+        adapter.notifyDataSetChanged();
+//        setMsgUnread(getTotalUnreadNum() == 0);
+        MyLog.e("sss", "count === " + getTotalUnreadNum());
+
+        unReadMessageNum = getTotalUnreadNum();
+        //获取用户资料
+        TIMFriendshipManager.getInstance().getUsersProfile(getUserList(), new TIMValueCallBack<List<TIMUserProfile>>() {
+            @Override
+            public void onError(int code, String s) {
+                //错误码code和错误描述desc，可用于定位请求失败原因
+                //错误码code列表请参见错误码表
+                MyLog.e("sss", "getUsersProfile failed: " + code + " desc:" + s);
+            }
+
+            @Override
+            public void onSuccess(List<TIMUserProfile> result) {
+                MyLog.e("sss", "getUsersProfile succ");
+                for (TIMUserProfile res : result) {
+                    MyLog.e("sss", "identifier: " + res.getIdentifier()
+                            + " nickName: " + res.getNickName()
+                            + " remark: " + res.getRemark()
+                            + " image:" + res.getFaceUrl());
+                    for (AbstractConversation conversation : conversationList) {
+                        if (res.getIdentifier().equals(conversation.getIdentify())) {
+                            conversation.setFaceUrl(res.getFaceUrl());
+                            conversation.setNickName(res.getNickName());
+
+                        }
+                    }
+                }
+                Collections.sort(conversationList);
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    @Override
+    public void onGetFriendshipLastMessage(TIMFriendFutureItem message, long unreadCount) {
+        if (friendshipConversation == null) {
+            friendshipConversation = new FriendshipConversation(message);
+            conversationList.add(friendshipConversation);
+        } else {
+            friendshipConversation.setLastMessage(message);
+        }
+        friendshipConversation.setUnreadCount(unreadCount);
+        Collections.sort(conversationList);
+        refresh();
+    }
+
+    @Override
+    public void onGetFriendshipMessage(List<TIMFriendFutureItem> message) {
+        friendshipManagerPresenter.getFriendshipLastMessage();
+    }
+
+    @Override
+    public void onGetGroupManageLastMessage(TIMGroupPendencyItem message, long unreadCount) {
+        if (groupManageConversation == null) {
+            groupManageConversation = new GroupManageConversation(message);
+            conversationList.add(groupManageConversation);
+        } else {
+            groupManageConversation.setLastMessage(message);
+        }
+        groupManageConversation.setUnreadCount(unreadCount);
+        Collections.sort(conversationList);
+        refresh();
+    }
+
+    @Override
+    public void onGetGroupManageMessage(List<TIMGroupPendencyItem> message) {
+
+    }
+
+    private long getTotalUnreadNum() {
+        long num = 0;
+        for (AbstractConversation conversation : conversationList) {
+            num += conversation.getUnreadNum();
+        }
+        return num;
+    }
+
+    /**
+     * 待获取用户资料的用户列表
+     * @return
+     */
+    private List<String> getUserList() {
+        List<String> users = new ArrayList<String>();
+        users.clear();
+        for (AbstractConversation conversation : conversationList) {
+            users.add(conversation.getIdentify());
+        }
+        return users;
+    }
+
+    /**
+     * 创建侧滑按钮以及事件监听
+     */
+    private void initSwipeList() {
+        SwipeMenuCreator swipeMenuCreator = new SwipeMenuCreator() {
+            @Override
+            public void create(SwipeMenu menu) {
+                SwipeMenuItem deleteItem = new SwipeMenuItem(getActivity().getApplicationContext());
+                // set item background
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25)));
+                // set item width
+                deleteItem.setWidth(Utils.dpToPx(getResources(), 72));
+                // set a icon
+                deleteItem.setIcon(R.mipmap.ic_delete);
+                // add to menu
+                menu.addMenuItem(deleteItem);
+            }
+        };
+        // set creator
+        listView.setMenuCreator(swipeMenuCreator);
+        listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(final int position, SwipeMenu menu, int index) {
+                switch (index) {
+                    case 0:
+                        AbstractDeleteDialog deleteDialog = new AbstractDeleteDialog(getActivity()) {
+                            @Override
+                            public void onSureClick() {
+                                if (TIMManager.getInstance().deleteConversation(TIMConversationType.C2C, conversationList.get(position).getIdentify())) {
+                                    conversationList.remove(position);
+                                    refresh();
+                                    ToastUtils.show("会话删除成功!");
+                                } else {
+                                    ToastUtils.show("会话删除失败,请重试!");
+                                }
+                            }
+                        };
+                        deleteDialog.setText("确认删除？");
+                        deleteDialog.showDialog();
+                        break;
+                    default:
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void flushintercept(boolean flag) {
+        if (flag) {
+            smartRefreshLayout.setEnableRefresh(false);
+            smartRefreshLayout.setEnableLoadmore(false);
+        } else {
+            smartRefreshLayout.setEnableRefresh(true);
+            smartRefreshLayout.setEnableLoadmore(true);
+        }
+    }
+}

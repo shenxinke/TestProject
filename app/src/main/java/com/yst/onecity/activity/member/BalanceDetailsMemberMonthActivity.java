@@ -1,0 +1,133 @@
+package com.yst.onecity.activity.member;
+
+import android.os.Handler;
+import android.view.View;
+import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.adapter.BalanceDetailMemberMonthAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.mycount.FineBean;
+import com.yst.onecity.bean.mycount.FineItemBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.XExpandableListView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+
+/**
+ * 零钱余额明细(分月)页面
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class BalanceDetailsMemberMonthActivity extends BaseActivity implements XExpandableListView.IXListViewListener {
+
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.tv_right)
+    TextView tvRight;
+    @BindView(R.id.xListView_dictation)
+    XExpandableListView xListViewDictation;
+    @BindView(R.id.ll_empty)
+    LinearLayout llEmpty;
+    @BindView(R.id.activity_balance_details)
+    LinearLayout activityBalanceDetails;
+    private Handler mHandler;
+    private BalanceDetailMemberMonthAdapter newsListAdapter;
+    private List<FineBean.ContentBean> fineBeanList = new ArrayList<>();
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_balance_details_month;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("余额明细");
+        xListViewDictation.setPullLoadEnable(true);
+        xListViewDictation.setPullRefreshEnable(true);
+        xListViewDictation.setXListViewListener(this);
+        mHandler = new Handler();
+        xListViewDictation.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                return false;
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fineBeanList.clear();
+        requestBalanceDetail();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
+    /**
+     * 请求余额明细
+     */
+    private void requestBalanceDetail() {
+        for (int i = 0; i < Const.INTEGER_12; i++) {
+            FineBean.ContentBean fineBean = new FineBean.ContentBean();
+            List<FineItemBean> fineItemBeanList = new ArrayList<>();
+            for (int m = 0; m < Const.INTEGER_5; m++) {
+                FineItemBean fineItemBean = new FineItemBean();
+                fineItemBeanList.add(fineItemBean);
+            }
+            fineBean.setConsultationChidList(fineItemBeanList);
+            fineBeanList.add(fineBean);
+        }
+        newsListAdapter = new BalanceDetailMemberMonthAdapter(fineBeanList, this);
+        xListViewDictation.setAdapter(newsListAdapter);
+        if (newsListAdapter != null) {
+            xListViewDictation.expandGroup(0);
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                onLoad();
+            }
+        }, 100);
+    }
+
+    @Override
+    public void onLoadMore() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                onLoad();
+            }
+        }, 100);
+    }
+
+    /**
+     * 用来停止列表刷新的
+     **/
+    private void onLoad() {
+        if (null == xListViewDictation) {
+            return;
+        }
+        xListViewDictation.stopLoadMore();
+        xListViewDictation.stopRefresh();
+        xListViewDictation.setRefreshTime(Utils.getXListViewTopTime());
+    }
+}

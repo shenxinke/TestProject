@@ -1,0 +1,40 @@
+package com.yst.onecity.bean.tickets;
+
+import java.util.List;
+
+/**
+ * 奖券实体类
+ *
+ * @author WangJingWei
+ * @version 4.0.0
+ * @date 2018/3/20.
+ */
+public class TicketsBean {
+    private int code;
+    private String msg;
+    private List<TicketsContent> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<TicketsContent> getContent() {
+        return content;
+    }
+
+    public void setContent(List<TicketsContent> content) {
+        this.content = content;
+    }
+}

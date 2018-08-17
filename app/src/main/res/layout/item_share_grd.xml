@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_10dp"
+        android:layout_marginStart="@dimen/margin_10dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingTop="@dimen/margin_5dp"
+        android:text="马尔代夫是世界上最大的岛国"
+        android:textColor="@color/color_1b1b1b"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <GridView
+        android:id="@+id/gridView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_5dp"
+        android:horizontalSpacing="@dimen/margin_2dp"
+        android:numColumns="3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_content" />
+
+    <TextView
+        android:id="@+id/tv_share_num"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="0dp"
+        android:drawableLeft="@mipmap/fenxiang"
+        android:drawablePadding="3dp"
+        android:gravity="center"
+        android:paddingRight="20dp"
+        android:text="1234"
+        android:textColor="@color/app_default_color"
+        android:textSize="12sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/tv_comment_num"
+        app:layout_constraintTop_toBottomOf="@id/gridView" />
+
+    <View
+        android:layout_width="@dimen/layout_height_0.5dp"
+        android:layout_height="20dp"
+        android:layout_marginBottom="13dp"
+        android:layout_marginTop="13dp"
+        android:background="@color/app_default_color"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_comment_num"
+        app:layout_constraintLeft_toRightOf="@id/tv_share_num"
+        app:layout_constraintRight_toLeftOf="@+id/tv_comment_num"
+        app:layout_constraintTop_toBottomOf="@id/gridView" />
+
+    <TextView
+        android:id="@+id/tv_comment_num"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:drawableLeft="@mipmap/pinglun"
+        android:drawablePadding="3dp"
+        android:gravity="center"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="2345"
+        android:textColor="@color/app_default_color"
+        android:textSize="12sp"
+        app:layout_constraintLeft_toRightOf="@id/tv_share_num"
+        app:layout_constraintRight_toLeftOf="@+id/tv_like_num"
+        app:layout_constraintTop_toBottomOf="@id/gridView" />
+
+    <View
+        android:layout_width="@dimen/layout_height_0.5dp"
+        android:layout_height="20dp"
+        android:layout_marginBottom="13dp"
+        android:layout_marginTop="13dp"
+        android:background="@color/app_default_color"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_like_num"
+        app:layout_constraintLeft_toRightOf="@id/tv_comment_num"
+        app:layout_constraintRight_toLeftOf="@+id/tv_like_num"
+        app:layout_constraintTop_toBottomOf="@id/gridView" />
+
+    <TextView
+        android:id="@+id/tv_like_num"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:drawableLeft="@mipmap/zan"
+        android:drawablePadding="3dp"
+        android:gravity="center"
+        android:paddingLeft="20dp"
+        android:text="3456"
+        android:textColor="@color/app_default_color"
+        android:textSize="12sp"
+        app:layout_constraintLeft_toRightOf="@id/tv_comment_num"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gridView" />
+
+</android.support.constraint.ConstraintLayout>

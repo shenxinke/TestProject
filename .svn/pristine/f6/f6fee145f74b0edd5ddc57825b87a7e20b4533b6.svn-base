@@ -1,0 +1,84 @@
+package com.yst.tianyimember.bean;
+
+import java.util.List;
+
+/**
+ * 邀请注册的好友列表
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/14
+ */
+
+public class FriendBean {
+
+    /**
+     * code : 1
+     * msg : 成功
+     * content : [{"created_time":"2017-10-20","address":null,"nickname":null},{"created_time":"2017-10-20","address":"upload/skysimple/20171220183931222306037.png","nickname":"小旭"},{"created_time":"2017-10-20","address":"upload/skysimple/20171113095213886304723.png","nickname":"小确幸"},{"created_time":"2017-10-20","address":null,"nickname":null},{"created_time":"2017-10-20","address":"upload/skysimple/20171129182144016783242.png","nickname":null}]
+     */
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * created_time : 2017-10-20
+         * address : null
+         * nickname : null
+         */
+
+        private String created_time;
+        private String address;
+        private String nickname;
+
+        public String getCreated_time() {
+            return created_time;
+        }
+
+        public void setCreated_time(String created_time) {
+            this.created_time = created_time;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+
+        public void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+    }
+}

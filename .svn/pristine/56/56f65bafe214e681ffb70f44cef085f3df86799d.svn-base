@@ -1,0 +1,116 @@
+package com.yst.tianyimember.bean.tickets;
+
+import java.util.List;
+
+/**
+ * 我的账户余额实体类
+ *
+ * @author WangJingWei
+ * @version 4.0.0
+ * @date 2018/3/26.
+ */
+public class AccountBalanceBean {
+
+    /**
+     * code : 1
+     * msg : 查询成功
+     * content : [{"created_time":"2017-12-21 14:36:01","money":0.06,"id":2022,"type":3,"status":1},{"created_time":"2017-12-21 14:36:01","money":0.06,"id":2021,"type":3,"status":1},{"created_time":"2017-12-21 14:22:01","money":0.09,"id":2019,"type":3,"status":1},{"created_time":"2017-12-21 14:22:01","money":0.09,"id":2014,"type":3,"status":1},{"created_time":"2017-12-21 14:22:01","money":0.09,"id":2015,"type":3,"status":1},{"created_time":"2017-12-21 14:22:01","money":0.09,"id":2016,"type":3,"status":1},{"created_time":"2017-12-21 14:22:01","money":0.09,"id":2018,"type":3,"status":1},{"created_time":"2017-12-21 14:22:01","money":0.09,"id":2017,"type":3,"status":1},{"created_time":"2017-12-10 02:03:10","money":1.1,"id":1031,"type":3,"status":1}]
+     */
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * created_time : 2017-12-21 14:36:01
+         * money : 0.06
+         * id : 2022
+         * type : 3
+         * status : 类型 0 支付订单 1提现  2充值  3结算 4 余额撤销 5花呗支付  6红包 7 花呗还款
+         *         8 花呗撤销  9 奖券一等奖  10 奖券二等奖  11 奖券三等奖  12 奖券四等奖
+         *         13 奖券五等奖   14 奖券六等奖  15 奖券七等奖  16 奖券八等奖  17 新业态补贴金额  18 新业态余额消费
+         */
+
+        private String created_time;
+        private double money;
+        private int id;
+        private int type;
+        private int status;
+
+        public String getCreated_time() {
+            return created_time;
+        }
+
+        public void setCreated_time(String created_time) {
+            this.created_time = created_time;
+        }
+
+        public double getMoney() {
+            return money;
+        }
+
+        public void setMoney(int money) {
+            this.money = money;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        @Override
+        public String toString() {
+            return "ContentBean{" +
+                    "created_time='" + created_time + '\'' +
+                    ", money=" + money +
+                    ", id=" + id +
+                    ", type=" + type +
+                    ", status=" + status +
+                    '}';
+        }
+    }
+}

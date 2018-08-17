@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/main_back_ground"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/tv_allComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/x14"
+            android:layout_marginLeft="@dimen/x14"
+            android:layout_marginTop="@dimen/x16"
+            android:text="商品评价(300)"
+            android:textColor="@color/color_333333" />
+
+        <TextView
+            android:id="@+id/tv_feedback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/x14"
+            android:layout_marginTop="@dimen/x16"
+            android:text="98.4%好评"
+            android:textColor="@color/color_666666"
+            android:textSize="@dimen/text_size_12" />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/x10"
+        android:background="@color/white"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/comment_all_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/shape_label_gray_bg"
+            android:gravity="center"
+            android:padding="@dimen/margin_5dp"
+            android:text="全部"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/comment_nice_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape_label_gray_bg"
+            android:gravity="center"
+            android:padding="@dimen/margin_5dp"
+            android:singleLine="true"
+            android:text="好评(0)"
+            android:textColor="@color/tab_bg_select_color"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/commentnum_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape_label_gray_bg"
+            android:gravity="center"
+            android:padding="@dimen/margin_5dp"
+            android:singleLine="true"
+            android:text="中评(0)"
+            android:textColor="@color/tab_bg_select_color"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/commentbad_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape_label_gray_bg"
+            android:gravity="center"
+            android:padding="@dimen/margin_5dp"
+            android:singleLine="true"
+            android:text="差评(0)"
+            android:textColor="@color/tab_bg_select_color"
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+       >
+
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/mSmartRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/x10">
+
+            <com.scwang.smartrefresh.layout.header.ClassicsHeader
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ListView
+                android:id="@+id/fragment_user_appraise_xlistview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:divider="@color/main_back_ground"
+                android:layout_marginLeft="@dimen/x12"
+                android:layout_marginRight="@dimen/x12"
+                android:dividerHeight="@dimen/x10"
+                android:scrollbars="none" />
+
+        <com.scwang.smartrefresh.layout.footer.BallPulseFooter
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+    <ImageView
+        android:id="@+id/img_no_commont"
+        android:layout_width="@dimen/x200"
+        android:layout_height="@dimen/x200"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:src="@drawable/bag_emptypng"
+        android:visibility="gone" />
+
+</FrameLayout></LinearLayout>

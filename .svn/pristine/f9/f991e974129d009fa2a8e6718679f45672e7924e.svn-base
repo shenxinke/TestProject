@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_card"
+    android:paddingLeft="@dimen/margin_10dp"
+    android:paddingTop="@dimen/margin_10dp">
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/iv_head"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/head_2"
+        app:border_color="@color/color_dddddd"
+        app:border_width="1px"
+        app:corner_radius="10dip"
+        app:mutate_background="true"
+        app:oval="true" />
+
+    <TextView
+        android:id="@+id/tv_nick_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_5dp"
+        android:gravity="center"
+        android:text="小毛驴"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/iv_head"
+        app:layout_constraintTop_toTopOf="@id/iv_head"
+        app:layout_constraintLeft_toRightOf="@id/iv_head" />
+
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding_10dp"
+        android:text="2018-09-09"
+        android:textColor="#FF999999"
+        android:textSize="@dimen/x12_size"
+        app:layout_constraintBottom_toBottomOf="@id/iv_head"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iv_head" />
+
+    <TextView
+        android:id="@+id/tv_comment_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:paddingBottom="@dimen/padding_10dp"
+        android:paddingLeft="@dimen/margin_5dp"
+        android:text="@string/comment"
+        android:textColor="@color/color_FF444444"
+        android:textSize="@dimen/text_size_13"
+        app:layout_constraintTop_toBottomOf="@id/iv_head" />
+</android.support.constraint.ConstraintLayout>

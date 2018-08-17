@@ -1,0 +1,632 @@
+package com.yst.onecity.activity;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.text.Html;
+import android.text.TextUtils;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.tencent.TIMConversationType;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.activity.chat.ChatActivity;
+import com.yst.onecity.activity.login.LoginActivity;
+import com.yst.onecity.activity.servermember.ServerMemberProductDetailActivity;
+import com.yst.onecity.adapter.AbstractCommonAdapter;
+import com.yst.onecity.adapter.CommonViewHolder;
+import com.yst.onecity.adapter.PublishAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.consult.ConsultCommentBean;
+import com.yst.onecity.bean.consult.ConsultDetailBean;
+import com.yst.onecity.callbacks.AbstractConsultCommentCallback;
+import com.yst.onecity.callbacks.AbstractConsultDetailCallback;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.SendCommentDialog;
+import com.yst.onecity.eventbus.GoCartEvent;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.RxCode;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.FlowLayout;
+import com.yst.onecity.view.roundedimageview.RoundedImageView;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import gorden.rxbus2.RxBus;
+import okhttp3.Call;
+import okhttp3.Request;
+
+import static com.yst.onecity.activity.ShareActivity.SHARE_CONSULT;
+
+/**
+ * 咨询详情
+ *
+ * @author luxuchang
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class InformationDetailActivity extends BaseActivity implements SendCommentDialog.OnSendListener {
+
+    @BindView(R.id.background)
+    ImageView background;
+    @BindView(R.id.headView)
+    RoundedImageView headView;
+    @BindView(R.id.nickName)
+    TextView nickName;
+    @BindView(R.id.ll_bottom)
+    LinearLayout llBottom;
+    @BindView(R.id.tv_contact_comment)
+    TextView tvContactComment;
+    @BindView(R.id.tv_now_contact)
+    TextView tvNowContact;
+    @BindView(R.id.tv_introduce)
+    TextView tvIntroduce;
+    @BindView(R.id.iv_product_icon)
+    RoundedImageView ivProductIcon;
+    @BindView(R.id.tv_product_name)
+    TextView tvProductName;
+    @BindView(R.id.tv_product_price)
+    TextView tvProductPrice;
+    @BindView(R.id.iv_is_or_not_collection)
+    ImageView ivIsOrNotCollection;
+    @BindView(R.id.tv_collection_product_num)
+    TextView tvCollectionProductNum;
+    @BindView(R.id.rl_collection_product)
+    RelativeLayout rlCollectionProduct;
+    @BindView(R.id.tv_like_num)
+    TextView tvLikeNum;
+    @BindView(R.id.tv_user_comments_num)
+    TextView tvUserCommentsNum;
+    @BindView(R.id.user_headView_icon)
+    RoundedImageView userHeadViewIcon;
+    @BindView(R.id.et_comment)
+    TextView etComment;
+    @BindView(R.id.rl_bottom)
+    RelativeLayout rlBottom;
+    @BindView(R.id.iv_like)
+    ImageView cbLike;
+    @BindView(R.id.iv_collection)
+    ImageView ivCollection;
+    @BindView(R.id.serverMemberLayout)
+    LinearLayout serverMemberLayout;
+    @BindView(R.id.ll_shop_address_info)
+    LinearLayout llShopAddressLayout;
+    @BindView(R.id.flow_label)
+    FlowLayout flowLabel;
+    @BindView(R.id.tv_shop_address)
+    TextView tvShopAddress;
+    @BindView(R.id.tv_shop_phone)
+    TextView tvShopPhone;
+    @BindView(R.id.consult_title)
+    TextView consultTitle;
+    @BindView(R.id.no_comment)
+    TextView noComment;
+    @BindView(R.id.ll_comment)
+    LinearLayout llComment;
+    @BindView(R.id.ll_image)
+    LinearLayout llImage;
+
+    private SendCommentDialog editDialog;
+    private AbstractCommonAdapter<ConsultCommentBean.ContentBean.InfoBean> adapter;
+    private PublishAdapter publishAdapter;
+    private List<ConsultCommentBean.ContentBean.InfoBean> datas = new ArrayList<>();
+    private List<ConsultDetailBean.ContentBean.ConsultationBean.InfoBean> publishList = new ArrayList<>();
+    private boolean isCollection = false;
+    private boolean isLike = false;
+    /**
+     * 资讯id
+     */
+    private String id = "";
+    /**
+     * 发布人id
+     */
+    private String mReleaseUserId;
+    private int likeNum = 0;
+    private int hunterId;
+    private int userType;
+    private int page = 1;
+    private int rows = 10;
+    private String mImId = "";
+
+    private Handler mHandler;
+    private HandlerThread mHandlerThread;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_information;
+    }
+
+    @Override
+    public void initData() {
+        mHandlerThread = new HandlerThread("MyHandlerThread");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
+
+        headView.setEnabled(false);
+        EventBus.getDefault().register(this);
+        RxBus.get().register(this);
+        if (getIntent() != null) {
+            id = getIntent().getExtras().getString("id", "");
+        }
+        getConsultCommentInfo();
+        if (!TextUtils.isEmpty(id)) {
+            //资讯详情接口
+            getConsultDetailInfo();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Const.ISDETAILJUMLP = false;
+    }
+
+    /**
+     * 获取改资讯的评论列表
+     */
+    private void getConsultCommentInfo() {
+        datas.clear();
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp, "id", id);
+        OkHttpUtils.post().url(Constants.CONSULT_COMMENT_INFO)
+                .addParams("id", id)
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractConsultCommentCallback() {
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                noComment.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onResponse(ConsultCommentBean response, int id) {
+                if (response.getCode() == 1) {
+                    if (response.getContent().getInfo() == null || "".equals(response.getContent())) {
+                        noComment.setVisibility(View.VISIBLE);
+                        return;
+                    } else {
+                        noComment.setVisibility(View.GONE);
+                    }
+
+                    tvUserCommentsNum.setText(String.format("用户评论(%1$d)", response.getContent().getCount()));
+                    datas.addAll(response.getContent().getInfo());
+                    //动态添加评论列表数据
+                    addCommentList();
+                } else {
+                    noComment.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+    /**
+     * 动态添加评论列表数据
+     */
+    private void addCommentList() {
+        adapter = new AbstractCommonAdapter<ConsultCommentBean.ContentBean.InfoBean>(this, datas, R.layout.item_comment) {
+            @Override
+            public void convert(CommonViewHolder holder, int position, ConsultCommentBean.ContentBean.InfoBean item) {
+                Glide.with(context).load(ConstUtils.matchingImageUrl(item.getHeadImg())).error(R.mipmap.head_2).into((RoundedImageView) holder.getView(R.id.head));
+                holder.setText(R.id.name, item.getName());
+                holder.setText(R.id.time, item.getCreatedTime());
+                holder.setText(R.id.comment_content, Html.fromHtml(item.getContent()) + "");
+            }
+        };
+        llComment.removeAllViews();
+        for (int i = 0; i < adapter.getCount(); i++) {
+            View view = adapter.getView(i, null, null);
+            llComment.addView(view);
+        }
+    }
+
+    /**
+     * 获取资讯详情信息
+     */
+    private void getConsultDetailInfo() {
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("consultationId", id, "merberId", TianyiApplication.appCommonBean.getId() == null ? "" : TianyiApplication.appCommonBean.getId(), "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.CONSULT_DETAIL)
+                .addParams("consultationId", id)
+                .addParams("merberId", TianyiApplication.appCommonBean.getId() == null ? "" : TianyiApplication.appCommonBean.getId())
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractConsultDetailCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                mHandler.post(mProgressShowRunnable);
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(TianyiApplication.getInstance().getResources().getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(ConsultDetailBean response, int id) {
+                if (response.getCode() == 1) {
+                    ConsultDetailBean.ContentBean.ConsultationBean consultBean = response.getContent().getConsultation();
+                    consultTitle.setText(consultBean.getTitle());
+                    mReleaseUserId = String.valueOf(consultBean.getUser_id());
+
+                    Glide.with(getApplicationContext()).load(ConstUtils.matchingImageUrl(consultBean.getMemberHeadImg())).error(R.mipmap.head_2).into(userHeadViewIcon);
+                    likeNum = consultBean.getFabulous_num();
+                    tvLikeNum.setText(String.format(getResources().getString(R.string.like), likeNum));
+
+                    if (consultBean.getInfo() != null) {
+                        publishList.clear();
+                        for (int i = 0; i < consultBean.getInfo().size(); i++) {
+                            if (consultBean.getInfo().get(i).getCover() == 0) {
+                                publishList.add(consultBean.getInfo().get(i));
+                            }
+                        }
+                        publishAdapter = new PublishAdapter(publishList, InformationDetailActivity.this, mReleaseUserId, consultBean.getUser_type());
+                        llImage.removeAllViews();
+                        for (int i = 0; i < publishAdapter.getCount(); i++) {
+                            View view = publishAdapter.getView(i, null, null);
+                            llImage.addView(view);
+                        }
+                    }
+
+                    userType = consultBean.getUser_type();
+                    if (userType == 0) {
+                        //会员
+                        serverMemberLayout.setVisibility(View.GONE);
+
+                        Glide.with(getApplicationContext()).load(ConstUtils.matchingImageUrl(consultBean.getHeadImg())).error(R.mipmap.head_2).into(headView);
+                        nickName.setText(consultBean.getName());
+                    }else if (userType == Const.INTEGER_3) {
+                        //店铺
+                        serverMemberLayout.setVisibility(View.GONE);
+
+                        Glide.with(getApplicationContext()).load(R.drawable.icon_logo).error(R.drawable.icon_logo).into(headView);
+                        nickName.setText("普济一城资讯");
+                    } else {
+                        serverMemberLayout.setVisibility(View.GONE);
+
+                        Glide.with(getApplicationContext()).load(ConstUtils.matchingImageUrl(consultBean.getHeadImgUrl())).error(R.mipmap.head_2).into(headView);
+                        nickName.setText(consultBean.getName());
+                    }
+
+                    if (consultBean.getFabType() != null && Const.STR1.equals(consultBean.getFabType())) {
+                        cbLike.setSelected(true);
+                        isLike = true;
+                    } else {
+                        cbLike.setSelected(false);
+                        isLike = false;
+                    }
+
+                    if (consultBean.getConType() != null && Const.STR0.equals(consultBean.getConType())) {
+                        ivCollection.setSelected(true);
+                        isCollection = true;
+                    } else {
+                        ivCollection.setSelected(false);
+                        isCollection = false;
+                    }
+
+                    mHandler.postDelayed(mProgressDisRunnable,200);
+                }
+            }
+        });
+    }
+
+    @gorden.rxbus2.Subscribe(code = RxCode.CODE_INFORMATIONDETAIL_LOGIN, threadMode = gorden.rxbus2.ThreadMode.MAIN)
+    public void reFreshData() {
+        if (!TextUtils.isEmpty(id)) {
+            //资讯详情接口
+            getConsultDetailInfo();
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(GoCartEvent event) {
+        finish();
+    }
+
+    void openEditDialog() {
+        if (editDialog == null) {
+            editDialog = SendCommentDialog.creat(this,0);
+        }
+        editDialog.show(getSupportFragmentManager());
+    }
+
+    @OnClick({R.id.headView, R.id.tv_now_contact, R.id.back, R.id.iv_is_or_not_collection, R.id.rl_collection_product
+            , R.id.iv_like, R.id.ll_share, R.id.ll_collection, R.id.et_comment})
+    public void onViewClicked(View view) {
+        if (!Utils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            case R.id.headView:
+                Bundle bundle = new Bundle();
+                if (userType == 1) {
+                    bundle.putInt("hunterId", hunterId);
+                    JumpIntent.jump(this, ServerMemberProductDetailActivity.class, bundle);
+                }
+                break;
+            case R.id.tv_now_contact:
+                if (!TianyiApplication.isLogin) {
+                    Const.ISDETAILJUMLP = true;
+                    JumpIntent.jump(this, LoginActivity.class);
+                    return;
+                }
+                ChatActivity.navToChat(this, mImId, String.valueOf(hunterId), TIMConversationType.C2C);
+                break;
+            case R.id.iv_is_or_not_collection:
+                break;
+            case R.id.back:
+                finish();
+                break;
+            case R.id.rl_collection_product:
+                break;
+            case R.id.iv_like:
+                if (!Utils.isClickable()) {
+                    return;
+                }
+                if (!TianyiApplication.isLogin) {
+                    Const.ISDETAILJUMLP = true;
+                    JumpIntent.jump(this, LoginActivity.class);
+                    return;
+                }
+                if (!isLike) {
+                    requestNetWorkConsultLike(id, String.valueOf(1));
+                } else {
+                    requestNetWorkConsultLike(id, String.valueOf(2));
+                }
+                break;
+            case R.id.et_comment:
+                if (!TianyiApplication.isLogin) {
+                    Const.ISDETAILJUMLP = true;
+                    JumpIntent.jump(this, LoginActivity.class);
+                    return;
+                }
+                openEditDialog();
+                break;
+            case R.id.ll_share:
+                if (!Utils.isClickable()) {
+                    return;
+                }
+                if (!TianyiApplication.isLogin) {
+                    Const.ISDETAILJUMLP = true;
+                    JumpIntent.jump(this, LoginActivity.class);
+                    return;
+                }
+                Bundle bundle1 = new Bundle();
+                bundle1.putInt("type", SHARE_CONSULT);
+                bundle1.putString("consultId", id);
+                JumpIntent.jump(this, ShareActivity.class, bundle1);
+                break;
+            case R.id.ll_collection:
+                if (!Utils.isClickable()) {
+                    return;
+                }
+                if (!TianyiApplication.isLogin) {
+                    Const.ISDETAILJUMLP = true;
+                    JumpIntent.jump(this, LoginActivity.class);
+                    return;
+                }
+                if (!isCollection) {
+                    requestNetWorkConsultCollection(id, String.valueOf(1));
+                } else {
+                    requestNetWorkConsultCollection(id, String.valueOf(2));
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 资讯收藏
+     *
+     * @param cosultationid 咨询id
+     * @param type          类型
+     */
+    private void requestNetWorkConsultCollection(String cosultationid, final String type) {
+
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp, "consultationId", cosultationid
+                , "uuid", TianyiApplication.appCommonBean.getUuid()
+                , "phone", TianyiApplication.appCommonBean.getPhone());
+        OkHttpUtils.post().url(Constants.CONSULT_COLLECTION)
+                .addParams("consultationId", cosultationid)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(TianyiApplication.getInstance().getResources().getString(R.string.str_net_error_message));
+                MyLog.e("@@ collection_onError", e.toString());
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("@@ collection", response);
+                try {
+                    JSONObject obj = new JSONObject(response);
+                    if (obj.getInt(Const.CONS_STR_CODE) == 1) {
+
+                        if (Const.STR1.equals(type)) {
+                            ivCollection.setSelected(true);
+                            isCollection = true;
+                        } else {
+                            isCollection = false;
+                            ivCollection.setSelected(false);
+                        }
+                    } else {
+                        ToastUtils.show(obj.getString("msg"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * 资讯点赞
+     *
+     * @param cosultationid 咨询id
+     * @param type          类型
+     */
+    private void requestNetWorkConsultLike(String cosultationid, final String type) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp, "cosultationid", cosultationid, "type", type
+                , "uuid", TianyiApplication.appCommonBean.getUuid()
+                , "phone", TianyiApplication.appCommonBean.getPhone());
+        OkHttpUtils.post().url(Constants.CONSULT_LIKE)
+                .addParams("cosultationid", cosultationid)
+                .addParams("type", type)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    if (jsonObject.getInt(Const.CONS_STR_CODE) == 1) {
+                        if (Const.STR1.equals(type)) {
+                            tvLikeNum.setText(String.format(getResources().getString(R.string.like), likeNum + 1));
+                            cbLike.setSelected(true);
+                            isLike = true;
+                            likeNum = likeNum + 1;
+                        } else {
+                            tvLikeNum.setText(String.format(getResources().getString(R.string.like), likeNum - 1));
+                            likeNum = likeNum - 1;
+                            cbLike.setSelected(false);
+                            isLike = false;
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+
+    /**
+     * 评价
+     *
+     * @param comment 评价内容
+     */
+    @Override
+    public void editSend(final String comment, EditText editText) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp, "consultationid", id
+                , "uuid", TianyiApplication.appCommonBean.getUuid()
+                , "phone", TianyiApplication.appCommonBean.getPhone()
+                , "content", comment);
+
+        OkHttpUtils.post().url(Constants.CONSULT_COMMENT).addParams("timestamp", timestamp)
+                .addParams("consultationid", id)
+                .addParams("content", comment)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("client_type", "A")
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("luxc", response);
+                try {
+                    JSONObject obj = new JSONObject(response);
+                    if (obj.getInt(Const.CONS_STR_CODE) == 1) {
+                        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(InformationDetailActivity.this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+                        getConsultCommentInfo();
+                        MyLog.e("@@", obj.getString("msg"));
+                    } else {
+                        ToastUtils.show(obj.getString("msg"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * 在子线程展示Dialog任务
+     */
+    Runnable mProgressShowRunnable = new Runnable() {
+        @Override
+        public void run() {
+            showInfoProgressDialog();
+        }
+    };
+
+    /**
+     * 在子线程销毁Dialog任务
+     */
+    Runnable mProgressDisRunnable = new Runnable() {
+        @Override
+        public void run() {
+            dismissInfoProgressDialog();
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+        RxBus.get().unRegister(this);
+        mHandler.removeCallbacks(mProgressShowRunnable);
+        mHandler.removeCallbacks(mProgressDisRunnable);
+        mHandler.removeCallbacksAndMessages(null);
+        mHandlerThread.getLooper().quit();
+        if(editDialog != null){
+            editDialog.dismiss();
+            editDialog = null;
+        }
+    }
+}

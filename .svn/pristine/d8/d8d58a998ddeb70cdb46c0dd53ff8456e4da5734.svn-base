@@ -1,0 +1,535 @@
+package com.yst.tianyimember.fragment;
+
+import android.app.Activity;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.View;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.activity.MyCollectionActivity;
+import com.yst.tianyimember.activity.ProductDetailActivity;
+import com.yst.tianyimember.adapter.AbstractCommonAdapter;
+import com.yst.tianyimember.adapter.CommonViewHolder;
+import com.yst.tianyimember.base.BaseFragment;
+import com.yst.tianyimember.bean.CodeMsgBean;
+import com.yst.tianyimember.bean.UserCollectionGoodBean;
+import com.yst.tianyimember.callbacks.AbstractCodeMsgCallback;
+import com.yst.tianyimember.callbacks.AbstractCollectionGoodCallback;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.dialog.AbstractDeleteBankCardDialog;
+import com.yst.tianyimember.eventbus.EditChangetEvent;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 商品收藏页面
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class CollectionGoodsFragment extends BaseFragment {
+
+    @BindView(R.id.txt_collection_all)
+    TextView txtCollectionAll;
+    @BindView(R.id.txt_collection_cancel)
+    TextView txtCollectionCancel;
+    @BindView(R.id.txt_collection_delete)
+    TextView txtCollectionDelete;
+    @BindView(R.id.llayout_collection_handle)
+    LinearLayout llayoutCollectionHandle;
+    @BindView(R.id.img_empty_content)
+    ImageView imgEmptyContent;
+    @BindView(R.id.txt_empty_content)
+    TextView txtEmptyContent;
+    @BindView(R.id.txt_empty_handle)
+    TextView txtEmptyHandle;
+    @BindView(R.id.llayout_empty_content)
+    LinearLayout llayoutEmptyContent;
+    @BindView(R.id.grid_collection_good)
+    GridView gridCollectionGood;
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
+    private AbstractDeleteBankCardDialog deleteBankCardDialog;
+    private boolean isCollectionAll = false;
+    private int page = 1;
+    private boolean isRefresh = true;
+    /**
+     * 全选左侧图标切换
+     */
+    private Drawable mSelectedDrawable;
+    private Drawable mNormalDrawable;
+    private List<UserCollectionGoodBean.ContentBean> mdata;
+
+    private AbstractCommonAdapter<UserCollectionGoodBean.ContentBean> generalAdapter;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_collection;
+    }
+
+    @Override
+    public void initData() {
+        smartRefreshLayout.setVisibility(View.VISIBLE);
+        smartRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                page = 1;
+                isRefresh = true;
+                mdata.clear();
+                generalAdapter.notifyDataSetChanged();
+                getUserCollectionGoods();
+            }
+        });
+        smartRefreshLayout.setOnLoadmoreListener(new OnLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+                if (mdata.size() < 1) {
+                    page = 1;
+                } else {
+                    page++;
+                }
+                isRefresh = false;
+                getUserCollectionGoods();
+            }
+        });
+
+        mSelectedDrawable = ContextCompat.getDrawable(getActivity(), R.drawable.collection_goods_all_s);
+        mSelectedDrawable.setBounds(0, 0, mSelectedDrawable.getMinimumWidth() - 5, mSelectedDrawable.getMinimumHeight() - 5);
+        mNormalDrawable = ContextCompat.getDrawable(getActivity(), R.drawable.collection_goods_all_n);
+        mNormalDrawable.setBounds(0, 0, mSelectedDrawable.getMinimumWidth() - 5, mSelectedDrawable.getMinimumHeight() - 5);
+        txtCollectionAll.setCompoundDrawables(mNormalDrawable, null, null, null);
+        mdata = new ArrayList<>();
+        initCtrls();
+    }
+
+    @OnClick({R.id.txt_collection_cancel, R.id.txt_collection_all, R.id.txt_collection_delete})
+    public void onViewClick(View view) {
+        switch (view.getId()) {
+            case R.id.txt_collection_all:
+                isCollectionAll = !isCollectionAll;
+                txtCollectionAll.setCompoundDrawables(isCollectionAll ? mSelectedDrawable : mNormalDrawable, null, null, null);
+                for (UserCollectionGoodBean.ContentBean bean : mdata) {
+                    bean.setCheck(isCollectionAll);
+                }
+                generalAdapter.notifyDataSetChanged();
+                break;
+            case R.id.txt_collection_cancel:
+                MyCollectionActivity.instance.setEdit(0);
+                isEdit(false);
+                for (UserCollectionGoodBean.ContentBean bean : mdata) {
+                    bean.setCheck(false);
+                }
+                EventBus.getDefault().post(new EditChangetEvent());
+                break;
+            case R.id.txt_collection_delete:
+                if (Utils.isClickable()) {
+                    if (canDelete()) {
+                        deleteBankCardDialog = new AbstractDeleteBankCardDialog(getActivity()) {
+                            @Override
+                            public void onSureClick() {
+//                                if (canDelete2() > 1 && canDelete2() < mdata.size()) {
+//                                    delCollectionGoodAll(0);
+//                                } else if (canDeleteAll() && canDelete2() > 1) {
+//                                    delCollectionGoodAll(1);
+//                                } else {
+//                                    delCollectionGood();
+//                                }
+                                if (canDelete2() == mdata.size()) {
+                                    /**全部删除*/
+                                    delCollectionGoodAll(1);
+                                } else {
+                                    delCollectionGoodAll(0);
+                                }
+                                dialog.dismiss();
+                                isEdit(false);
+                                EventBus.getDefault().post(new EditChangetEvent());
+                            }
+                        };
+                        deleteBankCardDialog.setCancleStyle(R.drawable.shape_white_10, R.color.black, "取消");
+                        deleteBankCardDialog.setSureStyle(R.drawable.shape_gray_180dp_bg, R.color.black, "确认");
+                        deleteBankCardDialog.showDialog();
+
+                    } else {
+                        ToastUtils.show("请选择您要删除的收藏");
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void delCollectionGoodAll(int type) {
+        String productIds = "";
+        String timestamp = SignUtils.getTimeStamp();
+
+        for (int i = 0; i < mdata.size(); i++) {
+            if (mdata.get(i).isCheck()) {
+                productIds += (mdata.get(i).getProductId() + ",");
+            }
+        }
+
+        productIds = productIds.substring(0, productIds.length() - 1);
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp,
+                "productIds", productIds,
+                "type", String.valueOf(type));
+        OkHttpUtils
+                .post()
+                .url(Constants.URL_DEL_COLLECTION_GOOD)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("type", String.valueOf(type))
+                .addParams("productIds", productIds)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(TianyiApplication.getInstance().getResources().getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    page = 1;
+                    mdata.clear();
+                    generalAdapter.notifyDataSetChanged();
+                    getUserCollectionGoods();
+                }
+                ToastUtils.show(response.getMsg());
+            }
+        });
+    }
+    /**
+     * 初始化网格布局适配器
+     */
+    private void initCtrls() {
+        gridCollectionGood.setAdapter(generalAdapter = new AbstractCommonAdapter<UserCollectionGoodBean.ContentBean>(getContext(), mdata, R.layout.item_collection_good) {
+                    @Override
+                    public void convert(CommonViewHolder holder, final int position, UserCollectionGoodBean.ContentBean item) {
+                        holder.setImageById(R.id.rimg_collection_good,R.mipmap.img_default_p);
+                        holder.getView(R.id.img_collection_check).setVisibility(mdata.get(position).isShow() ? View.VISIBLE : View.GONE);
+                        holder.setImageListener(R.id.img_collection_check, new Mylistener(position));
+                        holder.setImageById(R.id.img_collection_check, mdata.get(position).isCheck() ? R.drawable.collection_goods_all_s : R.drawable.collection_goods_all_n);
+                        if (mdata.get(position).getProductStatus()==0){
+                            holder.getView(R.id.txt_yixiajia_icon).setVisibility(View.VISIBLE);
+                        }
+                        holder.setImageError(getActivity(),R.id.rimg_collection_good,R.mipmap.img_default_p,item.getImageurl());
+                        if (llayoutCollectionHandle.getVisibility() == View.GONE) {
+                            smartRefreshLayout.setEnableRefresh(true);
+                            smartRefreshLayout.setEnableLoadmore(true);
+                            holder.setImageListener(R.id.rimg_collection_good, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (mdata.get(position).getProductStatus()!=0) {
+                                        String hunterId = String.valueOf(mdata.get(position).getHunterId());
+                                        Bundle b = new Bundle();
+                                        b.putString("merchantId",mdata.get(position).getMerchantId());
+                                        b.putString("spid","2");
+                                        b.putString("productId", String.valueOf(mdata.get(position).getProductId()));
+                                        b.putString("hunterId", hunterId);
+                                        JumpIntent.jump((Activity) context, ProductDetailActivity.class, b);
+                                    }
+                                    else {
+                                        ToastUtils.show("该商品已下架");
+                                    }
+
+                                }
+                            });
+                        } else {
+                            smartRefreshLayout.setEnableRefresh(false);
+                            smartRefreshLayout.setEnableLoadmore(false);
+                        }
+
+                    }
+                }
+        );
+    }
+
+    /**
+     * 获取用户收藏的商品列表
+     */
+    private void getUserCollectionGoods() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp,
+                "id", TianyiApplication.appCommonBean.getId(),
+                "page", String.valueOf(page));
+        OkHttpUtils
+                .post()
+                .url(Constants.URL_COLLECTION_PRODUCT)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("timestamp", timestamp)
+                .addParams("page", String.valueOf(page))
+                .addParams("id", TianyiApplication.appCommonBean.getId())
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractCollectionGoodCallback() {
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                if (isRefresh) {
+                    smartRefreshLayout.finishRefresh(500);
+                } else {
+                    smartRefreshLayout.finishLoadmore(2000);
+                }
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(TianyiApplication.getInstance().getResources().getString(R.string.str_net_error_message));
+                if (mdata.size() < 1) {
+                    showEmptyContent();
+                }
+            }
+
+            @Override
+            public void onResponse(UserCollectionGoodBean response, int id) {
+                if (null == response && mdata.size() < 1) {
+                    showEmptyContent();
+                    return;
+                }
+                if (null == response) {
+                    return;
+                }
+                if (response.getCode() == 1) {
+                    mdata.addAll(response.getContent());
+                }
+
+                if (mdata.size() < 1) {
+                    showEmptyContent();
+                }
+                generalAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(hidden) {
+            page = 1;
+            mdata.clear();
+            generalAdapter.notifyDataSetChanged();
+            getUserCollectionGoods();
+            isEdit(false);
+            EventBus.getDefault().post(new EditChangetEvent());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        page = 1;
+        mdata.clear();
+        generalAdapter.notifyDataSetChanged();
+        isEdit(false);
+        getUserCollectionGoods();
+        EventBus.getDefault().post(new EditChangetEvent());
+    }
+
+    /**
+     * 是否显示编辑框
+     *
+     * @param isEdit
+     */
+    public void isEdit(boolean isEdit) {
+        if (mdata.size() < 1) {
+            llayoutCollectionHandle.setVisibility(View.GONE);
+            return;
+        }
+        if (isEdit == false) {
+            for (UserCollectionGoodBean.ContentBean bean : mdata) {
+                bean.setCheck(false);
+            }
+            txtCollectionAll.setCompoundDrawables(mNormalDrawable, null, null, null);
+        }
+        llayoutCollectionHandle.setVisibility(isEdit ? View.VISIBLE : View.GONE);
+        for (UserCollectionGoodBean.ContentBean bean : mdata) {
+            bean.setShow(isEdit);
+        }
+        generalAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 判断是否有选中的菜单
+     *
+     * @return
+     */
+    private boolean canDelete() {
+        for (UserCollectionGoodBean.ContentBean bean : mdata) {
+            if (bean.isCheck()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int canDelete2() {
+        int integer = 0;
+        for (int i = 0; i < mdata.size(); i++) {
+            if (mdata.get(i).isCheck()) {
+                integer++;
+            }
+        }
+        Log.e("tag--integer", integer + "");
+        return integer;
+    }
+
+    private boolean canDeleteAll() {
+        boolean flag = false;
+        int index = 0;
+        for (int i = 0; i < mdata.size(); i++) {
+            if (mdata.get(i).isCheck() == true) {
+                flag = true;
+                index++;
+            }
+            if (mdata.get(i).isCheck() == false) {
+                flag = false;
+            }
+        }
+        Log.e("tag--index", index + "");
+        if (index == mdata.size()) {
+            return flag;
+        }
+        return false;
+    }
+
+    /**
+     * 显示内容为空的界面布局
+     */
+    private void showEmptyContent() {
+        llayoutEmptyContent.setVisibility(View.VISIBLE);
+        txtEmptyContent.setText("暂无收藏！");
+        txtEmptyHandle.setVisibility(View.GONE);
+        imgEmptyContent.setImageResource(R.mipmap.shoucang);
+        smartRefreshLayout.setVisibility(View.GONE);
+    }
+
+    /**
+     * item的选择框的点击事件
+     */
+    class Mylistener implements View.OnClickListener {
+        private int position;
+
+        public Mylistener(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+
+            mdata.get(position).setCheck(!mdata.get(position).isCheck());
+            if (canDeleteAll()) {
+                txtCollectionAll.setCompoundDrawables(mSelectedDrawable, null, null, null);
+            } else {
+                txtCollectionAll.setCompoundDrawables(mNormalDrawable, null, null, null);
+            }
+            generalAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * 删除选中的收藏商品
+     */
+    private void delCollectionGood() {
+        String productIds = "";
+        String timestamp = SignUtils.getTimeStamp();
+
+        for (int i = 0; i < mdata.size(); i++) {
+            if (mdata.get(i).isCheck()) {
+                productIds = mdata.get(i).getProductId() + "";
+            }
+        }
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp,
+                "productId", productIds,
+                "type", String.valueOf(1),
+                "id", TianyiApplication.appCommonBean.getId());
+        OkHttpUtils
+                .post()
+                .url(Constants.COLLECTION_PRODUCT)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("type", String.valueOf(1))
+                .addParams("productId", productIds)
+                .addParams("client_type", "A")
+                .addParams("id", TianyiApplication.appCommonBean.getId())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(TianyiApplication.getInstance().getResources().getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    page = 1;
+                    mdata.clear();
+                    generalAdapter.notifyDataSetChanged();
+                    getUserCollectionGoods();
+                }
+                ToastUtils.show(response.getMsg());
+            }
+        });
+    }
+}

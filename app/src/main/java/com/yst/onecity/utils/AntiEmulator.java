@@ -1,0 +1,315 @@
+package com.yst.onecity.utils;
+
+import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.os.Build;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.yst.onecity.R;
+import com.yst.onecity.config.Const;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import static android.content.Context.SENSOR_SERVICE;
+
+/**
+ * 检测是否是模拟器
+ *
+ * @author chenjiadi
+ * @version 3.2.3
+ * @date 2018/1/3.
+ */
+public class AntiEmulator {
+
+    private static String[] known_pipes = {
+            "/dev/socket/qemud",
+            "/dev/qemu_pipe"
+    };
+
+    private static String[] known_qemu_drivers = {
+            "goldfish"
+    };
+
+    private static String[] known_files = {
+            "/system/lib/libc_malloc_debug_qemu.so",
+            "/sys/qemu_trace",
+            "/system/bin/qemu-props"
+    };
+
+    private static String[] known_numbers = {"15555215554", "15555215556",
+            "15555215558", "15555215560", "15555215562", "15555215564",
+            "15555215566", "15555215568", "15555215570", "15555215572",
+            "15555215574", "15555215576", "15555215578", "15555215580",
+            "15555215582", "15555215584",};
+
+    private static String[] known_device_ids = {
+            // 默认ID
+            "000000000000000"
+    };
+
+    private static String[] known_imsi_ids = {
+            // 默认的 imsi id
+            "310260000000000"
+    };
+
+    /**
+     * 检测“/dev/socket/qemud”，“/dev/qemu_pipe”这两个通道
+     *
+     * @return
+     */
+    public static boolean checkPipes() {
+        for (int i = 0; i < known_pipes.length; i++) {
+            String pipes = known_pipes[i];
+            File qemuSocketFile = new File(pipes);
+            if (qemuSocketFile.exists()) {
+                Log.v("Result:", "Find pipes!");
+                return true;
+            }
+        }
+        Log.i("Result:", "Not Find pipes!");
+        return false;
+    }
+
+    /**
+     * 检测驱动文件内容
+     * 读取文件内容，然后检查已知QEmu的驱动程序的列表
+     *
+     * @return
+     */
+    public static Boolean checkQEmuDriverFile() {
+        File driverFile = new File("/proc/tty/drivers");
+        if (driverFile.exists() && driverFile.canRead()) {
+            //(int)driver_file.length()
+            byte[] data = new byte[1024];
+            try {
+                InputStream inStream = new FileInputStream(driverFile);
+                inStream.read(data);
+                inStream.close();
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+            String driverData = new String(data);
+            for (String knownQemuDriver : AntiEmulator.known_qemu_drivers) {
+                if (driverData.indexOf(knownQemuDriver) != -1) {
+                    Log.i("Result:", "Find know_qemu_drivers!");
+                    return true;
+                }
+            }
+        }
+        Log.i("Result:", "Not Find known_qemu_drivers!");
+        return false;
+    }
+
+    /**
+     * 检测模拟器上特有的几个文件
+     *
+     * @return
+     */
+    public static Boolean checkEmulatorFiles() {
+        for (int i = 0; i < known_files.length; i++) {
+            String fileName = known_files[i];
+            File qemuFile = new File(fileName);
+            if (qemuFile.exists()) {
+                Log.v("Result:", "Find Emulator Files!");
+                return true;
+            }
+        }
+        Log.v("Result:", "Not Find Emulator Files!");
+        return false;
+    }
+
+    /**
+     * 检测模拟器默认的电话号码
+     *
+     * @param context
+     * @return
+     */
+    public static Boolean checkPhoneNumber(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager) context
+                .getSystemService(Context.TELEPHONY_SERVICE);
+
+        String phonenumber = telephonyManager.getLine1Number();
+
+        for (String number : known_numbers) {
+            if (number.equalsIgnoreCase(phonenumber)) {
+                Log.v("Result:", "Find PhoneNumber!");
+                return true;
+            }
+        }
+        Log.v("Result:", "Not Find PhoneNumber!");
+        return false;
+    }
+
+    /**
+     * 检测设备IDS 是不是 “000000000000000”
+     *
+     * @param context
+     * @return
+     */
+    public static Boolean checkDeviceIDS(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager) context
+                .getSystemService(Context.TELEPHONY_SERVICE);
+
+        String deviceIds = telephonyManager.getDeviceId();
+
+        for (String knowDeviceid : known_device_ids) {
+            if (knowDeviceid.equalsIgnoreCase(deviceIds)) {
+                Log.v("Result:", "Find ids: 000000000000000!");
+                return true;
+            }
+        }
+        Log.v("Result:", "Not Find ids: 000000000000000!");
+        return false;
+    }
+
+    /**
+     * 检测imsi id是不是“310260000000000”
+     *
+     * @param context
+     * @return
+     */
+    public static Boolean checkImsiIDS(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager)
+                context.getSystemService(Context.TELEPHONY_SERVICE);
+
+        String imsiIds = telephonyManager.getSubscriberId();
+
+        for (String knowImsi : known_imsi_ids) {
+            if (knowImsi.equalsIgnoreCase(imsiIds)) {
+                Log.v("Result:", "Find imsi ids: 310260000000000!");
+                return true;
+            }
+        }
+        Log.v("Result:", "Not Find imsi ids: 310260000000000!");
+        return false;
+    }
+
+    /**
+     * 检测手机上的一些硬件信息
+     *
+     * @param context
+     * @return
+     */
+    public static Boolean checkEmulatorBuild(Context context) {
+        String board = android.os.Build.BOARD;
+        String bootLoader = android.os.Build.BOOTLOADER;
+        String brand = android.os.Build.BRAND;
+        String device = android.os.Build.DEVICE;
+        String hardWare = android.os.Build.HARDWARE;
+        String model = android.os.Build.MODEL;
+        String product = android.os.Build.PRODUCT;
+        if (board == context.getString(R.string.unknown) || bootLoader == context.getString(R.string.unknown)
+                || brand == "generic" || device == "generic"
+                || model == "sdk" || product == "sdk"
+                || hardWare == "goldfish") {
+            Log.v("Result:", "Find Emulator by EmulatorBuild!");
+            return true;
+        }
+        Log.v("Result:", "Not Find Emulator by EmulatorBuild!");
+        return false;
+    }
+
+    /**
+     * 检测手机运营商家
+     *
+     * @param context
+     * @return
+     */
+    public static boolean checkOperatorNameAndroid(Context context) {
+        String szOperatorName = ((TelephonyManager)
+                context.getSystemService(Context.TELEPHONY_SERVICE)).getNetworkOperatorName();
+
+        if (Const.ANDROID.equals(szOperatorName.toLowerCase()) == true) {
+            Log.v("Result:", "Find Emulator by OperatorName!");
+            return true;
+        }
+        Log.v("Result:", "Not Find Emulator by OperatorName!");
+        return false;
+    }
+
+    /**
+     * 检测是否是模拟器
+     *
+     * @return
+     */
+    public static boolean isEmulator() {
+        try {
+            Class systemPropertyClazz = Class.forName("android.os.SystemProperties");
+            boolean kernelQemu = getProperty(systemPropertyClazz, "ro.kernel.qemu").length() > 0;
+            boolean hardwareGoldfish = "goldfish".equals(getProperty(systemPropertyClazz, "ro.hardware"));
+            boolean modelSdk = "sdk".equals(getProperty(systemPropertyClazz, "ro.product.model"));
+            if (kernelQemu || hardwareGoldfish || modelSdk) {
+                return true;
+            }
+        } catch (Exception e) {
+            // error assumes emulator
+        }
+        return false;
+    }
+
+    private static String getProperty(Class clazz, String propertyName) throws Exception {
+        return (String) clazz.getMethod("get", new Class[]{String.class}).invoke(clazz, new Object[]{propertyName});
+    }
+
+    /**
+     * 判断蓝牙是否有效来判断是否为模拟器
+     *
+     * @return true 为模拟器
+     */
+    public static boolean notHasBlueTooth() {
+        BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
+        if (ba == null) {
+            return true;
+        } else {
+            // 如果有蓝牙不一定是有效的。获取蓝牙名称，若为null 则默认为模拟器
+            String name = ba.getName();
+            if (TextUtils.isEmpty(name)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * 判断是否存在光传感器来判断是否为模拟器
+     * 部分真机也不存在温度和压力传感器。其余传感器模拟器也存在。
+     *
+     * @return true 为模拟器
+     */
+    public static Boolean notHasLightSensorManager(Context context) {
+        SensorManager sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+        //光
+        Sensor sensor8 = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        if (null == sensor8) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 根据部分特征参数设备信息来判断是否为模拟器
+     *
+     * @return true 为模拟器
+     */
+    public static boolean isFeatures() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.toLowerCase().contains("vbox")
+                || Build.FINGERPRINT.toLowerCase().contains("test-keys")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
+    }
+
+}

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_2c2c2c"
+    android:orientation="vertical">
+
+    <com.yst.tianyimember.view.roundedimageview.RoundedImageView
+        android:id="@+id/iv_head"
+        android:layout_width="@dimen/x36"
+        android:layout_height="@dimen/x36"
+        android:layout_marginLeft="@dimen/x12"
+        android:layout_marginTop="@dimen/x12"
+        android:scaleType="fitXY"
+        android:src="@mipmap/head_2"
+        app:border_color="@color/color_dddddd"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x12"
+        android:text=""
+        android:singleLine="true"
+        android:textColor="@color/color_bbbbbb"
+        android:textSize="@dimen/text_size_13"
+        app:layout_constraintLeft_toRightOf="@id/iv_head"
+        app:layout_constraintTop_toTopOf="@id/iv_head"
+         />
+
+    <TextView
+        android:id="@+id/tv_desc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x12"
+        android:text=""
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_size_14"
+        app:layout_constraintLeft_toRightOf="@id/iv_head"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_head"
+        />
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:singleLine="true"
+        android:layout_marginTop="@dimen/x6"
+        android:textColor="@color/color_bbbbbb"
+        android:textSize="@dimen/text_size_12"
+        app:layout_constraintTop_toBottomOf="@+id/tv_desc"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_desc"
+        />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1px"
+        android:background="@color/color_979797"
+        app:layout_constraintTop_toBottomOf="@id/tv_time"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_name"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="@dimen/x10"
+        />
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,46 @@
+package com.yst.tianyimember.bean;
+
+/**
+ * @author Shenxinke
+ * @version 4.1.0
+ * @data 2018/5/24
+ */
+
+public class LiveMeasageBean {
+    String roomId;
+    String msg;
+    int type;
+    String name;
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}

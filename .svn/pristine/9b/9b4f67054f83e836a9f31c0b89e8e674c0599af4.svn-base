@@ -1,0 +1,380 @@
+package com.yst.tianyimember.adapter;
+
+import android.content.Context;
+import android.support.constraint.ConstraintLayout;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.bean.DetailsBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.interfaces.BaseAdapterListener;
+import com.yst.tianyimember.utils.ConstUtils;
+import com.yst.tianyimember.utils.GlideRoundTransform;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.view.GlideCircleTransform;
+import com.yst.tianyimember.view.roundedimageview.RoundedImageView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 分享详情页面的适配器
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/15
+ */
+
+
+public class ShareDetailsAdapter extends BaseAdapter {
+    public static final int TYPE_CONTENT = 0;
+    public static final int TYPE_PIC = 1;
+    public static final int TYPE_PRODUCT = 2;
+    private Context context;
+    private List<DetailsBean.ContentBean.ConsultationBean.InfoBean> infiList = new ArrayList<>();
+    private BaseAdapterListener baseAdapterListener;
+
+    public ShareDetailsAdapter(Context context, BaseAdapterListener baseAdapterListener) {
+        this.context = context;
+        this.baseAdapterListener = baseAdapterListener;
+    }
+
+    /**
+     * 添加数据
+     *
+     * @param infiList
+     */
+    public void addData(List<DetailsBean.ContentBean.ConsultationBean.InfoBean> infiList) {
+        if (infiList != null) {
+            this.infiList = infiList;
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public int getCount() {
+        MyLog.e("sss", "--11-" + infiList.size());
+        return infiList.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return null;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        switch (infiList.get(position).getType()) {
+            case TYPE_CONTENT:
+                return TYPE_CONTENT;
+            case TYPE_PIC:
+                return TYPE_PIC;
+            case TYPE_PRODUCT:
+                return TYPE_PRODUCT;
+            default:
+                break;
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        MyLog.e("sss", "---getItemViewType(position)" + getItemViewType(position));
+        convertView = null;
+        switch (getItemViewType(position)) {
+            case TYPE_CONTENT:
+                ContentHolder contentHolder = null;
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(context).inflate(R.layout.item_publish_content, parent, false);
+                    contentHolder = new ContentHolder(convertView);
+                    convertView.setTag(contentHolder);
+                } else {
+                    contentHolder = (ContentHolder) convertView.getTag();
+                }
+                contentHolder.content.setText(infiList.get(position).getContent());
+                break;
+            case TYPE_PIC:
+                PicHolder picHolder = null;
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(context).inflate(R.layout.item_publish_image, parent, false);
+                    picHolder = new PicHolder(convertView);
+                    convertView.setTag(picHolder);
+                } else {
+                    picHolder = (PicHolder) convertView.getTag();
+                }
+                Glide.with(context).load(ConstUtils.matchingImageUrl(infiList.get(position).getAddress())).transform(new GlideRoundTransform(context, 5)).error(R.mipmap.top_backgroud).into(picHolder.imageView);
+                break;
+            case TYPE_PRODUCT:
+                ProductHolder productHolder = null;
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(context).inflate(R.layout.layout_mall, parent, false);
+                    productHolder = new ProductHolder(convertView);
+                    convertView.setTag(productHolder);
+                } else {
+                    productHolder = (ProductHolder) convertView.getTag();
+                }
+                Glide.with(context).load(ConstUtils.matchingImageUrl(infiList.get(position).getPimage())).error(R.mipmap.default_home).transform(new GlideRoundTransform(context, 5)).into(productHolder.mallItemImage);
+                productHolder.mallItemGoumai.setText(String.valueOf(infiList.get(position).getSaleNum()) + "人购买");
+                productHolder.mallItemPrice.setText(String.format(context.getResources().getString(R.string.string_money), String.format("%.2f", infiList.get(position).getSalePrice())));
+                productHolder.mallItemTitle.setText(infiList.get(position).getPname());
+                productHolder.mallItemPingjia.setText(String.valueOf(infiList.get(position).getCommentNum()) + "人评价");
+                productHolder.mallItemLiulan.setText(String.valueOf(infiList.get(position).getViews()) + "人浏览");
+                productHolder.tvStory.setText(String.valueOf(infiList.get(position).getProductStoryCount()) + "个产品故事");
+                productHolder.zhuanyuanZan.setText(String.valueOf(infiList.get(position).getNiceNum()));
+                productHolder.zhuanyuanFenxiang.setText(String.valueOf(infiList.get(position).getSortNum()));
+                productHolder.mallItemGouwuche.setOnClickListener(new onViewAddcartLiatener(position));
+                List<DetailsBean.ContentBean.ConsultationBean.InfoBean.ConsultationPublisherListBean> imgList = infiList.get(position).getConsultationPublisherList();
+                switch (imgList.size()) {
+                    case Const.INTEGER_0:
+                        productHolder.head.setVisibility(View.GONE);
+                        productHolder.head2.setVisibility(View.GONE);
+                        productHolder.head3.setVisibility(View.GONE);
+                        break;
+                    case Const.INTEGER_1:
+                        productHolder.head.setVisibility(View.GONE);
+                        productHolder.head2.setVisibility(View.GONE);
+                        productHolder.head3.setVisibility(View.VISIBLE);
+                        if (imgList.get(Const.INTEGER_0).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(0).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head3);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head3);
+                        }
+                        break;
+                    case Const.INTEGER_2:
+                        productHolder.head.setVisibility(View.GONE);
+                        productHolder.head2.setVisibility(View.VISIBLE);
+                        productHolder.head3.setVisibility(View.VISIBLE);
+                        if (imgList.get(Const.INTEGER_0).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(0).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head3);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head3);
+                        }
+                        if (imgList.get(Const.INTEGER_1).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(1).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head2);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head2);
+                        }
+                        break;
+                    case Const.INTEGER_3:
+                        productHolder.head.setVisibility(View.VISIBLE);
+                        productHolder.head2.setVisibility(View.VISIBLE);
+                        productHolder.head3.setVisibility(View.VISIBLE);
+                        if (imgList.get(Const.INTEGER_0).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(0).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head3);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head3);
+                        }
+                        if (imgList.get(Const.INTEGER_1).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(1).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head2);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head2);
+                        }
+                        if (imgList.get(Const.INTEGER_2).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(2).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head);
+                        }
+                        break;
+                    default:
+                        productHolder.head.setVisibility(View.VISIBLE);
+                        productHolder.head2.setVisibility(View.VISIBLE);
+                        productHolder.head3.setVisibility(View.VISIBLE);
+                        if (imgList.get(Const.INTEGER_0).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(0).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head3);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head3);
+                        }
+                        if (imgList.get(Const.INTEGER_1).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(1).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head2);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head2);
+                        }
+                        if (imgList.get(Const.INTEGER_2).getUserType() == Const.INTEGER_0) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(imgList.get(2).getHeadImg()))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.head_2)
+                                    .into(productHolder.head);
+                        } else {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(String.valueOf(R.mipmap.logo_member)))
+                                    .asBitmap()
+                                    .transform(new GlideCircleTransform(TianyiApplication.getContext()))
+                                    .error(R.mipmap.logo_member)
+                                    .into(productHolder.head);
+                        }
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        return convertView;
+    }
+
+    public class onViewAddcartLiatener implements View.OnClickListener {
+        private int position;
+
+        public onViewAddcartLiatener(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            baseAdapterListener.onItemClick(position);
+        }
+    }
+
+    static class ContentHolder {
+        @BindView(R.id.content)
+        TextView content;
+
+        ContentHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    static class PicHolder {
+        @BindView(R.id.imageView)
+        ImageView imageView;
+
+        PicHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    static class ProductHolder {
+        @BindView(R.id.mall_item_background)
+        ImageView mallItemBackground;
+        @BindView(R.id.mall_item_image)
+        RoundedImageView mallItemImage;
+        @BindView(R.id.mall_item_title)
+        TextView mallItemTitle;
+        @BindView(R.id.mall_item_price)
+        TextView mallItemPrice;
+        @BindView(R.id.mall_item_goumai)
+        TextView mallItemGoumai;
+        @BindView(R.id.mall_item_pingjia)
+        TextView mallItemPingjia;
+        @BindView(R.id.mall_item_liulan)
+        TextView mallItemLiulan;
+        @BindView(R.id.mall_item_gouwuche)
+        ImageView mallItemGouwuche;
+        @BindView(R.id.view)
+        View view;
+        @BindView(R.id.mall_item_head)
+        RoundedImageView head;
+        @BindView(R.id.mall_item_head2)
+        RoundedImageView head2;
+        @BindView(R.id.mall_item_head3)
+        RoundedImageView head3;
+        @BindView(R.id.tv_story)
+        TextView tvStory;
+        @BindView(R.id.zhuanyuan_zan)
+        TextView zhuanyuanZan;
+        @BindView(R.id.zhuanyuan_fenxiang)
+        TextView zhuanyuanFenxiang;
+        @BindView(R.id.mall_item_type)
+        ImageView mallItemType;
+        @BindView(R.id.cl_root)
+        ConstraintLayout clRoot;
+
+        ProductHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

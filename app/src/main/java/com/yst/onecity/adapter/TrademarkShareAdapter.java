@@ -1,0 +1,233 @@
+package com.yst.onecity.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.onecity.R;
+import com.yst.onecity.bean.TrademarkShareBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.view.roundedimageview.RoundedImageView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 商城分享页面适配器
+ *
+ * @author Shenxinke
+ * @version 4.2.0
+ * @data 2018/6/5
+ */
+
+public class TrademarkShareAdapter extends BaseAdapter {
+    private Context mContext;
+    private List<TrademarkShareBean.ContentBean.ConsultationInfoListBean> mList = new ArrayList<>();
+    private LayoutInflater inflater;
+
+
+    public TrademarkShareAdapter(Context context) {
+        mContext = context;
+        inflater = LayoutInflater.from(context);
+    }
+
+    public void setData(List<TrademarkShareBean.ContentBean.ConsultationInfoListBean> list) {
+        if (list != null) {
+            this.mList=(list);
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return mList.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return mList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        convertView = null;
+        switch (mList.get(position).getModelType()) {
+            case Const.INTEGER_0:
+                TrademarkShareAdapter.NoViewHolder noPic;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.item_share_no_pic, null);
+                    noPic = new TrademarkShareAdapter.NoViewHolder(convertView);
+                    convertView.setTag(noPic);
+                } else {
+                    noPic = (TrademarkShareAdapter.NoViewHolder) convertView.getTag();
+                }
+                if (mList.get(position).getUserType() == Const.INTEGER_3) {
+                    Glide.with(mContext).load(R.drawable.icon_logo).error(R.mipmap.head_2).into(noPic.mItemIvShareHead);
+                    noPic.mItemTxtShareTitle.setText("普济一城资讯");
+                } else {
+                    noPic.mItemTxtShareTitle.setText(mList.get(position).getName());
+                }
+                noPic.mItemTxtShareContent.setText(mList.get(position).getTitle());
+                noPic.mItemZhuanfa.setText(ConstUtils.getStringNoEmpty(mList.get(position).getShareNum()));
+                noPic.mItemPinglun.setText(String.valueOf(mList.get(position).getCommentNum()));
+                noPic.mItemDianzan.setText(String.valueOf(mList.get(position).getFabulousNum()));
+
+                break;
+            case Const.INTEGER_1:
+                TrademarkShareAdapter.OneViewHolder one;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.item_share_one_pic, null);
+                    one = new TrademarkShareAdapter.OneViewHolder(convertView);
+                    convertView.setTag(one);
+                } else {
+                    one = (TrademarkShareAdapter.OneViewHolder) convertView.getTag();
+                }
+                if (mList.get(position).getUserType() == Const.INTEGER_3) {
+                    Glide.with(mContext).load(R.drawable.icon_logo).error(R.mipmap.head_2).into(one.mItemIvShareHead);
+                    one.mItemTxtShareTitle.setText("普济一城资讯");
+                } else {
+                    one.mItemTxtShareTitle.setText(mList.get(position).getName());
+                    Glide.with(mContext).load(ConstUtils.matchingImageUrl(mList.get(position).getHeadImg())).error(R.mipmap.head_2).into(one.mItemIvShareHead);
+                }
+                one.mItemTxtShareContent.setText(mList.get(position).getTitle());
+                one.mItemZhuanfa.setText(ConstUtils.getStringNoEmpty(mList.get(position).getShareNum()));
+                one.mItemPinglun.setText(String.valueOf(mList.get(position).getCommentNum()));
+                one.mItemDianzan.setText(String.valueOf(mList.get(position).getFabulousNum()));
+                if (mList.get(position).getInfo() != null && mList.get(position).getInfo().size() > 0) {
+                    for (int i = 0; i < mList.get(position).getInfo().size(); i++) {
+                        if (mList.get(position).getInfo().get(i).getCover() == 1) {
+                            //判断开头是否是http或https
+                            if (mList.get(position).getInfo().get(i).getAddress().startsWith(Const.CONS_STR_HTTP) ||
+                                    mList.get(position).getInfo().get(i).getAddress().startsWith(Const.CONS_STR_HTTPS)) {
+                                Glide.with(mContext).load(mList.get(position).getInfo().get(i).getAddress()).error(R.mipmap.img_default_bg).into(one.mItemIvShareCover);
+                            } else {
+                                Glide.with(mContext).load(Constants.URL_IMAGE_HEAD + mList.get(position).getInfo().get(i).getAddress()).error(R.mipmap.img_default_bg).into(one.mItemIvShareCover);
+                            }
+                        }
+                    }
+                }
+                break;
+            case Const.INTEGER_2:
+                TrademarkShareAdapter.ThreeViewHolder three;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.item_share_three_pic, null);
+                    three = new TrademarkShareAdapter.ThreeViewHolder(convertView);
+                    convertView.setTag(three);
+                } else {
+                    three = (TrademarkShareAdapter.ThreeViewHolder) convertView.getTag();
+                }
+                if (mList.get(position).getUserType() == Const.INTEGER_3) {
+                    Glide.with(mContext).load(R.drawable.icon_logo).error(R.mipmap.head_2).into(three.mItemIvThreeHead);
+                    three.mItemTxtThreeTitle.setText("普济一城资讯");
+                } else {
+                    three.mItemTxtThreeTitle.setText(mList.get(position).getName());
+                    Glide.with(mContext).load(ConstUtils.matchingImageUrl(mList.get(position).getHeadImg())).error(R.mipmap.head_2).into(three.mItemIvThreeHead);
+                }
+                three.mItemTxtThreeContent.setText(mList.get(position).getTitle());
+                three.mItemZhuanfa.setText(mList.get(position).getShareNum());
+                three.mItemPinglun.setText(String.valueOf(mList.get(position).getCommentNum()));
+                three.mItemDianzan.setText(String.valueOf(mList.get(position).getFabulousNum()));
+                if (mList.get(position).getInfo() != null) {
+                    List<String> coverPath = new ArrayList<>();
+                    for (int i = 0; i < mList.get(position).getInfo().size(); i++) {
+                        if (mList.get(position).getInfo().get(i).getCover() == 1) {
+                            //判断开头是否是http或https
+                            if (mList.get(position).getInfo().get(i).getAddress().startsWith(Const.CONS_STR_HTTP) ||
+                                    mList.get(position).getInfo().get(i).getAddress().startsWith(Const.CONS_STR_HTTPS)) {
+                                coverPath.add(mList.get(position).getInfo().get(i).getAddress());
+                            } else {
+                                coverPath.add(Constants.URL_IMAGE_HEAD + mList.get(position).getInfo().get(i).getAddress());
+                            }
+                        }
+                    }
+                    Glide.with(mContext).load(coverPath.get(0)).error(R.mipmap.img_default_p).into(three.mItemIvThreePic1);
+                    Glide.with(mContext).load(coverPath.get(1)).error(R.mipmap.img_default_p).into(three.mItemIvThreePic2);
+                    Glide.with(mContext).load(coverPath.get(2)).error(R.mipmap.img_default_p).into(three.mItemIvThreePic3);
+                }
+                break;
+            default:
+                break;
+        }
+        return convertView;
+    }
+
+    class NoViewHolder {
+        @BindView(R.id.item_iv_share_head)
+        RoundedImageView mItemIvShareHead;
+        @BindView(R.id.item_txt_share_title)
+        TextView mItemTxtShareTitle;
+        @BindView(R.id.item_txt_share_content)
+        TextView mItemTxtShareContent;
+        @BindView(R.id.item_zhuanfa)
+        TextView mItemZhuanfa;
+        @BindView(R.id.item_pinglun)
+        TextView mItemPinglun;
+        @BindView(R.id.item_dianzan)
+        TextView mItemDianzan;
+
+        NoViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    class OneViewHolder {
+        @BindView(R.id.item_iv_share_head)
+        RoundedImageView mItemIvShareHead;
+        @BindView(R.id.item_txt_share_title)
+        TextView mItemTxtShareTitle;
+        @BindView(R.id.item_txt_share_content)
+        TextView mItemTxtShareContent;
+        @BindView(R.id.item_iv_share_cover)
+        RoundedImageView mItemIvShareCover;
+        @BindView(R.id.item_zhuanfa)
+        TextView mItemZhuanfa;
+        @BindView(R.id.item_pinglun)
+        TextView mItemPinglun;
+        @BindView(R.id.item_dianzan)
+        TextView mItemDianzan;
+
+        OneViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    class ThreeViewHolder {
+        @BindView(R.id.item_iv_three_head)
+        RoundedImageView mItemIvThreeHead;
+        @BindView(R.id.item_txt_three_title)
+        TextView mItemTxtThreeTitle;
+        @BindView(R.id.item_txt_three_content)
+        TextView mItemTxtThreeContent;
+        @BindView(R.id.item_iv_three_pic1)
+        RoundedImageView mItemIvThreePic1;
+        @BindView(R.id.item_iv_three_pic2)
+        RoundedImageView mItemIvThreePic2;
+        @BindView(R.id.item_iv_three_pic3)
+        RoundedImageView mItemIvThreePic3;
+        @BindView(R.id.item_zhuanfa)
+        TextView mItemZhuanfa;
+        @BindView(R.id.item_pinglun)
+        TextView mItemPinglun;
+        @BindView(R.id.item_dianzan)
+        TextView mItemDianzan;
+
+        ThreeViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

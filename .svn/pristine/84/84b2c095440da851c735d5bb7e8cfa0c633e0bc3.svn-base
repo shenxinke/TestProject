@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+
+    <com.yst.tianyimember.view.ContainsEmojiEditText
+        android:id="@+id/et_comment_store"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/x100"
+        android:layout_marginLeft="@dimen/x12"
+        android:layout_marginRight="@dimen/x12"
+        android:layout_marginTop="@dimen/x12"
+        android:background="@null"
+        android:gravity="top"
+        android:hint="宝贝满足您的期待吗?说说您的体验"
+        android:padding="@dimen/x4"
+        android:textColor="@color/color_666666"
+        android:textSize="@dimen/text_size_14"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_store" />
+
+    <com.yst.tianyimember.view.ContainsEmojiEditText
+        android:id="@+id/et_comment_person"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/x100"
+        android:layout_marginLeft="@dimen/x12"
+        android:layout_marginRight="@dimen/x12"
+        android:layout_marginTop="@dimen/x12"
+        android:background="@null"
+        android:gravity="top"
+        android:hint="评价一下我的服务"
+        android:padding="@dimen/x4"
+        android:textColor="@color/color_666666"
+        android:textSize="@dimen/text_size_14"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_head" />
+
+
+    <com.yst.tianyimember.view.RatingBar
+        android:id="@+id/comment_ratingbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/x8"
+        app:layout_constraintRight_toRightOf="@+id/et_comment_store"
+        app:layout_constraintTop_toBottomOf="@+id/et_comment_store"
+        app:starCount="5"
+        app:starEmpty="@drawable/pingjia_star_n"
+        app:starFill="@drawable/pingjia_star_s"
+        app:starImageSize="20dp"
+        app:starPadding="8dp"
+        app:starStep="5"
+        app:stepSize="Full" />
+
+    <com.yst.tianyimember.view.RatingBar
+        android:id="@+id/comment_ratingbar_person"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/x10"
+        android:layout_marginRight="@dimen/x12"
+        android:layout_marginTop="@dimen/x8"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_comment_person"
+        app:starCount="5"
+        app:starEmpty="@drawable/pingjia_star_n"
+        app:starFill="@drawable/pingjia_star_s"
+        app:starImageSize="20dp"
+        app:starPadding="8dp"
+        app:starStep="5"
+        app:stepSize="Full" />
+
+    <View
+        android:id="@+id/view_line_top"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/x10"
+        android:background="@color/main_back_ground"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/view_line_top2"
+        android:layout_width="0dp"
+        android:layout_height="1px"
+        android:background="@color/line"
+        app:layout_constraintTop_toBottomOf="@+id/view_line_top" />
+
+    <ImageView
+        android:id="@+id/iv_store"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginLeft="@dimen/x12"
+        android:layout_marginTop="@dimen/x12"
+        android:scaleType="fitXY"
+        android:src="@mipmap/img_default_p"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_line_top" />
+
+    <TextView
+        android:id="@+id/tv_storename"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x16"
+        android:layout_marginStart="@dimen/x16"
+        android:singleLine="true"
+        android:text="正红花卉"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/text_size_14"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_store"
+        app:layout_constraintLeft_toRightOf="@+id/iv_store"
+        app:layout_constraintTop_toTopOf="@+id/iv_store" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x12"
+        android:layout_marginTop="@dimen/x8"
+        android:singleLine="true"
+        android:text="综合评分"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/text_size_16"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_comment_store" />
+
+
+    <View
+        android:id="@+id/viewline"
+        android:layout_width="0dp"
+        android:layout_height="1px"
+        android:layout_marginTop="@dimen/x16"
+        android:background="@color/line"
+        app:layout_constraintTop_toBottomOf="@id/comment_ratingbar" />
+
+
+    <ImageView
+        android:id="@+id/iv_head"
+        android:layout_width="@dimen/x52"
+        android:layout_height="@dimen/x52"
+        android:layout_marginLeft="@dimen/x20"
+        android:layout_marginTop="@dimen/x16"
+        android:scaleType="fitXY"
+        android:src="@mipmap/img_default_p"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewline" />
+
+    <TextView
+        android:id="@+id/tv_nickname"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x16"
+        android:layout_marginStart="@dimen/x16"
+        android:singleLine="true"
+        android:text="专员昵称"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/text_size_14"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_head"
+        app:layout_constraintLeft_toRightOf="@+id/iv_head"
+        app:layout_constraintTop_toTopOf="@+id/iv_head" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x12"
+        android:layout_marginTop="@dimen/x8"
+        android:singleLine="true"
+        android:text="综合评分"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/text_size_16"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_comment_person" />
+
+    <View
+        android:id="@+id/view_line_b"
+        android:layout_width="0dp"
+        android:layout_height="1px"
+        android:layout_marginTop="@dimen/x16"
+        android:background="@color/line"
+        app:layout_constraintTop_toBottomOf="@+id/comment_ratingbar_person" />
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,241 @@
+package com.yst.tianyimember;
+
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
+import android.os.Build;
+import android.os.Handler;
+import android.os.StrictMode;
+import android.support.multidex.MultiDex;
+import android.text.TextUtils;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.google.gson.Gson;
+import com.tencent.TIMConversationType;
+import com.tencent.TIMManager;
+import com.tencent.bugly.imsdk.crashreport.CrashReport;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.umeng.commonsdk.UMConfigure;
+import com.umeng.socialize.Config;
+import com.umeng.socialize.PlatformConfig;
+import com.umeng.socialize.UMShareAPI;
+import com.yst.tianyimember.bean.AppCommonBean;
+import com.yst.tianyimember.bean.SearchHistory;
+import com.yst.tianyimember.bean.SearchHistoryBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.utils.AppCommonManager;
+import com.yst.tianyimember.utils.CookiesManager;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.OkHttpLog;
+import com.yst.tianyimember.utils.security.PreferenceUtil;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+
+/**
+ * Application
+ *
+ * @author chenxiaowei
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class TianyiApplication extends Application {
+
+    public static LinkedList<Activity> activitys = new LinkedList<>();
+    public static TianyiApplication instance;
+    private static Handler mMainThreadHandler = null;
+    private static Thread mMainThread = null;
+    private static int  mMainThreadId;
+    public static boolean isLogin = false;
+    private static Context context;
+    public static AppCommonBean appCommonBean;
+    public static AppCommonManager mAppCommonManager;
+    private static final String APP_ID = Constants.WECHAT_APP_ID;
+    public IWXAPI msgApi;
+    /**
+     * 搜索历史
+     */
+    public static final String SEARCH_HISTORY = "search_history";
+
+    @Override
+    public void onCreate() {
+        MultiDex.install(this);
+        super.onCreate();
+        instance = this;
+        context = this;
+        mMainThread = Thread.currentThread();
+        mMainThreadHandler = new Handler();
+        mMainThreadId = android.os.Process.myTid();
+        //检测是否是模拟器运行（如果是 直接结束进程）
+///        if (AntiEmulator.notHasBlueTooth() || AntiEmulator.notHasLightSensorManager(context) || AntiEmulator.isFeatures()) {
+//            TianyiApplication.exit();
+//            System.exit(0);
+//        }
+        UMShareAPI.get(this);
+        UMConfigure.setLogEnabled(true);
+        UMConfigure.init(this, UMConfigure.DEVICE_TYPE_PHONE, null);
+        PlatformConfig.setWeixin(APP_ID, "13a0d260a84c63404025cc5fdbacaca9");
+        PlatformConfig.setSinaWeibo("3008700609", "59515451cb0d2e6ffe19f7fbdfa76878");
+        PlatformConfig.setQQZone("1106303973", "eHGxP8L15UlMXW10");
+        Config.REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";
+
+        // 将该app注册到微信
+        msgApi = WXAPIFactory.createWXAPI(context, APP_ID, true);
+        msgApi.registerApp(APP_ID);
+        mAppCommonManager = AppCommonManager.getInstance();
+        //防止拍照崩溃
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(new OkHttpLog("OkHttpUtils"))
+                .connectTimeout(15000L, TimeUnit.MILLISECONDS)
+                .readTimeout(15000L, TimeUnit.MILLISECONDS)
+                .writeTimeout(15000L, TimeUnit.MILLISECONDS)
+                //cookie管理
+                .cookieJar(new CookiesManager())
+                //其他配置
+                .build();
+        OkHttpUtils.initClient(okHttpClient);
+        //不Register的话，图片请求不会经过OkHttpClient
+        Glide.get(context)
+                .register(          //使用okhttp作为图片请求
+                        GlideUrl.class
+                        , InputStream.class
+                        , new OkHttpUrlLoader.Factory(okHttpClient));
+        TIMManager.getInstance().init(context);
+        MyLog.e("uuu", TIMManager.getInstance().getConversation(TIMConversationType.C2C, "18101249503").getUnreadMessageNum() + "");
+        CrashReport.initCrashReport(getApplicationContext(), "4d4ce31cab", false);
+    }
+
+    /**
+     * 保存搜索历史
+     *
+     * @param string 要保存的数据
+     */
+    public void saveSearchHistory(String string) {
+        if (TextUtils.isEmpty(string)) {
+            return;
+        }
+        List<SearchHistory> historyBeanList = getSearchHistory();
+        if (historyBeanList.size() == Const.INTEGER_10) {
+            historyBeanList.remove(historyBeanList.size() - 1);
+        }
+        for (int i = 0; i < historyBeanList.size(); i++) {
+            if (historyBeanList.get(i).getKeyword().trim().equals(string.trim())) {
+                historyBeanList.remove(i);
+                break;
+            }
+        }
+        JSONObject historyJson = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        SearchHistory historyBean = new SearchHistory(string);
+        historyBeanList.add(0, historyBean);
+        try {
+            for (int i = 0; i < historyBeanList.size(); i++) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("keyword", historyBeanList.get(i).getKeyword());
+                jsonArray.put(jsonObject);
+            }
+            historyJson.put("history", jsonArray);
+        } catch (JSONException jsonException) {
+            MyLog.e("app", "jsonException = " + jsonException.getMessage());
+        }
+        PreferenceUtil.put(SEARCH_HISTORY, historyJson.toString());
+    }
+
+    /**
+     * 用户未登录情况下获取本地存储的搜索历史
+     *
+     * @return 历史记录集合
+     */
+    public List<SearchHistory> getSearchHistory() {
+        String historyJson = PreferenceUtil.getString(SEARCH_HISTORY, "");
+        if (!TextUtils.isEmpty(historyJson)) {
+            SearchHistoryBean searchHistoryBean = new Gson().fromJson(historyJson, SearchHistoryBean.class);
+            if (searchHistoryBean.getHistory() != null) {
+                return searchHistoryBean.getHistory();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * 获取应用的上下文对象
+     * @return
+     */
+    public static Context getContext() {
+        return context;
+    }
+
+    public static TianyiApplication getInstance() {
+        return instance;
+    }
+
+    /**
+     * 获取主线程
+     */
+    public static Thread getMainThread(){
+        return mMainThread;
+    }
+
+    /**
+     * 获取主线程handler
+     */
+    public static Handler getMainThreadHandler(){
+        return mMainThreadHandler;
+    }
+
+    /**
+     * 对外暴露主线程id
+     */
+    public static int  getMainThreadId(){
+        return mMainThreadId;
+    }
+
+    /**
+     * 添加activity到LinkedList集合
+     *
+     * @param activity a
+     */
+    public void addActivity(Activity activity) {
+        activitys.add(activity);
+    }
+
+    /**
+     * 退出集合所有的activity
+     */
+    public static void exit() {
+        try {
+            for (Activity activity : activitys) {
+                if (activity != null) {
+                    activity.finish();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        System.gc();
+    }
+}

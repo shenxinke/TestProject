@@ -1,0 +1,18 @@
+package com.yst.onecity.interfaces;
+
+/**
+ * adapter监听接口
+ *
+ * @author WangJingWei
+ * @version 4.0.2
+ * @date 2018/4/24.
+ */
+
+public interface BaseAdapterListener {
+    /**
+     * 条目监听
+     *
+     * @param position 下标
+     */
+    void onItemClick(int position);
+}

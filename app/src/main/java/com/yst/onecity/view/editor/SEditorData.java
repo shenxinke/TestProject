@@ -1,0 +1,61 @@
+package com.yst.onecity.view.editor;
+
+/**
+ * 富文本数据Bean
+ *
+ * @author  jiaofan
+ * @date    2018/6/5
+ * @version 4.2.0
+ */
+public class SEditorData {
+
+    private String inputStr;
+
+    private String imagePath;
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
+
+    private String imageId;
+
+    private String videoPath;
+
+
+    public String getInputStr() {
+        return inputStr;
+    }
+
+    public void setInputStr(String inputStr) {
+        this.inputStr = inputStr;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public String getVideoPath() {
+        return videoPath;
+    }
+
+    public void setVideoPath(String videoPath) {
+        this.videoPath = videoPath;
+    }
+
+    @Override
+    public String toString() {
+        return "SEditorData{" +
+                "inputStr='" + inputStr + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", videoPath='" + videoPath + '\'' +
+                '}';
+    }
+}

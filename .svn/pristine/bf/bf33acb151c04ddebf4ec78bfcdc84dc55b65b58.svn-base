@@ -1,0 +1,224 @@
+package com.yst.onecity.view.clipview;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.View;
+
+/**
+ * 裁剪图片view
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class ClipImageBorderView extends View {
+    /**
+     * 水平方向与View的边距
+     */
+    private int mHorizontalPadding;
+    /**
+     * 垂直方向与View的边距
+     */
+    private int mVerticalPadding;
+    /**
+     * 绘制的矩形的宽度
+     */
+    private int mWidth;
+    /**
+     * 绘制的矩形的高度
+     */
+    private int mHeight;
+    /**
+     * 边框的颜色，默认为白色
+     */
+    private int mBorderColor = Color.parseColor("#FFFFFF");
+    /**
+     * 边框的宽度 单位dp
+     */
+    private int mBorderWidth = 1;
+
+    private Paint mPaint;
+
+    private static float[][] four_corner_coordinate_positions;
+
+    /**
+     * 屏幕像素密度
+     */
+    private int scale = (int) this.getResources().getDisplayMetrics().density;
+    /**
+     * 总高
+     */
+    private float borderHeight;
+    /**
+     * 总宽
+     */
+    private float borderWith;
+    /**
+     * 长方形框框粗
+     */
+    private int rectBorderWidth = 3 * scale;
+    /**
+     * 四个角的粗
+     */
+    private int rectCornerWith = 6 * scale;
+    /**
+     * 四个角的长度
+     */
+    private int rectCornerHeight = 20 * scale;
+
+
+    public ClipImageBorderView(Context context) {
+        this(context, null);
+    }
+
+    public ClipImageBorderView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public ClipImageBorderView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+
+        mBorderWidth = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, mBorderWidth, getResources().getDisplayMetrics());
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+    }
+
+    /**
+     * 初始化布局
+     *
+     * @param changed
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     */
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        /*borderHeight = getHeight();
+		borderWith = getWidth();
+//		mWidth = (int) (borderWith - 2 * mHorizontalPadding);
+//		mHeight = (int) (borderHeight - 2 * mVerticalPadding);
+
+//		borderLength =borderWith= mWidth;//
+		//初始化四个点的坐标
+		four_corner_coordinate_positions = new float[][]{
+				{(borderWith - mWidth) / 2, (borderHeight - mHeight) / 2}, //左上
+				{(borderWith + mWidth) / 2, (borderHeight - mHeight) / 2}, //右上
+				{(borderWith - mWidth) / 2, (borderHeight + mHeight) / 2}, //左下
+				{(borderWith + mWidth) / 2, (borderHeight + mHeight) / 2}, //右上
+		};*/
+    }
+
+    /**
+     * 长方形的粗半距
+     */
+    private int temp1 = (rectCornerWith - rectBorderWidth) / 2;
+    /**
+     * 四个角的粗半距
+     */
+    private int temp2 = (rectCornerWith + rectBorderWidth) / 2;
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        borderHeight = getHeight();
+        borderWith = getWidth();
+        //初始化四个点的坐标
+        four_corner_coordinate_positions = new float[][]{
+                //左上
+                {(borderWith - mWidth) / 2, (borderHeight - mHeight) / 2},
+                //右上
+                {(borderWith + mWidth) / 2, (borderHeight - mHeight) / 2},
+                //左下
+                {(borderWith - mWidth) / 2, (borderHeight + mHeight) / 2},
+                //右上
+                {(borderWith + mWidth) / 2, (borderHeight + mHeight) / 2},
+        };
+        // 计算矩形区域的宽度
+        // 计算距离屏幕垂直边界 的边距
+        mVerticalPadding = (getHeight() - mHeight) / 2;
+        mHorizontalPadding = (getWidth() - mWidth) / 2;
+        mPaint.setColor(Color.parseColor("#aa000000"));
+        mPaint.setStyle(Style.FILL);
+        // 绘制左边1
+        canvas.drawRect(0, 0, mHorizontalPadding, getHeight(), mPaint);
+        // 绘制右边2
+        canvas.drawRect(getWidth() - mHorizontalPadding, 0, getWidth(),
+                getHeight(), mPaint);
+        // 绘制上边3
+        canvas.drawRect(mHorizontalPadding, 0, getWidth() - mHorizontalPadding,
+                mVerticalPadding, mPaint);
+        // 绘制下边4
+        canvas.drawRect(mHorizontalPadding, getHeight() - mVerticalPadding,
+                getWidth() - mHorizontalPadding, getHeight(), mPaint);
+        // 绘制外边框
+        mPaint.setColor(mBorderColor);
+        mPaint.setStrokeWidth(mBorderWidth);
+        mPaint.setStyle(Style.STROKE);
+        canvas.drawRect(mHorizontalPadding, mVerticalPadding, getWidth()
+                - mHorizontalPadding, getHeight() - mVerticalPadding, mPaint);
+
+
+        //画四个角的画笔
+        mPaint.setColor(Color.WHITE);
+        mPaint.setStrokeWidth(rectCornerWith);
+        mPaint.setAntiAlias(true);
+        //左上角的两根
+        canvas.drawLine(four_corner_coordinate_positions[0][0] - temp2,
+                four_corner_coordinate_positions[0][1] - temp1,
+                four_corner_coordinate_positions[0][0] - temp1 + rectCornerHeight,
+                four_corner_coordinate_positions[0][1] - temp1,
+                mPaint);
+        canvas.drawLine(four_corner_coordinate_positions[0][0] - temp1,
+                four_corner_coordinate_positions[0][1] - temp2,
+                four_corner_coordinate_positions[0][0] - temp1,
+                four_corner_coordinate_positions[0][1] - temp1 + rectCornerHeight,
+                mPaint);
+        //左下角的两根
+        canvas.drawLine(four_corner_coordinate_positions[2][0] - temp2,
+                four_corner_coordinate_positions[2][1] + temp1,
+                four_corner_coordinate_positions[2][0] - temp1 + rectCornerHeight,
+                four_corner_coordinate_positions[2][1] + temp1,
+                mPaint);
+        canvas.drawLine(four_corner_coordinate_positions[2][0] - temp1,
+                four_corner_coordinate_positions[2][1] + temp1,
+                four_corner_coordinate_positions[2][0] - temp1,
+                four_corner_coordinate_positions[2][1] + temp1 - rectCornerHeight,
+                mPaint);
+        //右上角的两根
+        canvas.drawLine(four_corner_coordinate_positions[1][0] + temp1,
+                four_corner_coordinate_positions[1][1] - temp1,
+                four_corner_coordinate_positions[1][0] + temp1 - rectCornerHeight,
+                four_corner_coordinate_positions[1][1] - temp1,
+                mPaint);
+        canvas.drawLine(four_corner_coordinate_positions[1][0] + temp1,
+                four_corner_coordinate_positions[1][1] - temp2,
+                four_corner_coordinate_positions[1][0] + temp1,
+                four_corner_coordinate_positions[1][1] - temp1 + rectCornerHeight
+                , mPaint);
+        //右下角的两根
+        canvas.drawLine(four_corner_coordinate_positions[3][0] + temp2,
+                four_corner_coordinate_positions[3][1] + temp1,
+                four_corner_coordinate_positions[3][0] + temp1 - rectCornerHeight,
+                four_corner_coordinate_positions[3][1] + temp1,
+                mPaint);
+        canvas.drawLine(four_corner_coordinate_positions[3][0] + temp1,
+                four_corner_coordinate_positions[3][1] + temp1,
+                four_corner_coordinate_positions[3][0] + temp1,
+                four_corner_coordinate_positions[3][1] + temp1 - rectCornerHeight,
+                mPaint);
+    }
+
+    public void setHorizontalPadding(int width, int mHeight) {
+        this.mWidth = width;
+        this.mHeight = mHeight;
+        invalidate();
+    }
+}

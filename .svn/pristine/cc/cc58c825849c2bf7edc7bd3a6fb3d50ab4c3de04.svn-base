@@ -1,0 +1,48 @@
+package com.yst.onecity.activity.member;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.base.BaseActivity;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+
+/**
+ * 联系客服页面
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class ContactCustomerServiceActivity extends BaseActivity {
+    @BindView(R.id.tel)
+    TextView tel;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_contact_customer_service;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("联系客服");
+    }
+
+    @OnClick({R.id.ll_back, R.id.tel})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.tel:
+                if (TextUtils.isEmpty(tel.getText().toString().trim())){return;}
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+tel.getText().toString().trim()));
+                startActivity(intent);
+                break;
+            default:
+                break;
+        }
+    }
+}

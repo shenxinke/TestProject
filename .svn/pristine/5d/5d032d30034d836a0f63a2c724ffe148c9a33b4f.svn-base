@@ -1,0 +1,96 @@
+package com.yst.tianyimember.utils.security;
+
+import android.content.Context;
+
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.config.Const;
+
+/**
+ *  用户偏好设置(工具类)
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class PreferenceUtil {
+    /**
+     * App版本号
+     */
+    public static final String APP_VERSION = "app_version";
+    /**
+     * 设备id
+     */
+    public static final String DEVICE_ID = "device_id";
+    /**
+     * 推送开关
+     */
+    public static final String PUSH_CONFIG = "push_config";
+    /**
+     * 极光推送是否已经设置了别名
+     */
+    public static final String SETTED_ALIAS = "setted_alias";
+    private static SecuritySharedPreference securitySharedPreference;
+
+    public static SecuritySharedPreference getSp() {
+        if (securitySharedPreference == null) {
+            securitySharedPreference = new SecuritySharedPreference(TianyiApplication.getInstance(), "security_prefs", Context.MODE_PRIVATE);
+            ;
+        }
+        return securitySharedPreference;
+    }
+
+    public static SecuritySharedPreference.Editor getEditor() {
+        return getSp().edit();
+    }
+
+    /**
+     * 或去指定key对应的值，若没有该值则返回指定”默认值“
+     */
+    public static int getInt(String key, int defaultVal) {
+        return getSp().getInt(key, defaultVal);
+    }
+
+    public static String getString(String key, String defaultVal) {
+        return getSp().getString(key, defaultVal);
+    }
+
+    public static boolean getBoolean(String key, boolean defaultVal) {
+        return getSp().getBoolean(key, defaultVal);
+    }
+
+    public static float getFloat(String key, float defaultVal) {
+        return getSp().getFloat(key, defaultVal);
+    }
+
+    public static long getLong(String key, long defaultVal) {
+        return getSp().getLong(key, defaultVal);
+    }
+
+    /**
+     * 为给定key设置指定的值
+     */
+    public static void put(String key, Object object) {
+        SecuritySharedPreference.Editor editor = getEditor();
+
+        if (null == object) {
+            return;
+        }
+
+        String type = object.getClass().getSimpleName();
+
+        if (Const.CONS_STR_STRING.equals(type)) {
+            editor.putString(key, (String) object);
+        } else if (Const.CONS_STR_INTEGER.equals(type)) {
+            editor.putInt(key, (Integer) object);
+        } else if (Const.CONS_STR_BOOLEAN.equals(type)) {
+            editor.putBoolean(key, (Boolean) object);
+        } else if (Const.CONS_STR_FLOAT.equals(type)) {
+            editor.putFloat(key, (Float) object);
+        } else if (Const.CONS_STR_LONG.equals(type)) {
+            editor.putLong(key, (Long) object);
+        }
+
+        editor.commit();
+    }
+
+}

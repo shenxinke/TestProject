@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <include
+        android:id="@+id/include_title"
+        layout="@layout/activity_title_layout_white" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginTop="@dimen/x20"
+        android:background="#c6c6c6" />
+
+    <RelativeLayout
+        android:id="@+id/nickname_linear"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x52"
+        android:layout_below="@+id/include_title"
+        android:background="@color/white"
+        android:orientation="vertical" >
+
+        <com.yst.tianyimember.view.ContainsEmojiEditText
+            android:id="@+id/nickname_edt"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/x32"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="请输入昵称"
+            android:layout_marginRight="@dimen/x8"
+            android:layout_toLeftOf="@+id/nickname_delete_img"
+            android:textColorHint="@color/apply_activity_hint"
+            android:inputType="text"
+            android:maxLength="8"
+            android:singleLine="true"
+            android:textSize="@dimen/x14" />
+
+        <ImageView
+            android:id="@+id/nickname_delete_img"
+            android:layout_width="@dimen/x16"
+            android:layout_height="@dimen/x16"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x16"
+            android:src="@drawable/nickname_delet" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@+id/nickname_linear"
+        android:background="#c6c6c6" />
+
+</LinearLayout>

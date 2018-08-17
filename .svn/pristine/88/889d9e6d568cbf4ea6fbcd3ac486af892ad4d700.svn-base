@@ -1,0 +1,95 @@
+package com.yst.tianyimember.bean;
+
+/**
+ * 上传图片
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class UploadImageBean extends CodeMsgBean {
+
+    /**
+     * id : 9040
+     * createUser :
+     * createdTime : 2017-09-25 11:40:42
+     * updateTime : 2017-09-25 11:40:42
+     * createdIp :
+     * name : 1506310846989.png
+     * address : upload/consultationimg/20170925114040868327861.png
+     * memory : 0.06
+     */
+
+    private String id;
+    private String createUser;
+    private String createdTime;
+    private String updateTime;
+    private String createdIp;
+    private String name;
+    private String address;
+    private double memory;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getCreatedIp() {
+        return createdIp;
+    }
+
+    public void setCreatedIp(String createdIp) {
+        this.createdIp = createdIp;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public double getMemory() {
+        return memory;
+    }
+
+    public void setMemory(double memory) {
+        this.memory = memory;
+    }
+}

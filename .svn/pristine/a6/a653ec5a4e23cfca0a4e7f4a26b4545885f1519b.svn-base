@@ -1,0 +1,89 @@
+package com.yst.tianyimember.adapter;
+
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.bean.UserCollectionGoodBean;
+import com.yst.tianyimember.view.roundedimageview.RoundedImageView;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 用户收藏商品adapter
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class UserCollectionGoodsAdapter extends RecyclerView.Adapter<UserCollectionGoodsAdapter.GoodHolder> {
+
+    private Context mContext;
+    private List<UserCollectionGoodBean.ContentBean> mdata;
+    private int width;
+
+    public UserCollectionGoodsAdapter(Context context, List<UserCollectionGoodBean.ContentBean> data, int width) {
+        this.mContext = context;
+        this.mdata = data;
+        this.width = width;
+    }
+
+    @Override
+    public GoodHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_collection_good, parent, false);
+        view.setMinimumHeight(width);
+        view.setMinimumWidth(width);
+        return new GoodHolder(view);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mdata == null ? 0 : mdata.size();
+    }
+
+    @Override
+    public void onBindViewHolder(GoodHolder holder, int position) {
+        if (mdata.get(position).isShow()) {
+            holder.imgCollectionCheck.setVisibility(View.VISIBLE);
+                holder.imgCollectionCheck.setImageResource(mdata.get(position).isCheck() ? R.mipmap.icon_check : R.mipmap.icon_uncheck);
+        } else {
+            holder.imgCollectionCheck.setVisibility(View.GONE);
+        }
+        holder.imgCollectionCheck.setOnClickListener(new Mylistener(position));
+    }
+
+    class GoodHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.rimg_collection_good)
+        RoundedImageView rimgCollectionGood;
+        @BindView(R.id.img_collection_check)
+        ImageView imgCollectionCheck;
+
+        public GoodHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    class Mylistener implements View.OnClickListener {
+
+        private int position;
+
+        public Mylistener(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            mdata.get(position).setCheck(!mdata.get(position).isCheck());
+            notifyDataSetChanged();
+        }
+    }
+}

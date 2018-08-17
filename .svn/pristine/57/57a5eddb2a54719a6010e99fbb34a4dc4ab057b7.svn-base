@@ -1,0 +1,91 @@
+package com.yst.onecity.bean.information;
+
+import com.yst.onecity.bean.CodeMsgBean;
+
+import java.util.List;
+
+/**
+ * 资讯分类
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class NewsTypeBean extends CodeMsgBean {
+    private List<NewsTypeInfo> content;
+
+    public List<NewsTypeInfo> getContent() {
+        return content;
+    }
+
+    public void setContent(List<NewsTypeInfo> content) {
+        this.content = content;
+    }
+
+    public class NewsTypeInfo {
+
+        /**
+         * created_time : 1505907573000
+         * update_time : null
+         * description_name : 咨询分类名称
+         * id : 1
+         * create_user :
+         * created_ip : null
+         */
+
+        private String created_time;
+        private String update_time;
+        private String description_name;
+        private String id;
+        private String create_user;
+        private String created_ip;
+
+        public String getCreated_time() {
+            return created_time;
+        }
+
+        public void setCreated_time(String created_time) {
+            this.created_time = created_time;
+        }
+
+        public String getUpdate_time() {
+            return update_time;
+        }
+
+        public void setUpdate_time(String update_time) {
+            this.update_time = update_time;
+        }
+
+        public String getDescription_name() {
+            return description_name;
+        }
+
+        public void setDescription_name(String description_name) {
+            this.description_name = description_name;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getCreate_user() {
+            return create_user;
+        }
+
+        public void setCreate_user(String create_user) {
+            this.create_user = create_user;
+        }
+
+        public String getCreated_ip() {
+            return created_ip;
+        }
+
+        public void setCreated_ip(String created_ip) {
+            this.created_ip = created_ip;
+        }
+    }
+}

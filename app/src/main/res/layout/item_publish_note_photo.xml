@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_20px"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/content_img"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:scaleType="fitXY" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/imageUploadProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:max="100"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_edit_menu_bg"
+                android:gravity="right|center"
+                android:orientation="horizontal"
+                android:paddingBottom="3dp"
+                android:paddingRight="10dp"
+                android:paddingTop="3dp">
+
+
+                <TextView
+                    android:id="@+id/move_up"
+                    style="@style/item_publish_img_txt_stytle"
+                    android:drawableLeft="@mipmap/icon_up"
+                    android:text="上移" />
+
+                <TextView
+                    android:id="@+id/delete"
+                    style="@style/item_publish_img_txt_stytle"
+                    android:drawableLeft="@mipmap/icon_de22"
+                    android:text="删除" />
+
+                <TextView
+                    android:id="@+id/insert"
+                    style="@style/item_publish_img_txt_stytle"
+                    android:drawableLeft="@mipmap/icon_c"
+                    android:text="插入" />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

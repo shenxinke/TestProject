@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/colorTransparent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="200dp"
+        android:layout_height="250dp"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <ImageView
+            android:id="@+id/img_red_packet"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:src="@mipmap/hongbao_default" />
+        <TextView
+            android:id="@+id/tv_cancle"
+            android:layout_width="160dp"
+            android:layout_height="@dimen/x30"
+            android:background="@drawable/shape_reward_cancle"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:text="取消"
+            android:textColor="@color/color_f16565" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_red_packet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_f16565"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:text="¥" />
+
+        <TextView
+            android:id="@+id/tv_money"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+           android:layout_marginLeft="3dp"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="20sp"
+            android:textColor="@color/color_f16565"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>

@@ -1,0 +1,177 @@
+package com.yst.tianyimember.activity.member;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.bean.EventBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.utils.ConstUtils;
+import com.yst.tianyimember.utils.IsCard;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 会员实名认证页面
+ *
+ * @author Chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class RealNameAuthenticationActivity extends BaseActivity {
+
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.tv_right)
+    TextView tvRight;
+    @BindView(R.id.et_real_name)
+    EditText etRealName;
+    @BindView(R.id.et_card)
+    TextView etCard;
+    @BindView(R.id.tv_commit_auth)
+    TextView tvCommitAuth;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_real_name_authentication;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("实名认证");
+        EventBus.getDefault().register(this);
+    }
+
+    @OnClick({R.id.tv_commit_auth})
+    public void onViewClicked(View view) {
+        if (!ConstUtils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            //提交信息
+            case R.id.tv_commit_auth:
+                goCommitInfo();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 提交实名认证信息
+     */
+    private void goCommitInfo() {
+        final String realName = etRealName.getText().toString().trim();
+        if (TextUtils.isEmpty(realName)) {
+            ToastUtils.show("请输入您的真实姓名");
+            return;
+        }
+        final String card = etCard.getText().toString().trim();
+        if (TextUtils.isEmpty(card)) {
+            ToastUtils.show("请输入您的身份证证件号");
+            return;
+        }
+        boolean verify = new IsCard().verify(card);
+        if (!verify) {
+            ToastUtils.show("请输入您正确的身份证证件号");
+            return;
+        }
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "timestamp", timestamp,
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "name", realName,
+                "card", card,
+                "id", TianyiApplication.appCommonBean.getId()
+        );
+        OkHttpUtils.post().url(Constants.REALNAMEAUTHCATION)
+                .addParams("name", realName)
+                .addParams("card", card)
+                .addParams("id", TianyiApplication.appCommonBean.getId())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(String s, int id) {
+                MyLog.e("realnameauth","实名认证结果onresponse\n"+s);
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    if (jsonObject.has(Const.CONS_STR_CODE) && Const.STR1.equals(jsonObject.getString(Const.CONS_STR_CODE))) {
+                        //认证成功
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean("isSuccess",true);
+                        JumpIntent.jump(RealNameAuthenticationActivity.this, AuthenticationStateActivity.class,bundle);
+                        finish();
+                    } else {
+                        //认证失败
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean("isSuccess",false);
+                        bundle.putString("name",realName);
+                        bundle.putString("card",card);
+                        JumpIntent.jump(RealNameAuthenticationActivity.this, AuthenticationStateActivity.class,bundle);
+                    }
+                    ToastUtils.show(jsonObject.getString("msg"));
+                } catch (JSONException e) {
+                    ToastUtils.show(getString(R.string.app_on_request_exception_msg));
+                }
+            }
+        });
+    }
+
+    @Subscribe
+    public void onEventMainThread(EventBean event) {
+        if (Const.CONS_STR_AUTHENTICATION.equals(event.getMsg())) {
+            finish();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+}

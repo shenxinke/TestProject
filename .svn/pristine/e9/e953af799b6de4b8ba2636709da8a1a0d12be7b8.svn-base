@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!--<Button-->
+        <!--android:id="@+id/my_btn_new"-->
+        <!--android:text="@string/new_friend"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content" />-->
+
+    <!--<com.tencent.qcloud.ui.TemplateTitle-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:titleText="@string/home_conversation_tab"/>-->
+
+    <include layout="@layout/activity_title_layout_white"/>
+
+    <com.yst.tianyimember.view.slidingswipemenu.SwipeMenuListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:background="@color/white"
+        android:layout_height="match_parent">
+    </com.yst.tianyimember.view.slidingswipemenu.SwipeMenuListView>
+
+</LinearLayout>

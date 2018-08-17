@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle"
+    android:color="@color/red">
+    <corners
+        android:radius="@dimen/x60"
+        />
+    <stroke
+        android:width="@dimen/x0"
+        android:color="@color/hunter_info_label" />
+    <solid
+        android:color="@color/hunter_info_label"
+        />
+    <padding 
+        android:left="@dimen/x5"
+        android:right="@dimen/x5"
+        android:top="@dimen/x3"
+        android:bottom="@dimen/x3"
+        />
+</shape>

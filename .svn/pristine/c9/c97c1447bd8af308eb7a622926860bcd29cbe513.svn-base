@@ -1,0 +1,110 @@
+package com.yst.onecity.activity.servermember;
+
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.EventBean;
+import com.yst.onecity.utils.ConstUtils;
+
+import org.greenrobot.eventbus.EventBus;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+
+/**
+ * 服务专员提现结果页面
+ *
+ * @author Chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class CashStateActivity extends BaseActivity {
+
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.tv_right)
+    TextView tvRight;
+    @BindView(R.id.tv_state)
+    TextView tvState;
+    @BindView(R.id.iv_state)
+    ImageView ivState;
+    @BindView(R.id.tv_cash_money)
+    TextView tvCashMoney;
+    @BindView(R.id.tv_shouxufei)
+    TextView tvShouxufei;
+    @BindView(R.id.tv_bank_num)
+    TextView tvBankNum;
+    @BindView(R.id.ll_success)
+    LinearLayout llSuccess;
+    @BindView(R.id.tv_failed)
+    TextView tvFailed;
+
+    private boolean isSuccess;
+    private String bankno, cashmoney, msg;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_cash_state;
+    }
+
+    @Override
+    public void initData() {
+        setTitleBarTitle("提现状态");
+        if (getIntent().getExtras() != null) {
+            isSuccess = getIntent().getExtras().getBoolean("isSuccess");
+            if (isSuccess) {
+                //提现成功
+                tvState.setText("提现成功");
+                bankno = getIntent().getExtras().getString("bankno");
+                cashmoney = getIntent().getExtras().getString("cashmoney");
+                ivState.setImageResource(R.mipmap.chenggong);
+                llSuccess.setVisibility(View.VISIBLE);
+                tvFailed.setVisibility(View.GONE);
+                tvCashMoney.setText(cashmoney);
+                tvBankNum.setText(bankno);
+            } else {
+                //提现失败
+                tvState.setText("提现失败");
+                msg = getIntent().getExtras().getString("msg");
+                ivState.setImageResource(R.mipmap.shibai);
+                tvFailed.setVisibility(View.VISIBLE);
+                llSuccess.setVisibility(View.GONE);
+                tvFailed.setText(msg);
+            }
+        }
+    }
+
+    @OnClick({R.id.ll_back})
+    public void onViewClicked(View view) {
+        if (!ConstUtils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            //返回
+            case R.id.ll_back:
+                EventBus.getDefault().post(new EventBean("jump", "", "", "", ""));
+                finish();
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            EventBus.getDefault().post(new EventBean("jump", "", "", "", ""));
+            finish();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+}

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/llayout_collection_handle"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/x50"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/txt_collection_all"
+                android:layout_width="@dimen/x0"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/collection_goods_all_n"
+                android:drawablePadding="@dimen/x10"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/x15"
+                android:text="@string/all_select" />
+
+            <TextView
+                android:id="@+id/txt_collection_cancel"
+                android:layout_width="@dimen/x0"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#FEBC4E"
+                android:gravity="center"
+                android:text="@string/search_cancel"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/txt_collection_delete"
+                android:layout_width="@dimen/x0"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#272727"
+                android:gravity="center"
+                android:text="@string/chat_del"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/llayout_collection_handle"
+            android:orientation="vertical">
+
+            <include layout="@layout/activity_empty_content" />
+            <com.scwang.smartrefresh.layout.SmartRefreshLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/xlist_smartRefreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:srlAccentColor="@android:color/black"
+                app:srlEnablePreviewInEditMode="true"
+                app:srlPrimaryColor="@color/white">
+                <com.scwang.smartrefresh.layout.header.ClassicsHeader
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <com.yst.tianyimember.view.xlistview.XListView
+                    android:overScrollMode="never"
+                    android:scrollbars="none"
+                    android:id="@+id/xlist_collection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="#F4F4F4"
+                    android:dividerHeight="@dimen/x5"
+                    android:visibility="gone">
+                </com.yst.tianyimember.view.xlistview.XListView>
+
+                <com.scwang.smartrefresh.layout.footer.ClassicsFooter
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+            <com.yst.tianyimember.view.swipyrefreshlayout.SwipyRefreshLayout
+                android:id="@+id/refreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/x10"
+                android:layout_marginRight="@dimen/x10"
+                android:visibility="gone"
+                app:srl_direction="both">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler_collection"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"></android.support.v7.widget.RecyclerView>
+            </com.yst.tianyimember.view.swipyrefreshlayout.SwipyRefreshLayout>
+
+            <com.scwang.smartrefresh.layout.SmartRefreshLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/smartRefreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:srlAccentColor="@android:color/black"
+                app:srlEnablePreviewInEditMode="true"
+                app:srlPrimaryColor="@color/white">
+                <com.scwang.smartrefresh.layout.header.ClassicsHeader
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <GridView
+                    android:id="@+id/grid_collection_good"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:horizontalSpacing="5dp"
+                    android:numColumns="2"
+                    android:scrollbars="none"
+                    android:verticalSpacing="5dp" />
+
+                <com.scwang.smartrefresh.layout.footer.ClassicsFooter
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <include layout="@layout/activity_empty_content" />
+
+</LinearLayout>

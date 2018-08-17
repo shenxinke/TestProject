@@ -1,0 +1,422 @@
+package com.yst.onecity.fragment;
+
+import android.Manifest;
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.TextView;
+
+import com.amap.api.location.AMapLocation;
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.taobao.av.util.StringUtil;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.activity.ProductDetailActivity;
+import com.yst.onecity.activity.amap.Location;
+import com.yst.onecity.activity.login.LoginActivity;
+import com.yst.onecity.adapter.ShoppingLocalityAdapter;
+import com.yst.onecity.base.BaseFragment;
+import com.yst.onecity.bean.EventBean;
+import com.yst.onecity.bean.ShoppingLocalityBean;
+import com.yst.onecity.bean.product.ProductSortStandardBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.fragment.popfragment.AddCartPopFragment;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.RxCode;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import gorden.rxbus2.RxBus;
+import okhttp3.Call;
+import okhttp3.Request;
+import pub.devrel.easypermissions.EasyPermissions;
+
+/**
+ * 商城页面本地直供
+ *
+ * @author Shenxinke
+ * @version 4.2.0
+ * @data 2018/6/9
+ */
+
+public class ThisLocalityFragment extends BaseFragment {
+    private int pageNum = 1;
+    private int rows = 10;
+    private ShoppingLocalityAdapter shoppingMallAdapter;
+    private String locationPermission = Manifest.permission.ACCESS_FINE_LOCATION;
+    private List<ShoppingLocalityBean.ContentBean> contentList = new ArrayList<>();
+    private String province;
+    private String city;
+    private String district;
+
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
+    @BindView(R.id.recyclerView)
+    RecyclerView rvInformation;
+    @BindView(R.id.tv_no_shopping)
+    TextView tvNoShopping;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_shopping_mall_item;
+    }
+
+    /**
+     * 创建一个资讯frament的实例，传入资讯类型id
+     *
+     * @return 具体fragment
+     */
+    public static ThisLocalityFragment newInstance() {
+        ThisLocalityFragment fragment = new ThisLocalityFragment();
+        return fragment;
+    }
+
+    @Override
+    public void initData() {
+        EventBus.getDefault().register(this);
+        getAddres();
+        rvInformation.setLayoutManager(new LinearLayoutManager(getActivity(),
+                LinearLayoutManager.VERTICAL, false));
+        shoppingMallAdapter = new ShoppingLocalityAdapter();
+        rvInformation.setAdapter(shoppingMallAdapter);
+
+        initListener();
+    }
+
+    /**
+     * 定位
+     */
+    private void startLocation() {
+        if (EasyPermissions.hasPermissions(getActivity(), locationPermission)) {
+            //启动定位
+            new Location(locationCallback).startLocation();
+
+        } else {
+            EasyPermissions.requestPermissions(this, "请打开定位权限", 100, locationPermission);
+        }
+    }
+
+    Location.LocationCallback locationCallback = new Location.LocationCallback() {
+        @Override
+        public void locSuccess(AMapLocation amapLocation) {
+            if (amapLocation.getAoiName() == null || "".equals(amapLocation.getAoiName())) {
+                ToastUtils.show("定位失败");
+            } else {
+                province = amapLocation.getProvince();
+                city = amapLocation.getCity();
+                district = amapLocation.getDistrict();
+                getShoppingMallList();
+            }
+        }
+
+        @Override
+        public void locFailure(int code, String errorInfo) {
+            ToastUtils.show("定位失败");
+        }
+    };
+
+    @Subscribe
+    public void onEventMainThread(EventBean event) {
+        String choose = "choose";
+        String location = "location";
+        String resultAddress = "resultAddress";
+        if (choose.equals(event.getMsg())) {
+            province = event.getPID();
+            city = event.getCID();
+            district = event.getAID();
+            MyLog.e("aaa", "choose__________getAdress___" + event.getAdress()+"getPID___" + event.getPID()+"getCID___" + event.getCID()+"getAID___" + event.getAID());
+        } else if (location.equals(event.getMsg())) {
+            province = event.getPID();
+            city = event.getCID();
+            district = event.getAID();
+            MyLog.e("aaa", "location__________getAdress___" + event.getAdress()+"getPID___" + event.getPID()+"getCID___" + event.getCID()+"getAID___" + event.getAID());
+        } else if (resultAddress.equals(event.getMsg()) && Const.positionFlag == event.getPosition()) {
+            province = event.getPID();
+            city = event.getCID();
+            district = event.getAID();
+            MyLog.e("aaa", "location__________getAdress___" + event.getAdress()+"getPID___" + event.getPID()+"getCID___" + event.getCID()+"getAID___" + event.getAID());
+        }
+    }
+
+    /**
+     * 获取列表数据
+     */
+    public void getShoppingMallList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "type", Const.STR1,
+                "provinceName", province,
+                "cityName", city,
+                "countyName", district,
+                "page", String.valueOf(pageNum),
+                "rows", String.valueOf(rows),
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post()
+                .url(Constants.COMMISSIONER_PRODUCT_LIST)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("provinceName", province)
+                .addParams("cityName", city)
+                .addParams("countyName", district)
+                .addParams("rows", String.valueOf(rows))
+                .addParams("page", String.valueOf(pageNum))
+                .addParams("type", String.valueOf(Const.INTEGER_1))
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .build().execute(new StringCallback() {
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.tv_net_error));
+            }
+
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "-商城本地直供分类数据: " + response);
+                if (response != null) {
+                    ShoppingLocalityBean shoppingMallBean = new Gson().fromJson(response, ShoppingLocalityBean.class);
+                    if (shoppingMallBean.getCode() == Const.INTEGER_1) {
+                        if (shoppingMallBean.getContent() != null) {
+                            List<ShoppingLocalityBean.ContentBean> content = shoppingMallBean.getContent();
+                            contentList.addAll(content);
+                            shoppingMallAdapter.addList(contentList, Const.INTEGER_1);
+                            if (content.size() > Const.INTEGER_0 || contentList.size() > Const.INTEGER_0) {
+                                tvNoShopping.setVisibility(View.GONE);
+                            } else {
+                                tvNoShopping.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                } else {
+                    ToastUtils.show(getString(R.string.tv_check_service));
+                }
+            }
+        });
+    }
+
+    /**
+     * 上拉加载下拉刷新
+     */
+    private void initListener() {
+        shoppingMallAdapter.ShoppingLocalityAdapter(new ShoppingLocalityAdapter.ShoppingLocalityListener() {
+            @Override
+            public void btShoppingCart(int position, String status) {
+                if (!TianyiApplication.isLogin) {
+                    JumpIntent.jump((Activity) context, LoginActivity.class);
+                    return;
+                }
+                if (Utils.isClickable()) {
+                    if (contentList.get(position).getIsScope() == Const.INTEGER_1) {
+                        ToastUtils.show("超出配送范围");
+                    } else {
+                        getGuige(status, position);
+                    }
+                }
+            }
+
+            @Override
+            public void btShoppingStory(int position, String status) {
+                if (Utils.isClickable()) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("productId", String.valueOf(contentList.get(position).getId()));
+                    bundle.putInt(Const.STR_STORY_INTENT, Const.INTEGER_3);
+                    JumpIntent.jump(getActivity(), ProductDetailActivity.class, bundle);
+                }
+            }
+
+            @Override
+            public void onItemClick(int position) {
+                if (Utils.isClickable()) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("productId", String.valueOf(contentList.get(position).getId()));
+                    JumpIntent.jump(getActivity(),ProductDetailActivity.class,bundle);
+                }
+            }
+        });
+
+        smartRefreshLayout.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+                pageNum++;
+                getShoppingMallList();
+                smartRefreshLayout.finishLoadmore(1000);
+            }
+
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                pageNum = 1;
+                if (contentList != null) {
+                    contentList.clear();
+                }
+                getShoppingMallList();
+                smartRefreshLayout.finishRefresh(500);
+            }
+        });
+    }
+
+    /**
+     * 获取商品规格
+     */
+    private void getGuige(final String pId, final int position) {
+        final String productId = String.valueOf(pId);
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp,
+                "pId", productId, "merchantid", Const.STR1);
+        OkHttpUtils.post().url(Constants.GET_PRODUCT_SORT_STANDARD)
+                .addParams("timestamp", timestamp)
+                .addParams("pId", productId)
+                .addParams("merchantid", Const.STR1)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "-规格：" + response);
+                if (response != null) {
+                    ProductSortStandardBean standardBean = new Gson().fromJson(response, ProductSortStandardBean.class);
+                    if (null != standardBean.getContent() && standardBean.getCode() == Const.INTEGER_1) {
+                        if (standardBean.getContent().getStandard().size() > 1) {
+                            showAddCartDialog(productId, Const.STR1);
+                        } else {
+                            int standardId = standardBean.getContent().getStandard().get(0).getStandardId();
+                            int classId = standardBean.getContent().getClassify().get(0).getClassId();
+                            int kuNum = standardBean.getContent().getStandard().get(0).getKuNum();
+                            addCart(Const.STR1, String.valueOf(standardId), String.valueOf(classId));
+                        }
+                    }
+                } else {
+                    ToastUtils.show(getString(R.string.tv_check_service));
+                }
+            }
+        });
+    }
+
+    /**
+     * 显示购物车弹框
+     *
+     * @param productId  商品id
+     * @param merchantId merchantId
+     */
+    private void showAddCartDialog(String productId, String merchantId) {
+        AddCartPopFragment popFragment = AddCartPopFragment.newInstance(productId, merchantId, "", "", "", "", "", "", "");
+        popFragment.show(getFragmentManager(), "goodsFragment");
+    }
+
+    /**
+     * 添加购物车
+     */
+    private void addCart(String num, String standardId, String classId) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp,
+                "phone", TianyiApplication.appCommonBean.getPhone()
+                , "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "spid", standardId,
+                "stid", classId,
+                "num", num,
+                "hunterid", "");
+        OkHttpUtils.post().url(Constants.ADD_SHOP_CART)
+                .addParams("timestamp", timestamp)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("spid", standardId)
+                .addParams("stid", classId)
+                .addParams("num", num)
+                .addParams("hunterid", "")
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                try {
+                    JSONObject obj = new JSONObject(response);
+                    int code = obj.getInt("code");
+                    if (code == 1) {
+                        RxBus.get().send(RxCode.CODE_PUBLISH_ADD_SHOPPING_CARD);
+                        ToastUtils.show("成功加入购物车");
+                    } else {
+                        ToastUtils.show(obj.getString("msg"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        pageNum = 1;
+        if (contentList != null) {
+            contentList.clear();
+        }
+        getShoppingMallList();
+    }
+
+    /**
+     * 获取位置信息
+     */
+    public void getAddres() {
+        if(StringUtil.isEmpty(Const.HOME_ADDRES)){
+            startLocation();
+        }else {
+            province = TianyiApplication.appCommonBean.getProvinceName();
+            city = TianyiApplication.appCommonBean.getCityName();
+            district = TianyiApplication.appCommonBean.getCountyName();
+        }
+    }
+}

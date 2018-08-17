@@ -1,0 +1,159 @@
+package com.yst.onecity.adapter;
+
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.viewholder.AbstractTypeViewHolder;
+import com.yst.onecity.bean.ShoppingLocalityBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.interfaces.BaseAdapterListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 搜索专卖商品适配器
+ *
+ * @author Shenxinke
+ * @version 4.2.0
+ * @data 2018/6/19
+ */
+
+public class ShoppingMonopolyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private LayoutInflater mLayoutInflater;
+    private List<ShoppingLocalityBean.ContentBean> mData = new ArrayList<>();
+    private int mtype;
+
+    private ShoppingMonopolyListener shoppingMonopolyListener;
+
+    public void ShoppingMonopolyAdapter( ShoppingMonopolyListener shoppingMonopolyListener) {
+        this.shoppingMonopolyListener = shoppingMonopolyListener;
+    }
+
+    public ShoppingMonopolyAdapter() {
+        mLayoutInflater = LayoutInflater.from(TianyiApplication.getContext());
+    }
+
+    public void addList(List<ShoppingLocalityBean.ContentBean> data, int type) {
+        if (data != null) {
+            mData = data;
+            mtype = type;
+            notifyDataSetChanged();
+        }
+    }
+
+    public enum ItemType {
+        //ITEM1, ITEM2
+        ITEM1, ITEM2
+    }
+
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if(viewType == ItemType.ITEM1.ordinal()){
+            return new ShoppingMonopolyHolder(mLayoutInflater.inflate(R.layout.shopping_mall_item, parent, false));
+        }else {
+            return new ShoppingLocalityHolder(mLayoutInflater.inflate(R.layout.this_locality_item, parent, false));
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if(mData.get(position).getType() == Const.INTEGER_0){
+            return ItemType.ITEM1.ordinal();
+        } else {
+            return ItemType.ITEM2.ordinal();
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        ((AbstractTypeViewHolder) holder).bindHolder(mData.get(position));
+        setAdapterListener(position, holder);
+    }
+
+    public void setAdapterListener(final int position, final RecyclerView.ViewHolder holder) {
+        if (holder instanceof ShoppingMonopolyHolder) {
+            //购物车按钮点击事件
+            if (shoppingMonopolyListener != null) {
+                ((ShoppingMonopolyHolder) holder).imgShoppingCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String state = String.valueOf(((ShoppingMonopolyHolder) holder).id);
+                        shoppingMonopolyListener.btShoppingCart(position, state);
+                    }
+                });
+            }
+            //条目点击事件
+            ((ShoppingMonopolyHolder) holder).clParent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    shoppingMonopolyListener.onItemClick(position);
+                }
+            });
+            //故事点击事件
+            ((ShoppingMonopolyHolder) holder).tvStory.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String state = String.valueOf(((ShoppingMonopolyHolder) holder).id);
+                    shoppingMonopolyListener.btShoppingStory(position,state);
+                }
+            });
+        }
+        if (holder instanceof ShoppingLocalityHolder) {
+            //购物车按钮点击事件
+            if (shoppingMonopolyListener != null) {
+                ((ShoppingLocalityHolder) holder).imgShoppingCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String state = String.valueOf(((ShoppingLocalityHolder) holder).id);
+                        shoppingMonopolyListener.btShoppingCart(position, state);
+                    }
+                });
+
+                //故事点击事件
+                ((ShoppingLocalityHolder) holder).tvStory.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String state = String.valueOf(((ShoppingLocalityHolder) holder).id);
+                        shoppingMonopolyListener.btShoppingStory(position,state);
+                    }
+                });
+
+            }
+            //条目点击事件
+            ((ShoppingLocalityHolder) holder).clParent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    shoppingMonopolyListener.onItemClick(position);
+                }
+            });
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return mData.size();
+    }
+
+    public interface ShoppingMonopolyListener extends BaseAdapterListener {
+        /**
+         * 多种状态的按钮点击监听回调
+         *
+         * @param position
+         * @param status
+         */
+        void btShoppingCart(int position, String status);
+
+        /**
+         * 产品故事监听
+         * @param position
+         * @param status
+         */
+        void btShoppingStory(int position, String status);
+    }
+}

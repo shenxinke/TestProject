@@ -1,0 +1,118 @@
+package com.yst.tianyimember.activity.member;
+
+import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.TextView;
+
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.fragment.ConsultReplyFragment;
+import com.yst.tianyimember.fragment.ServiceSpecialistInteractionFragment;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+
+/**
+ * 我的消息页面
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class MyMessageActivity extends BaseActivity {
+
+    @BindView(R.id.tv_consult_reply)
+    TextView tvConsultReply;
+    @BindView(R.id.tv_service_specialist_interaction)
+    TextView tvServiceSpecialistInteraction;
+    private ConsultReplyFragment consultReplyFragment;
+    private ServiceSpecialistInteractionFragment serviceSpecialistInteractionFragment;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_my_message;
+    }
+
+    @Override
+    public void initData() {
+        initFragment1();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    }
+
+    /**
+     * 显示第一个fragment
+     */
+    private void initFragment1() {
+        //开启事务，fragment的控制是由事务来实现的
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        //第一种方式（add），初始化fragment并添加到事务中，如果为null就new一个
+        if (consultReplyFragment == null) {
+            consultReplyFragment = new ConsultReplyFragment();
+            transaction.add(R.id.fl_message, consultReplyFragment);
+        }
+        //隐藏所有fragment
+        hideFragment(transaction);
+        //显示需要显示的fragment
+        transaction.show(consultReplyFragment);
+        //提交事务
+        transaction.commit();
+    }
+
+    /**
+     * 显示第二个fragment
+     */
+    private void initFragment2() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        if (serviceSpecialistInteractionFragment == null) {
+            serviceSpecialistInteractionFragment = new ServiceSpecialistInteractionFragment();
+            transaction.add(R.id.fl_message, serviceSpecialistInteractionFragment);
+        }
+        hideFragment(transaction);
+        transaction.show(serviceSpecialistInteractionFragment);
+        transaction.commit();
+    }
+
+    /**
+     * 隐藏所有的fragment
+     * @param transaction 事物
+     */
+    private void hideFragment(FragmentTransaction transaction) {
+        if (consultReplyFragment != null) {
+            transaction.hide(consultReplyFragment);
+        }
+        if (serviceSpecialistInteractionFragment != null) {
+            transaction.hide(serviceSpecialistInteractionFragment);
+        }
+    }
+
+    @OnClick({R.id.ll_back, R.id.tv_consult_reply, R.id.tv_service_specialist_interaction})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.ll_back:
+                finish();
+                break;
+            case R.id.tv_consult_reply:
+                tvConsultReply.setBackground(ContextCompat.getDrawable(this, R.drawable.shape_yellow_6));
+                tvServiceSpecialistInteraction.setBackground(ContextCompat.getDrawable(this, R.drawable.shape_gray_6));
+                tvConsultReply.setTextColor(0xffffffff);
+                tvServiceSpecialistInteraction.setTextColor(0xffaaaaaa);
+                initFragment1();
+                break;
+            case R.id.tv_service_specialist_interaction:
+                tvConsultReply.setBackground(ContextCompat.getDrawable(this, R.drawable.shape_gray_6_left));
+                tvServiceSpecialistInteraction.setBackground(ContextCompat.getDrawable(this, R.drawable.shape_yellow_6_right));
+                tvConsultReply.setTextColor(0xffaaaaaa);
+                tvServiceSpecialistInteraction.setTextColor(0xffffffff);
+                initFragment2();
+                break;
+            default:
+                break;
+        }
+    }
+}

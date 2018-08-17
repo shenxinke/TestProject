@@ -1,0 +1,175 @@
+package com.yst.onecity.activity.member;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.activity.servermember.BalanceDetailsActivity;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.MyAccountBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 会员我的账户页面
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class MyMemberAccountActivity extends BaseActivity {
+
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.tv_right)
+    TextView tvRight;
+    @BindView(R.id.tv_lingqian)
+    TextView tvLingqian;
+    @BindView(R.id.tv_cash)
+    TextView tvCash;
+    @BindView(R.id.ll_pocket_money)
+    LinearLayout llPocketMoney;
+    @BindView(R.id.tv_tiantianjiang)
+    TextView tvTiantianjiang;
+    @BindView(R.id.ll_tiantianjiang)
+    LinearLayout llTiantianjiang;
+    @BindView(R.id.textView)
+    TextView textView;
+    @BindView(R.id.activity_my_account2)
+    LinearLayout activityMyAccount2;
+    @BindView(R.id.tv_zy_money)
+    TextView tvZYMoney;
+
+    private String mYE;
+    private String mDJ;
+    private Double mTxYE = 0.0;
+    private int mTxNum;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_my_member_account;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar(getResources().getString(R.string.my_account));
+    }
+
+    @Override
+    protected void onResume() {
+        requestMyZYYJInfo();
+        super.onResume();
+    }
+
+    @OnClick({R.id.ll_pocket_money, R.id.ll_zyyj, R.id.tv_cash})
+    public void onViewClicked(View view) {
+        if (!ConstUtils.isClickable()) {
+            return;
+        }
+        switch (view.getId()) {
+            /**
+             * 普济余额
+             */
+            case R.id.ll_pocket_money:
+                JumpIntent.jump(this, BalanceDetailsActivity.class);
+                break;
+            /**
+             * 提现
+             */
+            case R.id.tv_cash:
+                Bundle bundle = new Bundle();
+                bundle.putDouble("money", mTxYE);
+                bundle.putInt("num", mTxNum);
+                JumpIntent.jump(this, CashMemberActivity.class, bundle);
+                break;
+            /**
+             * 专员佣金
+             */
+            //待返积分 天天奖
+            case R.id.ll_zyyj:
+                JumpIntent.jump(this, MyAccountZyyjDetailActivity.class);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 获取我的专员佣金接口
+     */
+    public void requestMyZYYJInfo() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "timestamp", timestamp
+        );
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils.post()
+                .url(Constants.MYACCOUNT_MAIN)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new StringCallback() {
+
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                Gson gson = new Gson();
+                MyAccountBean myAccountBean = gson.fromJson(response, MyAccountBean.class);
+                if (myAccountBean != null && myAccountBean.getCode() == 1 && myAccountBean.getContent() != null) {
+                    MyAccountBean.ContentBean content = myAccountBean.getContent();
+                    tvZYMoney.setText("¥ " + content.getScore());
+                    mTxYE = content.getScore();
+                    mTxNum = content.getNum();
+                    if (content.getIsXyt() == Const.INTEGER_1) {
+                        llPocketMoney.setVisibility(View.VISIBLE);
+                        tvLingqian.setText("¥ " + ConstUtils.changeEmptyStringToZero(String.valueOf(content.getXytBalance())));
+                    } else {
+                        llPocketMoney.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
+        });
+    }
+}

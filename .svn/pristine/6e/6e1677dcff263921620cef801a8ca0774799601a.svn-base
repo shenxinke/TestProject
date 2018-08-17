@@ -1,0 +1,113 @@
+package com.yst.tianyimember.bean;
+
+import java.util.List;
+
+/**
+ * 服务专员消息
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class ServerMemberMessageBean {
+
+
+    /**
+     * code : 1
+     * msg : 成功
+     * content : [{"logoImg":"upload/skysimple/20171019110050635334714.png","nickname":"小旭www","serviceTime":null,"imid":"18101249503","memberId":177},{"logoImg":"upload/skysimple/20171018202429095029127.png","nickname":"啦啦啦来来","serviceTime":null,"imid":"18701574341","memberId":179},{"logoImg":"upload/skysimple/20171017161659591810512.png","nickname":"小妮妮妮妮","serviceTime":null,"imid":"18612926230","memberId":183},{"logoImg":"upload/skysimple/20171017190759463201965.png","nickname":"模拟","serviceTime":null,"imid":"18235872448","memberId":186}]
+     */
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * logoImg : upload/skysimple/20171019110050635334714.png
+         * nickname : 小旭www
+         * serviceTime : null
+         * imid : 18101249503
+         * memberId : 177
+         */
+
+        private String logoImg;
+        private String nickname;
+        private Long serviceTime;
+        private String imid;
+        private int memberId;
+        private long recive_hunter_id;
+
+        public long getRecive_hunter_id() {
+            return recive_hunter_id;
+        }
+
+        public void setRecive_hunter_id(long recive_hunter_id) {
+            this.recive_hunter_id = recive_hunter_id;
+        }
+
+        public String getLogoImg() {
+            return logoImg;
+        }
+
+        public void setLogoImg(String logoImg) {
+            this.logoImg = logoImg;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+
+        public void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+
+        public Long getServiceTime() {
+            return serviceTime;
+        }
+
+        public void setServiceTime(Long serviceTime) {
+            this.serviceTime = serviceTime;
+        }
+
+        public String getImid() {
+            return imid;
+        }
+
+        public void setImid(String imid) {
+            this.imid = imid;
+        }
+
+        public int getMemberId() {
+            return memberId;
+        }
+
+        public void setMemberId(int memberId) {
+            this.memberId = memberId;
+        }
+    }
+}

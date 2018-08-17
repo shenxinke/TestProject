@@ -1,0 +1,72 @@
+package com.yst.tianyimember.dialog;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
+
+import com.yst.tianyimember.R;
+
+/**
+ * 设置支付密码成功弹框
+ *
+ * @author jiaofan
+ * @version 1.0.1
+ * @date 2018/3/21
+ */
+
+public abstract class AbstractSetPasswordSuccessDialog {
+    protected Dialog dialog;
+
+    public AbstractSetPasswordSuccessDialog(Activity activity) {
+        if (dialog == null) {
+            getDialog(activity);
+        }
+    }
+
+    private Dialog getDialog(Activity activity) {
+        View view = activity.getLayoutInflater().inflate(R.layout.setsuccess_dialog, null);
+        dialog = new Dialog(activity, R.style.prompt_progress_dailog_dimenabled);
+        dialog.setContentView(view);
+        LinearLayout tvSure = (LinearLayout) view.findViewById(R.id.dialog_setsuccess_sure);
+        Window dialogWindow = dialog.getWindow();
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        //设置dialog 在布局中的位置
+        lp.gravity = Gravity.CENTER;
+        dialogWindow.setAttributes(lp);
+        // 设置点击外围不解散
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
+        tvSure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                onSureClick();
+            }
+        });
+        return dialog;
+    }
+
+    /**
+     * 确定回调
+     */
+    public abstract void onSureClick();
+
+    public void showDialog() {
+        dialog.show();
+    }
+
+    public void dismissDialog() {
+        if (dialog != null) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+}

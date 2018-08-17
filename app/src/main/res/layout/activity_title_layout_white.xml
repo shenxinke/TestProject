@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/x46"
+    android:background="@color/white" >
+
+    <ImageView
+        android:id="@+id/activity_back_iv1"
+        android:layout_width="@dimen/x32"
+        android:layout_height="@dimen/x32"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/x5"
+        android:visibility="gone"
+        android:src="@drawable/img_head_income_back_gray" />
+
+    <ImageView
+        android:id="@+id/activity_back_iv"
+        android:layout_width="@dimen/x32"
+        android:layout_height="@dimen/x32"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/x5"
+        android:src="@drawable/img_head_income_back_gray" />
+
+    <TextView
+        android:id="@+id/activity_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text=""
+        android:textColor="@color/app_title_color"
+        android:textSize="@dimen/x16" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/x10" >
+
+        <ImageView
+            android:id="@+id/activity_title_right_img"
+            android:layout_width="@dimen/x35"
+            android:layout_height="@dimen/x35"
+            android:padding="@dimen/x5"
+            android:visibility="gone"
+            android:src="@mipmap/ic_launcher" />
+
+        <ImageView
+            android:id="@+id/activity_title_right_chat_say_img"
+            android:layout_width="@dimen/x24"
+            android:layout_height="@dimen/x24"
+            android:padding="@dimen/x5"
+            android:visibility="gone"
+            android:background="@drawable/say_black" />
+
+        <TextView
+            android:id="@+id/activity_complete_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="完成"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size_16"
+            android:visibility="gone"
+            />
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_alignParentBottom="true"
+        android:background="@color/line_gray"
+        >
+    </View>
+
+</RelativeLayout>

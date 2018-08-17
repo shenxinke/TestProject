@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="45dp"
+    android:background="@color/white"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/ll_sale_count"
+        style="@style/goodslistlayout">
+
+        <TextView
+            android:id="@+id/tv_sale_count"
+            style="@style/goodslist"
+            android:text="@string/tv_sale_count"
+            android:textColor="@color/color_goodslist_selected" />
+
+
+        <ImageView
+            android:id="@+id/iv_count"
+            style="@style/goodslistiv"
+            android:src="@mipmap/jiantouup" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_goods_price"
+        style="@style/goodslistlayout">
+
+        <TextView
+            android:id="@+id/tv_goods_price"
+            style="@style/goodslist"
+            android:text="@string/tv_goods_price" />
+
+        <ImageView
+            android:id="@+id/iv_price"
+            style="@style/goodslistiv" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_goods_update"
+        style="@style/goodslistlayout">
+
+        <TextView
+            android:id="@+id/tv_goods_update"
+            style="@style/goodslist"
+            android:text="@string/tv_goods_update" />
+
+        <ImageView
+            android:id="@+id/iv_update"
+            style="@style/goodslistiv" />
+
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/tv_goods_pinkage"
+        style="@style/goodslist"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:padding="@dimen/padding_3dp"
+        android:text="@string/tv_goods_pinkage" />
+</LinearLayout>

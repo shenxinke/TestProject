@@ -1,0 +1,191 @@
+package com.yst.onecity.fragment;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ListView;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.yst.onecity.R;
+import com.yst.onecity.adapter.AddProductAdapter;
+import com.yst.onecity.base.BaseFragment;
+import com.yst.onecity.bean.ShoppingMallBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import okhttp3.Call;
+import okhttp3.Request;
+
+import static com.yst.onecity.activity.publish.EditShareActivity.mAllData;
+
+/**
+ * 添加商品列表fragment
+ *
+ * @author jiaofan
+ * @version 1.0.1
+ * @date 2018/6/5
+ */
+
+public class AddProductListFragment extends BaseFragment implements OnLoadmoreListener, OnRefreshListener {
+    private static final String TAG = "AddProductListFragment";
+    @BindView(R.id.lv_product)
+    ListView mLvProduct;
+    @BindView(R.id.refresh_product)
+    SmartRefreshLayout mRefreshProduct;
+    @BindView(R.id.iv_empty)
+    ImageView mIvEmpty;
+    private int page = 1;
+    private String classifyId;
+    private List<ShoppingMallBean.ContentBean> mLists = new ArrayList<>();
+    private AddProductAdapter mAdapter;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_add_product;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            classifyId = bundle.containsKey("classifyId") ? bundle.get("classifyId").toString() : "";
+        }
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = 1;
+        mLists.clear();
+        requestProductList(classifyId);
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        requestProductList(classifyId);
+    }
+
+    @Override
+    public void initData() {
+        init();
+    }
+
+    /**
+     * 初始化适配器
+     */
+    private void init() {
+        mRefreshProduct.setOnRefreshListener(this);
+        mRefreshProduct.setOnLoadmoreListener(this);
+        requestProductList(classifyId);
+        mAdapter = new AddProductAdapter(mLists, context, 0);
+        mLvProduct.setAdapter(mAdapter);
+    }
+
+    /**
+     * 根据分类id请求商品列表
+     *
+     * @param classifyId 分类id
+     */
+    private void requestProductList(String classifyId) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "type", "2",
+                "page", String.valueOf(page),
+                "pageSize", "10",
+                "productTypeId", classifyId,
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.COMMISSIONER_PRODUCT_LIST)
+                .addParams("type", "2")
+                .addParams("page", String.valueOf(page))
+                .addParams("pageSize", "10")
+                .addParams("productTypeId", classifyId)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+                mRefreshProduct.finishLoadmore(500);
+                mRefreshProduct.finishRefresh(500);
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                mIvEmpty.setVisibility(View.VISIBLE);
+                mRefreshProduct.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("response", "商品列表: " + response);
+                if (response != null) {
+                    ShoppingMallBean bean = new Gson().fromJson(response, ShoppingMallBean.class);
+                    if (bean.getCode() == Const.INTEGER_1) {
+                        if (bean.getContent().size() > 0) {
+                            mIvEmpty.setVisibility(View.GONE);
+                            mRefreshProduct.setVisibility(View.VISIBLE);
+                            for (int i = 0; i < bean.getContent().size(); i++) {
+                                for (int j = 0; j < mAllData.size() ; j++) {
+                                    if (bean.getContent().get(i).getId()==mAllData.get(j).getId()){
+                                        bean.getContent().get(i).setClick(true);
+                                    }
+                                }
+                            }
+                            mLists.addAll(bean.getContent());
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            if (page == Const.INTEGER_1) {
+                                mIvEmpty.setVisibility(View.VISIBLE);
+                                mRefreshProduct.setVisibility(View.GONE);
+                            } else {
+                                mIvEmpty.setVisibility(View.GONE);
+                                mRefreshProduct.setVisibility(View.VISIBLE);
+                                ToastUtils.show("已加载全部数据");
+                            }
+                        }
+                    } else {
+                        ToastUtils.show(bean.getMsg());
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 创建一个资讯fragment的实例，传入分类id
+     *
+     * @param id 分类id、
+     * @return fragment
+     */
+    public static AddProductListFragment newInstance(String id) {
+        Bundle args = new Bundle();
+        args.putString("classifyId", id);
+        AddProductListFragment fragment = new AddProductListFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+}

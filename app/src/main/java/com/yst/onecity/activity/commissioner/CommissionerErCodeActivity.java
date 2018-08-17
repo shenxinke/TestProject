@@ -1,0 +1,113 @@
+package com.yst.onecity.activity.commissioner;
+
+import android.graphics.Bitmap;
+import android.os.StrictMode;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.fragment.popfragment.ShareCommonDialog;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.roundedimageview.RoundedImageView;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+
+/**
+ * 专员二维码
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/5
+ */
+
+public class CommissionerErCodeActivity extends BaseActivity implements View.OnClickListener {
+
+    @BindView(R.id.tv_main_title)
+    TextView tvMainTitle;
+    @BindView(R.id.iv_right)
+    ImageView ivRight;
+    @BindView(R.id.iv_head)
+    RoundedImageView ivHead;
+    @BindView(R.id.tv_nick_name)
+    TextView tvNickName;
+    @BindView(R.id.tv_address)
+    TextView tvAddress;
+    @BindView(R.id.iv_er_code)
+    ImageView ivErCode;
+    @BindView(R.id.ll_back)
+    LinearLayout llBack;
+    @BindView(R.id.iv_logo)
+    RoundedImageView ivLogo;
+    private String content;
+    private String address;
+    private ShareCommonDialog shareDiaog;
+    private String hid;
+    private String serviceArea;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_er_code;
+    }
+
+    @Override
+    public void initData() {
+        ivRight.setOnClickListener(this);
+        address = TianyiApplication.appCommonBean.getAddress();
+        String nickname = TianyiApplication.appCommonBean.getNickname();
+        tvNickName.setText(nickname);
+
+        /*
+        开启一个新的线程
+         */
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        if (null != getIntent() && null != getIntent().getExtras()) {
+            hid = getIntent().getExtras().getString("hid");
+            serviceArea = getIntent().getExtras().getString("serviceArea");
+            tvAddress.setText(serviceArea);
+            createCode();
+        }
+    }
+
+    /**
+     * 生成二维码
+     */
+    private void createCode() {
+        content = Constants.URL_ROOT + "qrcode.html?hunterId=" + hid + "&phone=" + TianyiApplication.appCommonBean.getPhone();
+        MyLog.e("sss", "==hid: " + hid);
+        Bitmap bitmap = ZxingUtils.netPicToBmp(address);
+        Glide.with(this).load(address).error(R.mipmap.head_2).into(ivHead);
+        ivLogo.setVisibility(View.GONE);
+        ivErCode.setImageBitmap(ZxingUtils.createQRCodeBitmap(content, 800, bitmap, 2));
+    }
+
+    @OnClick(R.id.ll_back)
+    public void toFinish() {
+        if (!Utils.isClickable()) {
+            return;
+        }
+        finish();
+    }
+
+    @Override
+    public void onClick(View v) {
+        String zhuanYuan =  Constants.SHARE_CONSULT + "qrcode.html?hunterId=" + hid + "&phone=" + TianyiApplication.appCommonBean.getPhone();;
+        if (null == shareDiaog) {
+            shareDiaog = ShareCommonDialog.openShareDialog(this, "普济一城", "专员二维码分享", zhuanYuan, "");
+        }
+        shareDiaog.show(getFragmentManager(), "");
+    }
+
+    @OnClick(R.id.ll_back)
+    public void onBack() {
+        finish();
+    }
+}

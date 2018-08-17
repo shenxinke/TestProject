@@ -1,0 +1,106 @@
+package com.yst.onecity.activity;
+
+import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import com.bumptech.glide.Glide;
+import com.yst.onecity.R;
+import com.yst.onecity.adapter.GuidePageAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.security.PreferenceUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+
+/**
+ * 引导页
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class GuideActivity extends BaseActivity implements ViewPager.OnPageChangeListener {
+
+    @BindView(R.id.viewpager)
+    ViewPager viewPager;
+    @BindView(R.id.iv_go_to)
+    ImageView ivGoTo;
+    /**
+     * 图片资源的数组
+     */
+    private int[] imageIdArray;
+    /**
+     * 图片资源的集合
+     */
+    private List<View> viewList;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_guide;
+    }
+
+    @Override
+    public void initData() {
+        //加载ViewPager
+        initViewPager();
+    }
+
+    /**
+     * 加载图片ViewPager
+     */
+    private void initViewPager() {
+        //实例化图片资源
+        imageIdArray = new int[]{R.mipmap.start1, R.mipmap.start2, R.mipmap.start3, R.mipmap.start4};
+        viewList = new ArrayList<>();
+        //获取一个Layout参数，设置为全屏
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        //循环创建View并加入到集合中
+        int len = imageIdArray.length;
+        for (int i = 0; i < len; i++) {
+            //new ImageView并设置全屏和图片资源
+            ImageView imageView = new ImageView(this);
+            imageView.setLayoutParams(params);
+            Glide.with(GuideActivity.this).load(imageIdArray[i]).asBitmap().into(imageView);
+            //将ImageView加入到集合中
+            viewList.add(imageView);
+        }
+        //View集合初始化好后，设置Adapter
+        viewPager.setAdapter(new GuidePageAdapter(viewList));
+        //设置滑动监听
+        viewPager.addOnPageChangeListener(this);
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        //判断是否是最后一页，若是则显示按钮
+        if (position == imageIdArray.length - 1) {
+            ivGoTo.setVisibility(View.VISIBLE);
+        } else {
+            ivGoTo.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
+
+    @OnClick(R.id.iv_go_to)
+    public void onViewClicked() {
+        JumpIntent.jump(GuideActivity.this, MainActivity.class);
+        GuideActivity.this.finish();
+        PreferenceUtil.put("isFrist", false);
+    }
+}

@@ -1,0 +1,320 @@
+package com.yst.tianyimember.view;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.support.design.widget.TabLayout;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.adapter.AddressAdapter;
+import com.yst.tianyimember.bean.EventBean;
+import com.yst.tianyimember.bean.ProvinceBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.TabLayoutIndicatorUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.yst.tianyimember.utils.WindowUtils;
+import com.yst.tianyimember.utils.security.PreferenceUtil;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.Call;
+
+import static com.yst.tianyimember.utils.UiUtil.getString;
+
+/**
+ * 地址选择弹窗
+ *
+ * @author jiaofan
+ * @version 1.0.1
+ * @date 2018/6/1
+ */
+public class AddressPopupWindow extends PopupWindow implements AdapterView.OnItemClickListener, View.OnClickListener {
+    private View conentView;
+    private final ListView lvAddress;
+    private final TabLayout tab;
+    private final TextView tvSure;
+    private final ImageView ivEmpty;
+
+    private int tabCount;
+    private int startTabIndex;
+    private AddressAdapter adapter;
+    public static List<ProvinceBean.ContentBean> provinceList = new ArrayList<>();
+    public static List<ProvinceBean.ContentBean> cityList = new ArrayList<>();
+    public static List<ProvinceBean.ContentBean> districtList = new ArrayList<>();
+
+    public AddressPopupWindow(Activity activity) {
+        LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        conentView = inflater.inflate(R.layout.pop_address, null);
+        setAttribute(activity);
+        lvAddress = (ListView) conentView.findViewById(R.id.lv_address);
+        tab = (TabLayout) conentView.findViewById(R.id.tab);
+        tvSure = (TextView) conentView.findViewById(R.id.tvSure);
+        ivEmpty = (ImageView) conentView.findViewById(R.id.iv_empty);
+        tvSure.setOnClickListener(this);
+        initData(activity);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (startTabIndex == Const.INTEGER_0) {
+            getCity(String.valueOf(provinceList.get(position).getId()));
+            PreferenceUtil.put("provinceId", provinceList.get(position).getId());
+            PreferenceUtil.put("province", provinceList.get(position).getLetter());
+        }
+        if (startTabIndex == Const.INTEGER_1) {
+            getDistrict(String.valueOf(cityList.get(position).getId()));
+            PreferenceUtil.put("cityId", cityList.get(position).getId());
+            PreferenceUtil.put("city", cityList.get(position).getLetter());
+        }
+        if (startTabIndex >= Const.INTEGER_2) {
+            PreferenceUtil.put("districtId", districtList.get(position).getId());
+            PreferenceUtil.put("district", districtList.get(position).getLetter());
+            tvSure.setVisibility(View.VISIBLE);
+        }
+        startTabIndex++;
+        if (startTabIndex < tabCount) {
+            tab.getTabAt(startTabIndex).select();
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.tvSure:
+                String province = PreferenceUtil.getString("province", "");
+                String city = PreferenceUtil.getString("city", "");
+                String district = PreferenceUtil.getString("district", "");
+                String provinceId = PreferenceUtil.getString("provinceId", "");
+                String cityId = PreferenceUtil.getString("cityId", "");
+                String districtId = PreferenceUtil.getString("districtId", "");
+                MyLog.e("地址", "result==="+province+city+district+"\r\n"+"--------id---------"+provinceId+","+cityId+","+districtId);
+                Const.positionFlag = 1;
+                EventBus.getDefault().post(new EventBean("address", province, city, district));
+                this.dismiss();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void initData(Activity activity) {
+        tab.addTab(tab.newTab().setText("省份"));
+        tab.addTab(tab.newTab().setText("城市"));
+        tab.addTab(tab.newTab().setText("区县"));
+
+        tabCount = tab.getTabCount();
+
+        for (int i = 0; i < tab.getTabCount(); i++) {
+            TabLayout.Tab tab1 = tab.getTabAt(i);
+            if (tab1 == null) {
+                return;
+            }
+            //这里使用到反射，拿到Tab对象后获取Class
+            Class c = tab1.getClass();
+            try {
+                Field field = c.getDeclaredField("mView");
+                field.setAccessible(true);
+                final View view = (View) field.get(tab1);
+                if (view == null) {
+                    return;
+                }
+                view.setTag(i);
+                view.setEnabled(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        TabLayoutIndicatorUtils.setIndicator(tab, 10, 10);
+        adapter = new AddressAdapter(activity);
+        lvAddress.setAdapter(adapter);
+        lvAddress.setOnItemClickListener(this);
+        getProvinceData();
+    }
+
+    /**
+     * 获取省
+     */
+    private void getProvinceData() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "timestamp", timestamp);
+        OkHttpUtils.post() .url(Constants.GET_PROVINCE)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("province","省onError______"+e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("province","省response______"+response);
+                Gson gson = new Gson();
+                ProvinceBean provinceBean = gson.fromJson(response, ProvinceBean.class);
+                if (null != provinceBean) {
+                    if (provinceBean.getCode() == Const.INTEGER_1 && null != provinceBean.getContent()) {
+                        provinceList = provinceBean.getContent();
+                        adapter.addData(provinceList);
+                        if (provinceList.isEmpty()) {
+                            lvAddress.setVisibility(View.GONE);
+                            ivEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            lvAddress.setVisibility(View.VISIBLE);
+                            ivEmpty.setVisibility(View.GONE);
+                        }
+                    } else {
+                        ToastUtils.show(provinceBean.getMsg());
+                    }
+                } else {
+                    lvAddress.setVisibility(View.GONE);
+                    ivEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取市
+     */
+    private void getCity(String provinceId) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "pId", provinceId,
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GET_CITY)
+                .addParams("pId", provinceId)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("city", "市onError______" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("city", "市response______" + response);
+                Gson gson = new Gson();
+                ProvinceBean provinceBean = gson.fromJson(response, ProvinceBean.class);
+                if (null != provinceBean) {
+                    if (provinceBean.getCode() == Const.INTEGER_1 && null != provinceBean.getContent()) {
+                        cityList = provinceBean.getContent();
+                        adapter.addData(cityList);
+                        if (cityList.isEmpty()) {
+                            lvAddress.setVisibility(View.GONE);
+                            ivEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            lvAddress.setVisibility(View.VISIBLE);
+                            ivEmpty.setVisibility(View.GONE);
+                        }
+                    } else {
+                        ToastUtils.show(provinceBean.getMsg());
+                    }
+                } else {
+                    lvAddress.setVisibility(View.GONE);
+                    ivEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取区
+     */
+    private void getDistrict(String cityId) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "cId", cityId,
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GET_AREA)
+                .addParams("cId", cityId)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+                MyLog.e("area", "区onError______" + e);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("area", "区response______" + response);
+                Gson gson = new Gson();
+                ProvinceBean provinceBean = gson.fromJson(response, ProvinceBean.class);
+                if (null != provinceBean) {
+                    if (provinceBean.getCode() == Const.INTEGER_1 && null != provinceBean.getContent()) {
+                        districtList = provinceBean.getContent();
+                        adapter.addData(districtList);
+                        if (districtList.isEmpty()) {
+                            lvAddress.setVisibility(View.GONE);
+                            ivEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            lvAddress.setVisibility(View.VISIBLE);
+                            ivEmpty.setVisibility(View.GONE);
+                        }
+                    } else {
+                        ToastUtils.show(provinceBean.getMsg());
+                    }
+                } else {
+                    lvAddress.setVisibility(View.GONE);
+                    ivEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+
+        });
+    }
+
+    /**
+     * 设置pop属性
+     */
+    private void setAttribute(Activity activity) {
+        this.setContentView(conentView);
+        this.setWidth(WindowUtils.getScreenWidth(activity));
+        this.setHeight((int) (WindowUtils.getScreenHeight(activity) * 0.8));
+        this.setFocusable(true);
+        this.setOutsideTouchable(true);
+        this.update();
+        ColorDrawable dw = new ColorDrawable(0);
+        this.setBackgroundDrawable(dw);
+        this.setAnimationStyle(R.style.add_cart_pop_anim_style);
+    }
+
+    /**
+     * 显示popupWindow
+     */
+    public void showPop(View parent, ImageView iv) {
+        if (!this.isShowing()) {
+            this.showAsDropDown(parent);
+            iv.setImageResource(R.mipmap.shang);
+        } else {
+            this.dismiss();
+            iv.setImageResource(R.mipmap.xia);
+        }
+    }
+}

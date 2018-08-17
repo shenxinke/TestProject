@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x96"
+        android:gravity="center_vertical"
+        android:layout_marginRight="@dimen/x10"
+        android:layout_marginLeft="@dimen/x10"
+        android:orientation="horizontal">
+
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/rimg_focus_head"
+            android:layout_width="@dimen/x64"
+            android:layout_height="@dimen/x64"
+            android:scaleType="fitXY"
+            app:oval="true"
+            android:src="@drawable/ic_photography"
+            />
+
+        <TextView
+            android:id="@+id/txt_focus_name"
+            android:layout_width="@dimen/x0"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_marginRight="@dimen/x10"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/txt_focus_handle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/img_focus_handle_bg"
+            android:text="已关注" />
+    </LinearLayout>
+</LinearLayout>

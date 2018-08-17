@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:background="@color/white"
+    android:orientation="vertical"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        >
+        <com.yst.onecity.view.ContainsEmojiEditText
+            android:id="@+id/et_live_comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/txt_live_send"
+            android:layout_centerInParent="true"
+            android:paddingRight="@dimen/margin_5dp"
+            android:background="@drawable/shape_infomation_comment_edit_bg"
+            android:drawableLeft="@mipmap/icon_infomation_write_comment"
+            android:hint="说点好听的"
+            android:drawablePadding="6dp"
+            android:imeOptions="actionSend"
+            android:maxLength="200"
+            android:minHeight="@dimen/height_70px"
+            android:paddingLeft="@dimen/margin_20px"
+            android:singleLine="true"
+            android:textSize="@dimen/text_size_26px"
+            />
+        <TextView
+            android:id="@+id/txt_live_send"
+            android:layout_width="45dp"
+            android:layout_height="35dp"
+            android:text="发送"
+            android:gravity="center"
+            android:textSize="17sp"
+            android:textColor="@color/color_2D7CF7"
+            android:layout_marginLeft="8dp"
+            android:layout_centerInParent="true"
+            android:layout_alignParentRight="true"
+            />
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle"
+    android:color="@color/white">
+    <corners
+        android:radius="2dp"
+        />
+    <stroke
+        android:width="0dp"
+        android:color="@color/color_bank_card_btn" />
+    <solid
+        android:color="@color/color_bank_card_btn" />
+</shape>

@@ -1,0 +1,29 @@
+package com.yst.tianyimember.bean;
+
+/**
+ * 收货地址管理
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class AddressManageBean {
+    private String name;
+    private String phone;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+}

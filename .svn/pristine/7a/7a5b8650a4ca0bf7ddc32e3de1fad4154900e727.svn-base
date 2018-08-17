@@ -1,0 +1,39 @@
+package com.yst.onecity.utils;
+
+import com.yst.onecity.config.Const;
+
+/**
+ *  订单判断类
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class OrderStatusUtils {
+
+    public static String getOrderStatus(int status) {
+        String orderStatus = "";
+        // 	订单状态码0待付款 1已支付 2待发货 3待收货 4已评价 5待评价 6已撤销 7已收货 8全部
+        if (status == 0) {
+            orderStatus = "待付款";
+        } else if (status == 1) {
+            orderStatus = "已支付";
+        } else if (status == Const.INTEGER_2) {
+            orderStatus = "待发货";
+        } else if (status == Const.INTEGER_3) {
+            orderStatus = "待收货";
+        } else if (status == Const.INTEGER_4) {
+            orderStatus = "已评价";
+        } else if (status == Const.INTEGER_5) {
+            orderStatus = "待评价";
+        } else if (status == Const.INTEGER_6) {
+            orderStatus = "已撤销";
+        } else if (status == Const.INTEGER_7) {
+            orderStatus = "已收货";
+        } else if (status == Const.INTEGER_8) {
+            orderStatus = "全部";
+        }
+        return orderStatus;
+    }
+
+}

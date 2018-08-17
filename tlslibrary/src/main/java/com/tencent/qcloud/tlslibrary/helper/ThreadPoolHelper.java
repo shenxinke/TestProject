@@ -1,0 +1,82 @@
+package com.tencent.qcloud.tlslibrary.helper;//package com.yst.onecity.service;
+
+import android.util.Log;
+
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * 线程池辅助类
+ *
+ * @author WangJingWei
+ * @version 4.0.0
+ * @date 2018/3/27.
+ */
+
+public class ThreadPoolHelper {
+
+    private static final String LOGGER = "ThreadPoolHelper";
+    /**
+     * 线程池大小
+     */
+    private static final int POOL_SIZE = 32;
+
+    //订单任务线程池
+
+    private static ScheduledExecutorService comitTaskPool = new ScheduledThreadPoolExecutor(POOL_SIZE,
+            new BasicThreadFactory.Builder().namingPattern("example-schedule-pool-%d").daemon(true).build());
+
+
+    /**
+     * 执行订单任务
+     *
+     * @param comitTask
+     */
+    public static void executeTask(Runnable comitTask) {
+        comitTaskPool.execute(comitTask);
+    }
+
+    /**
+     * 执行延时任务
+     */
+    public static void executeTaskDelay(Runnable command,long initialDelay, long delay,TimeUnit unit) {
+        comitTaskPool.scheduleWithFixedDelay(command,initialDelay,delay, unit);
+    }
+
+    public static boolean isShutDown(){
+        return comitTaskPool.isShutdown();
+    }
+
+    /**
+     * 关闭线程池
+     */
+    public static void shutdown() {
+        Log.d(LOGGER, "shutdown comitTaskPool...");
+        comitTaskPool.shutdown();
+
+        if (!comitTaskPool.isTerminated()) {
+            Log.d(LOGGER, "直接关闭失败[" + comitTaskPool.toString() + "]");
+            try {
+                comitTaskPool.awaitTermination(3, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (comitTaskPool.isTerminated()) {
+                Log.d(LOGGER, "成功关闭[" + comitTaskPool.toString() + "]");
+            } else {
+                Log.d(LOGGER, "[" + comitTaskPool.toString() + "]关闭失败，执行shutdownNow...");
+                if (comitTaskPool.shutdownNow().size() > 0) {
+                    Log.d(LOGGER, "[" + comitTaskPool.toString() + "]没有关闭成功");
+                } else {
+                    Log.d(LOGGER, "shutdownNow执行完毕，成功关闭[" + comitTaskPool.toString() + "]");
+                }
+            }
+        } else {
+            Log.d(LOGGER, "成功关闭[" + comitTaskPool.toString() + "]");
+        }
+        Log.d(LOGGER, "接收到中断请" + comitTaskPool.toString() + "停止操作");
+    }
+}

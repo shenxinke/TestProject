@@ -1,0 +1,122 @@
+package com.yst.onecity.bean.mall;
+
+import java.util.List;
+
+/**
+ * 商城品牌列表的bean
+ *
+ * @author wuxiaofang
+ * @version 4.0.0
+ * @date 2018/3/20
+ */
+
+public class BrandBean {
+
+    /**
+     * code : 1
+     * content : {"brandList":[{"id":1,"name":"益达"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127212229020129405.jpg","id":2,"name":"晨光"},{"id":3,"name":"222222"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127212354297697200.jpg","id":4,"name":"德芙"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127213717339801870.jpg","id":5,"name":"怡口莲"},{"id":6,"name":"巧克力"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127222348745259092.jpg","id":7,"name":"蒙牛"},{"id":8,"name":"蒙牛"},{"id":9,"name":"巧克力"},{"id":10,"name":"巧克力"}],"count":44}
+     * msg : 请求成功
+     */
+
+    private int code;
+    private ContentBean content;
+    private String msg;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public static class ContentBean {
+        /**
+         * brandList : [{"id":1,"name":"益达"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127212229020129405.jpg","id":2,"name":"晨光"},{"id":3,"name":"222222"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127212354297697200.jpg","id":4,"name":"德芙"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127213717339801870.jpg","id":5,"name":"怡口莲"},{"id":6,"name":"巧克力"},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127222348745259092.jpg","id":7,"name":"蒙牛"},{"id":8,"name":"蒙牛"},{"id":9,"name":"巧克力"},{"id":10,"name":"巧克力"}]
+         * count : 44
+         */
+
+        private String  count;
+        private List<BrandListBean> brandList;
+
+        public String getCount() {
+            return count;
+        }
+
+        public void setCount(String count) {
+            this.count = count;
+        }
+
+        public List<BrandListBean> getBrandList() {
+            return brandList;
+        }
+
+        public void setBrandList(List<BrandListBean> brandList) {
+            this.brandList = brandList;
+        }
+
+        public static class BrandListBean {
+            /**
+             * id : 1
+             * name : 益达
+             * address : https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171127/20171127212229020129405.jpg
+             */
+
+            private String id;
+            private String name;
+            private String address;
+            private String logo;
+
+            public String getLogo() {
+                return logo;
+            }
+
+            public void setLogo(String logo) {
+                this.logo = logo;
+            }
+
+            public BrandListBean() {
+            }
+
+            public String getId() {
+                return id;
+            }
+
+            public void setId(String id) {
+                this.id = id;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getAddress() {
+                return address;
+            }
+
+            public void setAddress(String address) {
+                this.address = address;
+            }
+        }
+    }
+}

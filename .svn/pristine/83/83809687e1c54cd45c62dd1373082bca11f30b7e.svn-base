@@ -1,0 +1,135 @@
+package com.yst.tianyimember.bean;
+
+import java.util.List;
+
+/**
+ * 商品收藏实体类
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class UserCollectionGoodBean {
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+
+        private int hunterId;
+        private int productId;
+        private String merchantId;
+        private double price;
+        private String imageurl;
+        private String name;
+        private int productStatus;
+        private int id;
+        private boolean isShow;
+        private boolean isCheck;
+
+        public String getMerchantId() {
+            return merchantId;
+        }
+
+        public void setMerchantId(String merchantId) {
+            this.merchantId = merchantId;
+        }
+
+        public boolean isShow() {
+            return isShow;
+        }
+
+        public void setShow(boolean show) {
+            isShow = show;
+        }
+
+        public boolean isCheck() {
+            return isCheck;
+        }
+
+        public void setCheck(boolean check) {
+            isCheck = check;
+        }
+
+        public int getHunterId() {
+            return hunterId;
+        }
+
+        public void setHunterId(int hunterId) {
+            this.hunterId = hunterId;
+        }
+
+        public int getProductId() {
+            return productId;
+        }
+
+        public void setProductId(int productId) {
+            this.productId = productId;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
+
+        public String getImageurl() {
+            return imageurl;
+        }
+
+        public void setImageurl(String imageurl) {
+            this.imageurl = imageurl;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getProductStatus() {
+            return productStatus;
+        }
+
+        public void setProductStatus(int productStatus) {
+            this.productStatus = productStatus;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+    }
+}

@@ -1,0 +1,143 @@
+package com.yst.onecity.adapter;
+
+import android.app.Activity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.bean.ServerMemberInfoBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 用户认证上传图片适配器
+ *
+ * @author chenjiaddi
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class FlagViewAdapter extends BaseAdapter {
+
+    private List<ServerMemberInfoBean.ContentBean.HunterLableBean> strings = null;
+    private Activity context;
+
+
+    public FlagViewAdapter(List<ServerMemberInfoBean.ContentBean.HunterLableBean> urls, Activity context) {
+        if (urls != null) {
+            this.strings = urls;
+        } else {
+            this.strings = new ArrayList<>();
+        }
+        this.context = context;
+        MyLog.e("falg","FlagViewAdapter"+strings.size());
+
+    }
+
+    public void setData(List<ServerMemberInfoBean.ContentBean.HunterLableBean> urls) {
+        if (urls != null) {
+            this.strings = urls;
+            this.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public int getCount() {
+        int count = strings == null ? 1 : strings.size() + 1;
+        MyLog.e("falg","getCount"+count);
+        if (count > Const.INTEGER_5) {
+            return strings.size();
+        } else {
+            return count;
+        }
+    }
+
+    @Override
+    public Object getItem(int i) {
+        return strings.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+    @Override
+    public View getView(final int i, View view, ViewGroup viewGroup) {
+        ViewHolder viewHolder = null;
+        if (view == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.item_flagview, null);
+            viewHolder = new ViewHolder(view);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+        }
+        MyLog.e("falg","getView"+strings.size());
+        if (strings != null && i < strings.size()) {
+            viewHolder.tvName.setText(strings.get(i).getName());
+            viewHolder.ivDelete.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.tvName.setBackgroundResource(R.mipmap.server_information_add);
+            viewHolder.ivDelete.setVisibility(View.GONE);
+        }
+        viewHolder.tvName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (i == strings.size()) {
+                    if (iGetScrollPosition != null) {
+                        iGetScrollPosition.add();
+                    }
+                }
+            }
+        });
+        viewHolder.ivDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (iGetScrollPosition != null) {
+                    iGetScrollPosition.delete(i);
+                }
+            }
+        });
+        return view;
+    }
+
+    private IGetScrollPosition iGetScrollPosition;
+
+    public void setIScrollPositon(IGetScrollPosition iGetScrollPosition) {
+        this.iGetScrollPosition = iGetScrollPosition;
+    }
+
+    public interface IGetScrollPosition {
+        /**
+         * 点击加号回掉
+         */
+        void add();
+
+        /**
+         * 删除标签
+         * @param position 标签索引
+         */
+        void delete(int position);
+
+    }
+
+    class ViewHolder {
+        @BindView(R.id.tv_name)
+        TextView tvName;
+        @BindView(R.id.iv_delete)
+        ImageView ivDelete;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

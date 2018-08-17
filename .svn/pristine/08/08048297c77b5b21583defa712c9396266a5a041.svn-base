@@ -1,0 +1,171 @@
+package com.yst.onecity.fragment;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ListView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.ProductShareAdapter;
+import com.yst.onecity.base.BaseFragment;
+import com.yst.onecity.bean.consult.ConsultListBean;
+import com.yst.onecity.callbacks.AbstractConsultListCallback;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.Unbinder;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 商品咨询分享列表展示页面
+ *
+ * @author WangJingWei
+ * @version 4.2.0
+ * @date 2018/6/4.
+ */
+public class ProductShareZxFragment extends BaseFragment implements OnRefreshLoadmoreListener {
+    @BindView(R.id.lv_share)
+    ListView lvShare;
+    @BindView(R.id.smart_share)
+    SmartRefreshLayout smartShare;
+    @BindView(R.id.iv_empty)
+    ImageView ivEmpty;
+    Unbinder unbinder;
+
+    private int page = 1;
+    private int pageSize = 5;
+    private String productId;
+    private ProductShareAdapter mShareAdapter;
+    private List<ConsultListBean.ContentBean.ContentListBean> mList = new ArrayList<>();
+
+    /**
+     * 创建一个分享fragment实例
+     *
+     * @return fragment
+     */
+    public static ProductShareZxFragment newInstance(String id) {
+        Bundle bundle = new Bundle();
+        bundle.putString("productId", id);
+        ProductShareZxFragment fragment = new ProductShareZxFragment();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_product_share;
+    }
+
+    @Override
+    public void initData() {
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            productId = bundle.getString("productId");
+        }
+
+        smartShare.autoRefresh(100);
+        smartShare.setOnRefreshLoadmoreListener(this);
+
+        requestShareData();
+    }
+
+
+    /**
+     * 适配分享列表数据
+     */
+    private void setShareData() {
+        if (mShareAdapter == null) {
+            mShareAdapter = new ProductShareAdapter(context, mList);
+            lvShare.setAdapter(mShareAdapter);
+        } else {
+            mShareAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * 获取分享列表数据
+     */
+    private void requestShareData() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "page", String.valueOf(page),
+                "pageSize", String.valueOf(pageSize),
+                "productid", productId,
+                "timestamp", timestamp);
+
+        OkHttpUtils.post().url(Constants.PRODUCT_DETAIL_SHARE_LIST)
+                .addParams("page", String.valueOf(page))
+                .addParams("pageSize", String.valueOf(pageSize))
+                .addParams("productid", productId)
+                .addParams("timestamp", timestamp)
+                .addParams("sign", sign)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractConsultListCallback() {
+
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(TianyiApplication.getInstance().getResources().getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(ConsultListBean bean, int id) {
+                if (bean.getCode() == Const.INTEGER_1) {
+                    if (bean.getContent() != null && bean.getContent().getConsultationInfoList() != null &&
+                            bean.getContent().getConsultationInfoList().size() > 0) {
+                        mList.addAll(bean.getContent().getConsultationInfoList());
+                    } else {
+                        ToastUtils.show("暂无更多数据");
+                    }
+
+                    if (mList.size() > 0) {
+                        ivEmpty.setVisibility(View.GONE);
+                    } else {
+                        ivEmpty.setVisibility(View.VISIBLE);
+                    }
+
+                    setShareData();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = 1;
+        mList.clear();
+        requestShareData();
+        smartShare.finishRefresh(500);
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        requestShareData();
+        smartShare.finishLoadmore(500);
+    }
+}

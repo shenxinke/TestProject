@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <!--添加文本输入框，查找地址-->
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" android:orientation="horizontal"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_gravity="center_horizontal">
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="经度"/>
+        <EditText android:layout_height="fill_parent"
+            android:layout_width="100px"
+            android:id="@+id/longitude"/>
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="纬度"/>
+        <EditText android:layout_height="fill_parent"
+            android:layout_width="100px"
+            android:id="@+id/latitude"/>
+        <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="查找"
+            android:id="@+id/button"/>
+    </LinearLayout>
+
+    <com.amap.mapapi.map.MapView android:id="@+id/mapView"
+        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:clickable="true"
+        />
+</LinearLayout>

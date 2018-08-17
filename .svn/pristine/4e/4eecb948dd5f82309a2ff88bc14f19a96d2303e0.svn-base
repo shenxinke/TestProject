@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <include layout="@layout/main_title" />
+    <ImageView
+        android:id="@+id/iv_pubish_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:src="@mipmap/post_successful"/>
+
+    <TextView
+        android:id="@+id/tv_pubish_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="发布成功" />
+
+    <TextView
+        android:id="@+id/tv_service_fail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="服务器未响应"
+        android:visibility="gone"
+        android:textColor="@color/color_FFCE1C"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/tv_again_edit"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/shape_common_bg"
+        android:gravity="center"
+        android:text="重新编辑"
+        android:visibility="gone"
+        android:textColor="@color/white"
+        android:textSize="12sp" />
+</LinearLayout>

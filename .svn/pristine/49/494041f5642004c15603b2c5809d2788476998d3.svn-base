@@ -1,0 +1,175 @@
+package com.yst.onecity.dialog;
+
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.text.InputFilter;
+import android.text.TextUtils;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.utils.KeyBoardUtils;
+import com.yst.onecity.utils.SoftKeyBoardListener;
+import com.yst.onecity.utils.ToastUtils;
+
+import butterknife.BindView;
+
+/**
+ * 发送评论的dialog
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class SendCommentDialog extends AbstractBaseBottomDialog{
+    @BindView(R.id.et_comment)
+    EditText etComment;
+    @BindView(R.id.tv_send)
+    TextView send;
+    OnSendListener mListener;
+    OnShowOrDismissLinstener mOnShowOrDismissLinstener;
+    private int mContentLength = 200;
+    public boolean isDisallowEnable;
+    private int dialogType;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        dialogType = getArguments().getInt(Const.CONS_STR_TYPE);
+    }
+
+    @Override
+    public int getLayoutRes() {
+        if(Const.INTEGER_0 == dialogType){
+            return R.layout.dialog_edit_cmment;
+        }else{
+            return R.layout.dialog_edit_cmment_emoji;
+        }
+    }
+
+    @Override
+    public void bindView(View v) {
+        etComment.requestFocus();
+        etComment.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mContentLength)});
+        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        initLayoutListener();
+    }
+
+    /**
+     * 初始化DialogFragment里布局控件监听事件
+     */
+    private void initLayoutListener() {
+        etComment.setOnEditorActionListener((v, actionId, event) -> {
+            String comment = v.getText().toString().replace(" ", "");
+            if ("".equals(comment)) {
+                ToastUtils.show("您还没有填写评论");
+                return true;
+            } else {
+                mListener.editSend(comment, etComment);
+                dismiss();
+                v.setText("");
+                return false;
+            }
+        });
+
+        send.setOnClickListener(v -> {
+
+            String comment = etComment.getText().toString().trim();
+            if (TextUtils.isEmpty(comment)) {
+                ToastUtils.show("您还没有填写评论");
+                return;
+            } else {
+                mListener.editSend(comment, etComment);
+                if(isDisallowEnable){
+                    return;
+                }
+                dismiss();
+                etComment.setText("");
+            }
+        });
+        SoftKeyBoardListener.setListener(getActivity(), new SoftKeyBoardListener.OnSoftKeyBoardChangeListener() {
+            @Override
+            public void keyBoardShow(int height) {
+            }
+
+            @Override
+            public void keyBoardHide(int height) {
+                dismiss();
+            }
+        });
+    }
+
+    /**
+     * 设置是否不允许处理点击的标记
+     * @param isDisallowEnable
+     */
+    public void setDisallowEnable(boolean isDisallowEnable){
+        this.isDisallowEnable = isDisallowEnable;
+    }
+
+    @Override
+    public void show(FragmentManager fragmentManager) {
+        if(mOnShowOrDismissLinstener != null){
+            mOnShowOrDismissLinstener.onDialogShow();
+        }
+        super.show(fragmentManager);
+    }
+
+    /**
+     * SendCommentDialog隐藏监听
+     * @param dialog
+     */
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        KeyBoardUtils.hintKeyboard(getActivity());
+
+        if(mOnShowOrDismissLinstener != null){
+            mOnShowOrDismissLinstener.onDialogDimiss();
+        }
+    }
+
+        /**
+         * 创建 SendCommentDialog对象
+         * @param listener
+         * @return
+         */
+    public static SendCommentDialog creat(OnSendListener listener, int type) {
+        SendCommentDialog dialog = new SendCommentDialog();
+        Bundle bundle = new Bundle();
+        bundle.putInt(Const.CONS_STR_TYPE,type);
+        dialog.setArguments(bundle);
+        dialog.mListener = listener;
+        return dialog;
+    }
+
+    public interface OnSendListener {
+
+        /**
+         * 发送消息
+         * @param comment
+         * @param etComment
+         */
+        void editSend(String comment, EditText etComment);
+    }
+
+    public void setmOnShowOrDismissLinstener(OnShowOrDismissLinstener mOnShowOrDismissLinstener) {
+        this.mOnShowOrDismissLinstener = mOnShowOrDismissLinstener;
+    }
+
+    public interface OnShowOrDismissLinstener{
+        /**
+         * 弹框显示
+         */
+        void onDialogShow();
+
+        /**
+         * 弹框小时
+         */
+        void onDialogDimiss();
+    }
+}

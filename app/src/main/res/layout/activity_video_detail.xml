@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:id="@+id/rl_root"
+    android:orientation="vertical">
+
+    <com.yst.onecity.activity.video.LandLayoutVideo
+        android:id="@+id/gsy_video_player"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x200" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/tv_comment"
+        android:layout_below="@+id/gsy_video_player"
+        android:background="@color/white">
+
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/mSmartRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ListView
+                android:id="@+id/listView_comment"
+                style="@style/ListView_style"
+                android:layout_height="match_parent"
+                android:divider="@color/transparent" />
+
+            <com.scwang.smartrefresh.layout.footer.BallPulseFooter
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+        <ImageView
+            android:id="@+id/img_empty"
+            android:layout_width="@dimen/x88"
+            android:layout_height="@dimen/x88"
+            android:layout_marginTop="@dimen/x48"
+            android:layout_gravity="center"
+            android:background="@drawable/home_live_empty"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+
+    <TextView
+        android:id="@+id/tv_comment"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x36"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/x10"
+        android:layout_marginLeft="@dimen/x20"
+        android:layout_marginRight="@dimen/x20"
+        android:layout_marginTop="@dimen/x10"
+        android:background="@drawable/shape_video_comment_edit_bg"
+        android:drawableLeft="@mipmap/icon_infomation_write_comment"
+        android:drawablePadding="@dimen/x10"
+        android:padding="@dimen/x8"
+        android:singleLine="true"
+        android:text="说点好听的..."
+        android:textSize="@dimen/text_size_15" />
+
+</RelativeLayout>

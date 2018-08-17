@@ -1,0 +1,147 @@
+package com.yst.tianyimember.bean.order;
+
+/**
+ * 会员线下订单详情
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class MemberOrderBean {
+
+    /**
+     * order_no : 20170926173633655
+     * created_time : 2017-09-26 17:40:33
+     * total_price : 100000
+     * nickname : 三只小金
+     * himg : 推广师头像
+     * status : 7
+     * merchant_name : 店铺名称
+     */
+    private String id;
+    private String order_no;
+    private String created_time;
+    private double total_price;
+    private double totalMoney;
+    private String nickname;
+    private String himg;
+    private int status;
+    private String merchant_name;
+    private int flag;
+    private String fenRunType;
+    private String payType;
+    private String scorePrice;
+    private boolean isScore;
+
+    public boolean isScore() {
+        return isScore;
+    }
+
+    public void setScore(boolean score) {
+        isScore = score;
+    }
+
+    public String getScorePrice() {
+        return scorePrice;
+    }
+
+    public void setScorePrice(String scorePrice) {
+        this.scorePrice = scorePrice;
+    }
+
+    public String getPayType() {
+        return payType;
+    }
+
+    public void setPayType(String payType) {
+        this.payType = payType;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getOrder_no() {
+        return order_no;
+    }
+
+    public void setOrder_no(String order_no) {
+        this.order_no = order_no;
+    }
+
+    public String getCreated_time() {
+        return created_time;
+    }
+
+    public void setCreated_time(String created_time) {
+        this.created_time = created_time;
+    }
+
+    public double getTotal_price() {
+        return total_price;
+    }
+
+    public void setTotal_price(double total_price) {
+        this.total_price = total_price;
+    }
+
+    public double getTotalMoney() {
+        return totalMoney;
+    }
+
+    public void setTotalMoney(double totalMoney) {
+        this.totalMoney = totalMoney;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public String getHimg() {
+        return himg;
+    }
+
+    public void setHimg(String himg) {
+        this.himg = himg;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getMerchant_name() {
+        return merchant_name;
+    }
+
+    public void setMerchant_name(String merchant_name) {
+        this.merchant_name = merchant_name;
+    }
+
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    public String getFenRunType() {
+        return fenRunType;
+    }
+
+    public void setFenRunType(String fenRunType) {
+        this.fenRunType = fenRunType;
+    }
+}

@@ -1,0 +1,79 @@
+package com.yst.tianyimember.bean.livevideo;
+
+import java.util.List;
+
+/**
+ * 直播在线人数实体类
+ *
+ * @author WangJingWei
+ * @version 4.1.0
+ * @date 2018/5/18.
+ */
+public class LiveOnLineNum {
+    private int code;
+    private String msg;
+    private List<OnLineNum> dataList;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<OnLineNum> getContent() {
+        return dataList;
+    }
+
+    public void setContent(List<OnLineNum> content) {
+        this.dataList = content;
+    }
+
+    public static class OnLineNum {
+        private String id;
+        private String nick;
+        private String image;
+        private String time;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return nick;
+        }
+
+        public void setName(String name) {
+            this.nick = name;
+        }
+
+        public String getImgUrl() {
+            return image;
+        }
+
+        public void setImgUrl(String imgUrl) {
+            this.image = imgUrl;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public void setTime(String time) {
+            this.time = time;
+        }
+    }
+}

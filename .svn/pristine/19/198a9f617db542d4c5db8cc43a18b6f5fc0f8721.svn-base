@@ -1,0 +1,326 @@
+package com.yst.onecity.fragment.commissoner;
+
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
+
+import com.google.gson.Gson;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.commissoner.GoodsAdapter;
+import com.yst.onecity.base.BaseFragment;
+import com.yst.onecity.bean.commissioner.GoodsBean;
+import com.yst.onecity.bean.product.ProductSortStandardBean;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.fragment.popfragment.AddCartPopFragment;
+import com.yst.onecity.interfaces.BaseAdapterListener;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.SpaceItemDecoration;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.Unbinder;
+import okhttp3.Call;
+
+/**
+ * 商品页面
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/1
+ */
+
+public class GoodsFragment extends BaseFragment implements OnLoadmoreListener, OnRefreshLoadmoreListener, BaseAdapterListener {
+    @BindView(R.id.recycler)
+    RecyclerView recycler;
+    @BindView(R.id.refreshlayout)
+    SmartRefreshLayout refreshlayout;
+    @BindView(R.id.iv_empty)
+    ImageView ivEmpty;
+    Unbinder unbinder;
+    private boolean isVisiable;
+    private boolean isPrepared;
+    private boolean isFirst = true;
+    private GoodsAdapter adapter;
+    private int page = Const.INTEGER_1;
+    List<GoodsBean.ContentBean> goodsList = new ArrayList<>();
+    private String hid;
+    private int position;
+    private String memberId;
+
+
+    @Override
+    public int bindLayout() {
+        return R.layout.fragment_goods;
+    }
+
+    @Override
+    public void initData() {
+        isPrepared = true;
+        init();
+        lazyLoad();
+    }
+
+    public static GoodsFragment newInstance(String hid, String memberId) {
+        GoodsFragment fragment = new GoodsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("hid", hid);
+        bundle.putString("memberId", memberId);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    /**
+     * 初始化
+     */
+    private void init() {
+        adapter = new GoodsAdapter(getActivity(), this);
+        recycler.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        recycler.addItemDecoration(new SpaceItemDecoration(0, 25));
+        recycler.setAdapter(adapter);
+        refreshlayout.setOnRefreshLoadmoreListener(this);
+        Bundle arguments = getArguments();
+        if (null != arguments) {
+            hid = arguments.getString("hid");
+            memberId = arguments.getString("memberId");
+            adapter.setMemberId(memberId);
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        MyLog.e("xxx", "setUserVisibleHint --- 发布" + isVisibleToUser);
+        if (isVisibleToUser) {
+            isVisiable = true;
+            lazyLoad();
+        } else {
+            isVisiable = false;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getGoodsList();
+    }
+
+    /**
+     * 获取商品列表
+     */
+    private void getGoodsList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "hunterId", hid,
+                "page", String.valueOf(page),
+                "rows", String.valueOf(Const.INTEGER_10),
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.GET_COMMISSONER_GOODS_LIST)
+                .addParams("hunterId", hid)
+                .addParams("page", String.valueOf(page))
+                .addParams("rows", String.valueOf(Const.INTEGER_10))
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(e.getMessage());
+                List<GoodsBean.ContentBean> emptyList = new ArrayList<>();
+                setVisiableGone(emptyList);
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                if (null != response) {
+                    GoodsBean goodsBean = new Gson().fromJson(response, GoodsBean.class);
+                    if (null != goodsBean) {
+                        if (goodsBean.getCode() == Const.INTEGER_1 && null != goodsBean.getContent()) {
+                            if (page == Const.INTEGER_1) {
+                                goodsList.clear();
+                            } else {
+                                if (goodsBean.getContent().isEmpty()) {
+                                    ToastUtils.show("已加载全部");
+                                }
+                            }
+                            goodsList.addAll(goodsBean.getContent());
+                            adapter.addData(goodsList);
+                            setVisiableGone(goodsList);
+                        } else {
+                            ToastUtils.show(goodsBean.getMsg());
+                        }
+
+                    }
+                }
+            }
+        });
+
+    }
+
+
+    /**
+     * 懒加载
+     */
+    public void lazyLoad() {
+        MyLog.e("sss", "isFirst: " + isFirst + "-isRepared: " + isPrepared + "_isVisible: " + isVisiable);
+        if (!isPrepared || !isVisiable || !isFirst) {
+            return;
+        }
+        getGoodsList();
+        isFirst = false;
+    }
+
+
+    /**
+     * 设置数据和图片的展示
+     *
+     * @param list 集合
+     */
+    public void setVisiableGone(List<GoodsBean.ContentBean> list) {
+        if (null != list) {
+            if (list.isEmpty()) {
+                ivEmpty.setVisibility(View.VISIBLE);
+            } else {
+                ivEmpty.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        page++;
+        getGoodsList();
+        refreshlayout.finishLoadmore(500);
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        page = Const.INTEGER_1;
+        getGoodsList();
+        refreshlayout.finishRefresh(500);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        if (!Utils.isClickable()) {
+            return;
+        }
+        getGuige(goodsList.get(position).getProductId(), position);
+    }
+
+    /**
+     * 获取商品规格
+     */
+    private void getGuige(final int pId, final int position) {
+        final String productId = String.valueOf(pId);
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp,
+                "pId", productId, "merchantid", Const.STR1);
+        OkHttpUtils.post().url(Constants.GET_PRODUCT_SORT_STANDARD)
+                .addParams("timestamp", timestamp)
+                .addParams("pId", productId)
+                .addParams("merchantid", Const.STR1)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "-规格：" + response);
+                if (response != null) {
+                    ProductSortStandardBean standardBean = new Gson().fromJson(response, ProductSortStandardBean.class);
+                    if (null != standardBean.getContent() && standardBean.getCode() == Const.INTEGER_1) {
+                        if (standardBean.getContent().getStandard().size() > 1) {
+                            showAddCartDialog(productId, Const.STR1);
+                        } else {
+                            int standardId = standardBean.getContent().getStandard().get(0).getStandardId();
+                            int classId = standardBean.getContent().getClassify().get(0).getClassId();
+                            int kuNum = standardBean.getContent().getStandard().get(0).getKuNum();
+                            addCart(String.valueOf(kuNum), String.valueOf(standardId), String.valueOf(classId));
+                        }
+                    }
+                } else {
+                    ToastUtils.show(getString(R.string.tv_check_service));
+                }
+            }
+        });
+    }
+
+    /**
+     * 添加购物车
+     */
+    private void addCart(String num, String standardId, String classId) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign("timestamp", timestamp,
+                "phone", TianyiApplication.appCommonBean.getPhone()
+                , "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "spid", standardId,
+                "stid", classId,
+                "num", num,
+                "hunterid", memberId);
+        OkHttpUtils.post().url(Constants.ADD_SHOP_CART)
+                .addParams("timestamp", timestamp)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("spid", standardId)
+                .addParams("stid", classId)
+                .addParams("num", num)
+                .addParams("hunterid", memberId)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                try {
+                    JSONObject obj = new JSONObject(response);
+                    int code = obj.getInt("code");
+                    if (code == 1) {
+                        ToastUtils.show("成功加入购物车");
+                    } else {
+                        ToastUtils.show(obj.getString("msg"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * 显示购物车弹框
+     *
+     * @param productId  商品id
+     * @param merchantId merchantId
+     */
+    private void showAddCartDialog(String productId, String merchantId) {
+        AddCartPopFragment popFragment = AddCartPopFragment.newInstance(productId, merchantId, memberId, "", "", "", "", "", "");
+        popFragment.show(getFragmentManager(), "goodsFragment");
+    }
+}
+

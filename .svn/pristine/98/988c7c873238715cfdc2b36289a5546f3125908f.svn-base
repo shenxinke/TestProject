@@ -1,0 +1,92 @@
+package com.yst.onecity.bean.commissioner;
+
+/**
+ * 从个人中心进入的专员bean
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/6/14
+ */
+
+public class PersonCommissionerBean {
+
+    /**
+     * code : 1
+     * content : {"id":814,"merchant_id":0,"nickname":"mysF6925","profit_money":0}
+     * msg : 获取专员信息成功
+     */
+
+    private int code;
+    private ContentBean content;
+    private String msg;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public static class ContentBean {
+        /**
+         * id : 814
+         * merchant_id : 0
+         * nickname : mysF6925
+         * profit_money : 0
+         */
+
+        private int id;
+        private int merchant_id;
+        private String nickname;
+        private int profit_money;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getMerchant_id() {
+            return merchant_id;
+        }
+
+        public void setMerchant_id(int merchant_id) {
+            this.merchant_id = merchant_id;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+
+        public void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+
+        public int getProfit_money() {
+            return profit_money;
+        }
+
+        public void setProfit_money(int profit_money) {
+            this.profit_money = profit_money;
+        }
+    }
+}

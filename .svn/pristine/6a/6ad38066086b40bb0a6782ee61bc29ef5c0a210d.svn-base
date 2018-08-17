@@ -1,0 +1,301 @@
+package com.yst.onecity.activity.member;
+
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import com.bumptech.glide.Glide;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.AbstractCommonAdapter;
+import com.yst.onecity.adapter.CommonViewHolder;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.order.MemberOffLineDetailsBean;
+import com.yst.onecity.bean.order.OrderRewardBean;
+import com.yst.onecity.bean.order.UnLineOrderBean;
+import com.yst.onecity.callbacks.AbstractMemberOffLineDetailsCallBack;
+import com.yst.onecity.callbacks.AbstractOrderRewardCallBack;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.MyListView;
+import com.zhy.http.okhttp.OkHttpUtils;
+import java.util.ArrayList;
+import java.util.List;
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 会员端线下订单详情
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class OffLineOrderDetailActivity extends BaseActivity {
+
+    @BindView(R.id.tv_shop_name)
+    TextView tvShopName;
+    @BindView(R.id.listView)
+    MyListView listView;
+    @BindView(R.id.tv_order_creat)
+    TextView tvOrderCreat;
+    @BindView(R.id.tv_order_number)
+    TextView tvOrderNumber;
+    @BindView(R.id.tv_order_price)
+    TextView tvOrderPrice;
+    @BindView(R.id.tv_order_reward)
+    TextView tvOrderReward;
+    @BindView(R.id.tv_money_state)
+    TextView tvMoneyState;
+    @BindView(R.id.ll_reward)
+    LinearLayout llReward;
+    @BindView(R.id.tv_everyday_reward)
+    TextView tvEveryDarReward;
+    @BindView(R.id.tv_open_red_package)
+    TextView tvOpenRedReward;
+    @BindView(R.id.view_line)
+    View viewLine;
+    @BindView(R.id.iv_reward)
+    ImageView ivReward;
+    @BindView(R.id.iv_head)
+    ImageView ivHead;
+    @BindView(R.id.img_jifen)
+    ImageView imJifen;
+    @BindView(R.id.tv_order_score)
+    TextView tvScore;
+
+    private List<UnLineOrderBean> data = new ArrayList<>();
+    private AbstractCommonAdapter<UnLineOrderBean> adapter;
+    private String oid;
+    private String id;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_offline_order_detail;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("订单详情");
+        oid = getIntent().getExtras().getString("oid");
+        id = getIntent().getExtras().getString("id");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+         requestOrderDetailsNetWork(oid);
+
+    }
+
+    /**
+     * 获取会员线下订单详情
+     */
+    private void requestOrderDetailsNetWork(String oid) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "oid", oid,
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        //请求参数：主订单id、会员手机号、uuid
+        OkHttpUtils.post().url(Constants.MEMBER_UNORDER_DETAIL)
+                .addParams("oid", oid)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractMemberOffLineDetailsCallBack() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(MemberOffLineDetailsBean response, int id) {
+                if (response.getCode() == 1) {
+                    MemberOffLineDetailsBean.MemberOffLineDetailBean content = response.getContent();
+                    Glide.with(context).load(content.getMimg()).error(R.mipmap.head_2).into(ivHead);
+                    tvShopName.setText(ConstUtils.getStringNoEmpty(content.getMerchant_name()));
+                    tvOrderCreat.setText(ConstUtils.getStringNoEmpty(content.getCreated_time()));
+                    tvOrderNumber.setText(ConstUtils.getStringNoEmpty(content.getOrderNo()));
+
+                    tvMoneyState.setText("可获奖励");
+                    tvOrderReward.setText(String.valueOf(content.getTotalScore()));
+                    if(Const.CONS_STR_JIFENZHIFU.equals(content.getPay_type())){
+                        imJifen.setVisibility(View.VISIBLE);
+                        tvScore.setVisibility(View.VISIBLE);
+                        tvOrderPrice.setVisibility(View.GONE);
+                        tvScore.setText(String.valueOf(content.getTotalScore()));
+                    }else {
+                        imJifen.setVisibility(View.GONE);
+                        tvScore.setVisibility(View.GONE);
+                        tvOrderPrice.setVisibility(View.VISIBLE);
+                        tvOrderPrice.setText("¥" + content.getTotal_price());
+                    }
+
+                    //0天天奖
+                    if (Const.STR0.equals(content.getFenRunType())) {
+                        ivReward.setVisibility(View.GONE);
+                        ivReward.setImageResource(R.mipmap.tiantianjiang);
+                        llReward.setVisibility(View.GONE);
+                        tvEveryDarReward.setBackgroundColor(0xFFECECEC);
+                        tvEveryDarReward.setTextColor(0xFFCCCCCC);
+                        tvEveryDarReward.setEnabled(false);
+                        tvOpenRedReward.setBackgroundColor(0xFFECECEC);
+                        tvOpenRedReward.setTextColor(0xFFCCCCCC);
+                        tvOpenRedReward.setEnabled(false);
+                        viewLine.setVisibility(View.GONE);
+                    } else if (Const.STR1.equals(content.getFenRunType())) {
+                        ivReward.setVisibility(View.GONE);
+                        ivReward.setImageResource(R.mipmap.red_package);
+                        llReward.setVisibility(View.GONE);
+                        tvEveryDarReward.setBackgroundColor(0xFFECECEC);
+                        tvEveryDarReward.setTextColor(0xFFCCCCCC);
+                        tvEveryDarReward.setEnabled(false);
+                        tvOpenRedReward.setBackgroundColor(0xFFECECEC);
+                        tvOpenRedReward.setTextColor(0xFFCCCCCC);
+                        tvOpenRedReward.setEnabled(false);
+                        viewLine.setVisibility(View.GONE);
+                    } else { //是空说明没开过
+                        if (content.getFlag() == 1) {
+                            llReward.setVisibility(View.GONE);
+                            tvEveryDarReward.setBackgroundResource(R.drawable.shape_gradient_btn);
+                            tvEveryDarReward.setTextColor(0xFFFFFFFF);
+                            tvEveryDarReward.setEnabled(true);
+                            tvOpenRedReward.setBackgroundColor(0xFFFF763F);
+                            tvOpenRedReward.setTextColor(0xFFFFFFFF);
+                            tvOpenRedReward.setEnabled(true);
+                            viewLine.setVisibility(View.GONE);
+                        } else {
+                            llReward.setVisibility(View.GONE);
+                        }
+                    }
+                    if (content.getSon() != null) {
+                        data = content.getSon();
+                        initCtrl(content.getIsXYT());
+                    }
+                } else {
+                    ToastUtils.show(response.getMsg());
+                }
+            }
+        });
+    }
+
+    public void initCtrl(final int isXinYeTai) {
+        adapter = new AbstractCommonAdapter<UnLineOrderBean>(context, data, R.layout.item_offline_order_details) {
+            @Override
+            public void convert(CommonViewHolder holder, int position, UnLineOrderBean item) {
+                holder.setText(R.id.tv_goods_name, ConstUtils.getStringNoEmpty(item.getName()));
+                holder.setText(R.id.tv_goods_number, "x" + item.getNum());
+                holder.setText(R.id.tv_integral, "" + item.getScorePrice());
+                holder.setText(R.id.tv_goods_money, "¥" + item.getPrice());
+                /**
+                 * 判断是否是新业态用户
+                 */
+                if(isXinYeTai == Const.INTEGER_1){
+                    holder.setRlVisiable(R.id.ll_image,View.GONE);
+                }else {
+                    holder.setRlVisiable(R.id.ll_image,View.VISIBLE);
+                }
+            }
+        };
+        listView.setAdapter(adapter);
+    }
+
+    /**
+     * 复制订单号
+     */
+    @OnClick({R.id.tv_ordernumber_copy, R.id.tv_open_red_package, R.id.tv_everyday_reward})
+    public void onViewClicked(View v) {//复制订单号
+        switch (v.getId()) {
+            case R.id.tv_ordernumber_copy:
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                // 将文本内容放到系统剪贴板里。
+                cm.setText(tvOrderNumber.getText());
+                ToastUtils.show("复制成功");
+                break;
+            //开红包
+            case R.id.tv_open_red_package:
+                Bundle bundle = new Bundle();
+                bundle.putString("id", id);
+                JumpIntent.jump(OffLineOrderDetailActivity.this, RedPackageActivity.class, bundle);
+                break;
+            //天天奖
+            case R.id.tv_everyday_reward:
+                openRedPackage();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void openRedPackage() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "id", id,
+                "type", "0",
+                "memberId", TianyiApplication.appCommonBean.getId(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "timestamp", timestamp);
+        OkHttpUtils.post().url(Constants.ORDER_REWARD)
+                .addParams("id", id)
+                //1开红包，0天天返
+                .addParams("type", "0")
+                .addParams("memberId", TianyiApplication.appCommonBean.getId())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractOrderRewardCallBack() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(OrderRewardBean response, int id) {
+                requestOrderDetailsNetWork(oid);
+                ToastUtils.show(response.getMsg());
+            }
+        });
+    }
+
+}

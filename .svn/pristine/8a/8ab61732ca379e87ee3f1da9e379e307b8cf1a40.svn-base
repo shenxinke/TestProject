@@ -1,0 +1,299 @@
+package com.yst.onecity.activity.member;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.DraftBoxAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.CodeMsgBean;
+import com.yst.onecity.bean.information.InformationBean;
+import com.yst.onecity.bean.information.InformationContentBean;
+import com.yst.onecity.callbacks.AbstractCodeMsgCallback;
+import com.yst.onecity.callbacks.AbstractMemberInformationCallBack;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.AbstractDeleteDialog;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 草稿箱
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class DraftBoxActivity extends BaseActivity implements DraftBoxAdapter.OnDeleteListener, DraftBoxAdapter.OnEditListener, DraftBoxAdapter.OnUploadListener, OnRefreshListener, OnLoadmoreListener {
+    @BindView(R.id.listView)
+    ListView listView;
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
+    @BindView(R.id.ll_empty)
+    LinearLayout llEmpty;
+    private List<InformationContentBean> data = new ArrayList<>();
+    private DraftBoxAdapter adapter;
+    private AbstractDeleteDialog deleteDialog;
+    private int pageSize = 10, pageNum = 1;
+    private String newsId;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_draft_box;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("草稿箱");
+        smartRefreshLayout.setOnRefreshListener(this);
+        smartRefreshLayout.setOnLoadmoreListener(this);
+        smartRefreshLayout.setEnableRefresh(true);
+        smartRefreshLayout.setEnableLoadmore(true);
+        initDialog();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        requestDraftListNetWork(pageNum);
+    }
+
+    /**
+     * 获取草稿箱列表
+     */
+    private void requestDraftListNetWork(final int page) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "page", String.valueOf(page),
+                "rows", String.valueOf(pageSize),
+                "flag", "0",
+                "userId", Constants.ISSERVER ? TianyiApplication.appCommonBean.getHunter_id() : TianyiApplication.appCommonBean.getId(),
+                "userType", Constants.ISSERVER ? "1" : "0",
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        //请求参数：当前页数、0 草稿箱 1发布列表、用户id、0普通会员 1推广师
+        OkHttpUtils.post().url(Constants.MY_NEWS_LIST)
+                .addParams("page", String.valueOf(page))
+                .addParams("rows", String.valueOf(pageSize))
+                .addParams("flag", "0")
+                .addParams("userId", Constants.ISSERVER ? TianyiApplication.appCommonBean.getHunter_id() : TianyiApplication.appCommonBean.getId())
+                .addParams("userType", Constants.ISSERVER ? "1" : "0")
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractMemberInformationCallBack() {
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                onLoad();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(InformationBean response, int id) {
+                if (response.getCode() == 1) {
+                    if (page == 1) {
+                        data = response.getContent();
+                    } else {
+                        data.addAll(response.getContent());
+                    }
+                } else {
+                    ToastUtils.show(response.getMsg());
+                }
+                flushOnLineListData();
+            }
+        });
+    }
+
+    /**
+     * 刷新适配器
+     */
+    private void flushOnLineListData() {
+        if (null == listView) {
+            return;
+        }
+        if (data == null || data.size() == 0) {
+            llEmpty.setVisibility(View.VISIBLE);
+        } else {
+            llEmpty.setVisibility(View.GONE);
+        }
+        if (adapter == null) {
+            adapter = new DraftBoxAdapter(context, data, this, this, this);
+            listView.setAdapter(adapter);
+        } else {
+            adapter.setData(data);
+        }
+    }
+
+    /**
+     * 初始化弹框
+     */
+    private void initDialog() {
+        deleteDialog = new AbstractDeleteDialog(this) {
+            @Override
+            public void onSureClick() {
+                deleteInformation(newsId);
+            }
+        };
+        deleteDialog.setText("删除后无法恢复，确认删除？");
+    }
+
+    @Override
+    public void deleteClick(String id) {
+        newsId = id;
+        deleteDialog.showDialog();
+    }
+
+    /**
+     * 删除资讯
+     */
+    private void deleteInformation(String id) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "id", id,
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        //请求参数：uuid、手机号、资讯id
+        OkHttpUtils.post().url(Constants.DELETE_NEWS)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("id", id)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    requestDraftListNetWork(pageNum);
+                } else {
+                    ToastUtils.show(response.getMsg());
+                }
+            }
+        });
+    }
+
+    /**
+     * 用来停止列表刷新
+     **/
+    private void onLoad() {
+        smartRefreshLayout.finishRefresh(500);
+        smartRefreshLayout.finishLoadmore(500);
+    }
+
+    @Override
+    public void btnEditClick(InformationContentBean bean) {
+        Bundle bundle = new Bundle();
+        bundle.putString("flag", "编辑");
+        bundle.putSerializable("bean", bean);
+        JumpIntent.jump(DraftBoxActivity.this, PublishInformationActivity.class, bundle);
+    }
+
+    @Override
+    public void uploadClick(InformationContentBean bean) {
+        isShowInformation(bean.getId(), 1);
+    }
+
+    /**
+     * 显示/不显示资讯
+     */
+    private void isShowInformation(String id, int status) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "status", String.valueOf(status),
+                "id", id,
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        //请求参数：4代表不显示 2代表显示、资讯id、uuid、手机号
+        OkHttpUtils.post().url(Constants.SHOW_NEWS)
+                //4代表不显示 2代表显示
+                .addParams("status", String.valueOf(status))
+                .addParams("id", id)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    requestDraftListNetWork(pageNum);
+                }
+                ToastUtils.show(response.getMsg());
+            }
+        });
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        pageNum = 1;
+        requestDraftListNetWork(pageNum);
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        pageNum++;
+        requestDraftListNetWork(pageNum);
+    }
+}

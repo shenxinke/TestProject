@@ -1,0 +1,187 @@
+package com.yst.tianyimember.activity.member;
+
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.tencent.TIMCallBack;
+import com.tencent.TIMFriendshipManager;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.bean.CodeMsgBean;
+import com.yst.tianyimember.callbacks.AbstractCodeMsgCallback;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.yst.tianyimember.view.ContainsEmojiEditText;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 用户修改昵称
+ *
+ * @author chejianqi
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class UserEditNickNameActivity extends BaseActivity {
+
+    @BindView(R.id.activity_back_iv1)
+    ImageView activityBackIv1;
+    @BindView(R.id.activity_back_iv)
+    ImageView activityBackIv;
+    @BindView(R.id.activity_title_tv)
+    TextView activityTitleTv;
+    @BindView(R.id.activity_title_right_img)
+    ImageView activityTitleRightImg;
+    @BindView(R.id.activity_title_right_chat_say_img)
+    ImageView activityTitleRightChatSayImg;
+    @BindView(R.id.activity_complete_tv)
+    TextView activityCompleteTv;
+    @BindView(R.id.nickname_edt)
+    ContainsEmojiEditText nicknameEdt;
+    @BindView(R.id.nickname_delete_img)
+    ImageView nicknameDeleteImg;
+    @BindView(R.id.nickname_linear)
+    RelativeLayout nicknameLinear;
+    private String nickname;
+    private String firstLoginNull = "第一次登陆昵称为空";
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_user_edit_nick_name;
+    }
+
+    @Override
+    public void initData() {
+        activityTitleTv.setText(getString(R.string.user_edit_nickname_title));
+        activityCompleteTv.setVisibility(View.VISIBLE);
+        nickname = getIntent().getStringExtra("nickName");
+        if (firstLoginNull.equals(nickname)) {
+            nicknameEdt.setHint("请输入昵称");
+        } else {
+            nicknameEdt.setText(nickname);
+        }
+        if (nickname.length() > 0 && !firstLoginNull.equals(nickname)) {
+            nicknameEdt.setSelection(getIntent().getStringExtra("nickName").length());
+        }
+        Utils.setEmojiEdittextLength(nicknameEdt, 8);
+        nicknameEdt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() >= Const.INTEGER_8) {
+                    ToastUtils.show("昵称八字以内");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+    }
+
+    @OnClick(R.id.activity_back_iv)
+    public void onFinish() {
+        finish();
+    }
+
+    @OnClick(R.id.activity_complete_tv)
+    public void onEditTextComplete() {
+        if (Utils.isClickable()) {
+            updateUserNickName();
+        }
+    }
+
+    @OnClick(R.id.nickname_delete_img)
+    public void onEditDelete() {
+        nicknameEdt.setText("");
+    }
+
+    /**
+     * 修改用户的昵称
+     */
+    private void updateUserNickName() {
+        if (Utils.isClickable()) {
+            final String mNickName = nicknameEdt.getText().toString().trim();
+            if (mNickName.length() < 1) {
+                ToastUtils.show("请输入昵称");
+                return;
+            }
+            if (mNickName.equals(nickname)) {
+                finish();
+                return;
+            }
+            if (firstLoginNull.equals(mNickName)) {
+                finish();
+                return;
+            }
+            String timestamp = SignUtils.getTimeStamp();
+            String sign = Utils.getSign(
+                    "uuid", TianyiApplication.appCommonBean.getUuid(),
+                    "phone", TianyiApplication.appCommonBean.getPhone(),
+                    "newNickname", mNickName,
+                    "timestamp", timestamp);
+            OkHttpUtils.post().url(Constants.URL_UPDATE_NICKNAME)
+                    .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                    .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                    .addParams("newNickname", mNickName)
+                    .addParams("timestamp", timestamp)
+                    .addParams("sign", sign)
+                    .addParams("client_type", "A")
+                    .build().execute(new AbstractCodeMsgCallback() {
+
+                @Override
+                public void onBefore(Request request, int id) {
+                    super.onBefore(request, id);
+                    showInfoProgressDialog();
+                }
+
+                @Override
+                public void onAfter(int id) {
+                    super.onAfter(id);
+                    dismissInfoProgressDialog();
+                }
+
+                @Override
+                public void onError(Call call, Exception e, int id) {
+                }
+
+                @Override
+                public void onResponse(CodeMsgBean response, int id) {
+                    if (response != null && response.getCode() == 1) {
+
+                        TIMFriendshipManager.getInstance().setNickName(mNickName, new TIMCallBack() {
+                            @Override
+                            public void onError(int i, String s) {
+                                MyLog.e("sss", "the result is === " + s);
+                            }
+
+                            @Override
+                            public void onSuccess() {
+                                MyLog.e("sss", "the result is === successful");
+                            }
+                        });
+                        finish();
+                    }
+                    ToastUtils.show(response.getMsg());
+                }
+            });
+        }
+    }
+}

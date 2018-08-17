@@ -1,0 +1,31 @@
+package com.yst.onecity.utils;
+
+/**
+ *
+ * @author  WangJingWei
+ * @version
+ * @date 2018/3/21.
+ * RxBus的code值
+ */
+
+public class RxCode {
+    public static final int CODE_AUTOTICKETS_MESSAGE = 1001;
+    public static final int CODE_ADD_CART_SUCCESSFUL = 1002;
+    public static final int CODE_REGISTER_SEND = 1003;
+    public static final int ADD_CART = 1004;
+    public static final int ADD_CART_DETAILS = 1005;
+    public static final int CODE_SETTING_PWD_FINISH = 1006;
+    public static final int CODE_INFORMATIONDETAIL_LOGIN = 1007;
+    public static final int NEW_VERSION_APK = 1008;
+    public static final int NOT_NEW_VERSION_APK = 1009;
+    public static final int REGISTER_IM_MSG = 1010;
+    public static final int CODE_SHARE_SUCCESS= 1011;
+    public static final int CODE_PUBLISH_VIDEO_SUCCRSSS= 1012;
+    public static final int CODE_PX_COMMENT= 1013;
+    public static final int CODE_PX_DZ= 1014;
+    public static final int CODE_PUBLISH_SERVER_ADDRESS= 1015;
+    public static final int CODE_PX_SHARESUCCESS= 1016;
+    public static final int CODE_MY_ZY= 1017;
+    public static final int CODE_PUBLISH_ADD_SHOPPING_CARD= 1018;
+    public static final int CODE_ADDRESS= 1019;
+}

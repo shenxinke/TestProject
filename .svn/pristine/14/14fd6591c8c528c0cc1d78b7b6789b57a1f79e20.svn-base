@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/color_fafafa"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/white"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <TextView
+            android:id="@+id/tv_goods_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:ellipsize="end"
+            android:layout_toLeftOf="@+id/tv_goods_money"
+            android:drawableLeft="@mipmap/orderdetails_img_goods"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingLeft="5dp"
+            android:paddingTop="10dp"
+            android:text="儿童座椅"
+            android:textColor="@color/color_333333"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_goods_money"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/iv_goods"
+            android:paddingRight="5dp"
+            android:paddingTop="10dp"
+            android:text="¥0"
+            android:textColor="@color/color_333333"
+            android:textSize="14sp" />
+        <ImageView
+            android:id="@+id/im_jifen"
+            android:src="@mipmap/jifen_dingdan"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_below="@+id/tv_goods_money"
+            android:layout_marginTop="6dp"
+            android:layout_toLeftOf="@+id/tv_integral"
+            android:paddingRight="5dp" />
+
+        <TextView
+            android:id="@+id/tv_integral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_goods_money"
+            android:layout_marginTop="3dp"
+            android:layout_toLeftOf="@+id/iv_goods"
+            android:paddingRight="5dp"
+            android:text="0"
+            android:textColor="@color/color_333333"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_goods_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@+id/iv_goods"
+            android:paddingBottom="10dp"
+            android:paddingRight="5dp"
+            android:text="x1"
+            android:textColor="@color/color_999999"
+            android:textSize="12sp" />
+
+
+        <ImageView
+            android:id="@+id/iv_goods"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="10dp"
+            android:paddingBottom="10dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/img_default_p" />
+
+        <TextView
+            android:id="@+id/tv_goods_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="30dp"
+            android:text="黑色"
+            android:textColor="@color/color_999999"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/tv_width"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/tv_goods_color"
+            android:text="0.4KG"
+            android:textColor="@color/color_999999"
+            android:textSize="12sp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/color_e4e4e4" />
+    </RelativeLayout>
+
+</LinearLayout>

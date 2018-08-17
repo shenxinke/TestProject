@@ -1,0 +1,202 @@
+package com.yst.onecity.activity.tickets;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.adapter.AbstractCommonAdapter;
+import com.yst.onecity.adapter.CommonViewHolder;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.tickets.TicketsBean;
+import com.yst.onecity.bean.tickets.TicketsContent;
+import com.yst.onecity.callbacks.AbstractTicketsListCallback;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 我的奖券（未开奖详情页面）
+ *
+ * @author WangJingWei
+ * @version 4.0.0
+ * @date 2018/3/20.
+ */
+public class TkNoLotteryDetailActivity extends BaseActivity {
+
+    @BindView(R.id.activity_title_tv)
+    TextView activityTitleTv;
+    @BindView(R.id.activity_back_iv)
+    ImageView imgBack;
+    @BindView(R.id.listview)
+    ListView mListView;
+    @BindView(R.id.mSmartRefresh)
+    SmartRefreshLayout mSmartRefresh;
+    @BindView(R.id.img_empty)
+    ImageView imgEmpty;
+    @BindView(R.id.tv_ordernum)
+    TextView tvOrderNum;
+
+    private int pageSize = 1;
+    private int rows = 10;
+    private String orderNo;
+    private String packagenum;
+    private List<TicketsContent> mData = new ArrayList<>();
+    private AbstractCommonAdapter<TicketsContent> mCommonAdapter;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_tickets_nolottery_detail;
+    }
+
+    @Override
+    public void initData() {
+        activityTitleTv.setText(getString(R.string.my_tickets));
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            orderNo = bundle.getString("orderNo");
+            packagenum = bundle.getString("packagenum");
+            tvOrderNum.setText("订单号: " + Utils.changeEmptyStringToZero(orderNo) + " (" + Utils.changeEmptyStringToZero(packagenum) + ")");
+        }
+
+        initListener();
+        initTicketsData();
+        requestTicketsList();
+    }
+
+    /**
+     * 实例化监听事件
+     */
+    private void initListener() {
+        mSmartRefresh.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+                pageSize++;
+                requestTicketsList();
+                mSmartRefresh.finishLoadmore(500);
+            }
+
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                mData.clear();
+                pageSize = 1;
+                requestTicketsList();
+                mSmartRefresh.finishRefresh(500);
+            }
+        });
+
+        imgBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+    }
+
+    /**
+     * 设置奖券数据
+     */
+    private void initTicketsData() {
+
+        mCommonAdapter = new AbstractCommonAdapter<TicketsContent>(this, mData, R.layout.item_tickets_no_lottery_detail) {
+            @Override
+            public void convert(CommonViewHolder holder, int position, final TicketsContent item) {
+                holder.setText(R.id.tv_date,"开奖日期: "+Utils.getStringNoEmpty(item.getDate()));
+                holder.setText(R.id.tv_ticket_num,"券号: "+Utils.getStringNoEmpty(item.getNum()));
+
+                holder.setButtonListener(R.id.tv_tk_preview, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("lotteryNum", orderNo);
+                        JumpIntent.jump(TkNoLotteryDetailActivity.this, TkPreviewActivity.class, bundle);
+                    }
+                });
+            }
+        };
+        mListView.setAdapter(mCommonAdapter);
+    }
+
+    /**
+     * 请求某一订单下未开奖的奖券
+     */
+    private void requestTicketsList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "orderNo", orderNo,
+                "rows", String.valueOf(rows),
+                "timestamp", timestamp,
+                "page", String.valueOf(pageSize));
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils
+                .post()
+                .url(Constants.TICKETS_NO_LOTTERY_RP_LIST)
+                .addParams("page", String.valueOf(pageSize))
+                .addParams("rows", String.valueOf(rows))
+                .addParams("orderNo", orderNo)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .build().execute(new AbstractTicketsListCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+            }
+
+            @Override
+            public void onResponse(TicketsBean response, int id) {
+                if (response.getCode() == 1) {
+                    if (response.getContent() != null && response.getContent().size() > 0) {
+                        mData.addAll(response.getContent());
+                    }
+
+                    if(mData.size() > 0){
+                        imgEmpty.setVisibility(View.GONE);
+                    }else{
+                        imgEmpty.setVisibility(View.VISIBLE);
+                    }
+
+                    mCommonAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+}

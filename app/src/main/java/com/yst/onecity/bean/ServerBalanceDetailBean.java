@@ -1,0 +1,246 @@
+package com.yst.onecity.bean;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * 服务专员余额明细
+ *
+ * @author chenjiadi
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public class ServerBalanceDetailBean implements Serializable {
+
+    /**
+     * code : 1
+     * msg : 获取成功
+     * content : [{"order_no":"2017092111112365412","created_time":1502331384000,"after_money":null,"fee":0,"type":3,"order_sub_no":null,"update_time":null,"bank":null,"user_type":1,"money":50,"user_id":2,"before_money":null,"bank_num":null,"id":1,"create_user":null,"created_ip":null,"status":0},{"order_no":"2017092112002523625","created_time":1503972987000,"after_money":null,"fee":0,"type":1,"order_sub_no":null,"update_time":null,"bank":null,"user_type":1,"money":50,"user_id":2,"before_money":null,"bank_num":null,"id":2,"create_user":null,"created_ip":null,"status":0}]
+     */
+
+    private int code;
+    private String msg;
+    private List<ContentBean> content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public List<ContentBean> getContent() {
+        return content;
+    }
+
+    public void setContent(List<ContentBean> content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * order_no : 2017092111112365412
+         * created_time : 1502331384000
+         * after_money : null
+         * fee : 0
+         * type : 3
+         * order_sub_no : null
+         * update_time : null
+         * bank : null
+         * user_type : 1
+         * money : 50
+         * user_id : 2
+         * before_money : null
+         * bank_num : null
+         * id : 1
+         * create_user : null
+         * created_ip : null
+         * status : 0
+         */
+
+        private String order_no;
+        private String created_time;
+        private String after_money;
+        private int fee;
+        private int type;
+        private String order_sub_no;
+        private String update_time;
+        private String bank;
+        private int user_type;
+        private double money;
+        private int user_id;
+        private String before_money;
+        private String bank_num;
+        private int id;
+        private String create_user;
+        private String created_ip;
+        private int sourceType;
+        private String integralType;
+
+        /**
+         * 0申请中 1成功 2失败
+         */
+        private int status;
+
+        public String getOrder_no() {
+            return order_no;
+        }
+
+        public void setOrder_no(String order_no) {
+            this.order_no = order_no;
+        }
+
+        public String getCreated_time() {
+            return created_time;
+        }
+
+        public void setCreated_time(String created_time) {
+            this.created_time = created_time;
+        }
+
+        public String getAfter_money() {
+            return after_money;
+        }
+
+        public void setAfter_money(String after_money) {
+            this.after_money = after_money;
+        }
+
+        public int getFee() {
+            return fee;
+        }
+
+        public void setFee(int fee) {
+            this.fee = fee;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+
+        public String getOrder_sub_no() {
+            return order_sub_no;
+        }
+
+        public void setOrder_sub_no(String order_sub_no) {
+            this.order_sub_no = order_sub_no;
+        }
+
+        public String getUpdate_time() {
+            return update_time;
+        }
+
+        public void setUpdate_time(String update_time) {
+            this.update_time = update_time;
+        }
+
+        public String getBank() {
+            return bank;
+        }
+
+        public void setBank(String bank) {
+            this.bank = bank;
+        }
+
+        public int getUser_type() {
+            return user_type;
+        }
+
+        public void setUser_type(int user_type) {
+            this.user_type = user_type;
+        }
+
+        public double getMoney() {
+            return money;
+        }
+
+        public void setMoney(double money) {
+            this.money = money;
+        }
+
+        public int getUser_id() {
+            return user_id;
+        }
+
+        public void setUser_id(int user_id) {
+            this.user_id = user_id;
+        }
+
+        public String getBefore_money() {
+            return before_money;
+        }
+
+        public void setBefore_money(String before_money) {
+            this.before_money = before_money;
+        }
+
+        public String getBank_num() {
+            return bank_num;
+        }
+
+        public void setBank_num(String bank_num) {
+            this.bank_num = bank_num;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getCreate_user() {
+            return create_user;
+        }
+
+        public void setCreate_user(String create_user) {
+            this.create_user = create_user;
+        }
+
+        public String getCreated_ip() {
+            return created_ip;
+        }
+
+        public void setCreated_ip(String created_ip) {
+            this.created_ip = created_ip;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        public int getSourceType() {
+            return sourceType;
+        }
+
+        public void setSourceType(int sourceType) {
+            this.sourceType = sourceType;
+        }
+
+        public String getIntegralType() {
+            return integralType;
+        }
+
+        public void setIntegralType(String integralType) {
+            this.integralType = integralType;
+        }
+    }
+}

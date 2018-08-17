@@ -1,0 +1,293 @@
+package com.yst.tianyimember.activity.member;
+
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.adapter.TrademarkViewPagerAdapter;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.bean.TrademarkShareBean;
+import com.yst.tianyimember.bean.TrademarkShoppingBean;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.fragment.TrademarkMallFragment;
+import com.yst.tianyimember.fragment.TrademarkShareFragment;
+import com.yst.tianyimember.utils.ConstUtils;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.MyLog;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 商品品牌主页
+ *
+ * @author Shenxinke
+ * @version 4.2.0
+ * @data 2018/6/5
+ */
+
+public class TrademarkActivity extends BaseActivity {
+
+    private List<Fragment> fragmentList = new ArrayList<>();
+    private String locationPermission = Manifest.permission.ACCESS_FINE_LOCATION;
+    private int arrowsStype = 1;
+    private int pageNum = 1;
+    private int rows = 2;
+    private static String brandId = "";
+    private String shoppingNum;
+    private String shareNum;
+
+    @BindView(R.id.viewpager)
+    ViewPager vpTrademark;
+    @BindView(R.id.tl_tablayout)
+    TabLayout tlTrademark;
+    @BindView(R.id.more_server_arrows)
+    ImageView imvArrows;
+    @BindView(R.id.activity_back_iv)
+    ImageView imvBack;
+    @BindView(R.id.iv_head)
+    ImageView imvHead;
+    @BindView(R.id.riv_head)
+    ImageView imvLogo;
+    @BindView(R.id.tv_title)
+    TextView tvTitle;
+    @BindView(R.id.tv_describe)
+    TextView tvDescribe;
+    @BindView(R.id.tv_num)
+    TextView tvNum;
+    @BindView(R.id.tv_story_text)
+    TextView tvStory;
+
+
+    public static void openActivity(Context context, String brandId) {
+        Bundle bundle = new Bundle();
+        bundle.putString("brandId", brandId);
+        JumpIntent.jump((Activity) context, TrademarkActivity.class, bundle);
+    }
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_trademark;
+    }
+
+    @Override
+    public void initData() {
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            brandId = bundle.getString("brandId");
+        }
+        TrademarkViewPagerAdapter viewPagerAdapter = new TrademarkViewPagerAdapter(getSupportFragmentManager(), fragmentList);
+        fragmentList.add(new TrademarkMallFragment());
+        fragmentList.add(new TrademarkShareFragment());
+        vpTrademark.setAdapter(viewPagerAdapter);
+        tlTrademark.addTab(tlTrademark.newTab().setText(Const.REQ_QR_SHOPPING + shoppingNum + Const.REQ_QR_BRACKET));
+        tlTrademark.addTab(tlTrademark.newTab().setText(Const.REQ_QR_SHARE + shareNum + Const.REQ_QR_BRACKET));
+        tlTrademark.setupWithViewPager(vpTrademark);
+        tlTrademark.getTabAt(0).setText(Const.REQ_QR_SHOPPING + Const.REQ_QR_BRACKET);
+        tlTrademark.getTabAt(1).setText(Const.REQ_QR_SHARE +Const.REQ_QR_BRACKET);
+
+        getBrandShareList();
+        getBrandShoppingList();
+
+    }
+
+
+    @OnClick({R.id.more_server_arrows, R.id.activity_back_iv})
+    public void clickEvent(View view) {
+        switch (view.getId()) {
+            case R.id.more_server_arrows:
+                if (arrowsStype == Const.INTEGER_1) {
+                    imvArrows.setImageResource(R.mipmap.up_arrows);
+                    tvStory.setMaxLines(Const.INTEGER_10000);
+                    arrowsStype = Const.INTEGER_0;
+                } else {
+                    imvArrows.setImageResource(R.mipmap.down_arrows);
+                    tvStory.setMaxLines(Const.INTEGER_2);
+                    arrowsStype = Const.INTEGER_1;
+                }
+                break;
+            case R.id.activity_back_iv:
+                finish();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 获取品牌分享信息
+     */
+    public void getBrandShareList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "memberid", TianyiApplication.appCommonBean.getId(),
+                "brandId", brandId,
+                "page", String.valueOf(pageNum),
+                "rows", String.valueOf(rows),
+                "type", String.valueOf(Const.STR1),
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post()
+                .url(Constants.GET_BRAND_LIST)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("memberid", TianyiApplication.appCommonBean.getId())
+                .addParams("brandId", brandId)
+                .addParams("rows", String.valueOf(rows))
+                .addParams("page", String.valueOf(pageNum))
+                .addParams("type", Const.STR1)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .build().execute(new StringCallback() {
+
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.tv_net_error));
+            }
+
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "-品牌分享: " + response);
+                if (response != null) {
+                    TrademarkShareBean trademarkBean = new Gson().fromJson(response, TrademarkShareBean.class);
+                    if (trademarkBean.getCode() == Const.INTEGER_1) {
+                        if (trademarkBean.getContent() != null) {
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(ConstUtils.getStringNoEmpty(trademarkBean.getContent().getBranddetail().getBrand_img())))
+                                    .asBitmap()
+                                    .error(R.mipmap.brand_default)
+                                    .into(imvHead);
+                            Glide.with(TianyiApplication.getInstance())
+                                    .load(ConstUtils.matchingImageUrl(ConstUtils.getStringNoEmpty(trademarkBean.getContent().getBranddetail().getAddress())))
+                                    .asBitmap()
+                                    .error(R.mipmap.iv_default_class)
+                                    .into(imvLogo);
+                            tvTitle.setText(ConstUtils.getStringNoEmpty(trademarkBean.getContent().getBranddetail().getName()));
+                            tvDescribe.setText(ConstUtils.getStringNoEmpty(trademarkBean.getContent().getBranddetail().getDescription()));
+                            tvNum.setText(ConstUtils.getStringNoEmpty(trademarkBean.getContent().getBranddetail().getSale_num()));
+                            tvStory.setText(ConstUtils.getStringNoEmpty(trademarkBean.getContent().getBranddetail().getStory()));
+                            shareNum = ConstUtils.getStringNoEmpty(String.valueOf(trademarkBean.getContent().getCount()));
+                            tlTrademark.getTabAt(1).setText(Const.REQ_QR_SHARE + shareNum + Const.REQ_QR_BRACKET);
+                        }
+                    } else {
+                        ToastUtils.show(getString(R.string.tv_net_error));
+                    }
+                } else {
+                    ToastUtils.show(getString(R.string.tv_net_error));
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取品牌商品信息
+     */
+    public void getBrandShoppingList() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "memberid", TianyiApplication.appCommonBean.getId(),
+                "brandId", brandId,
+                "page", String.valueOf(pageNum),
+                "rows", String.valueOf(rows),
+                "type", String.valueOf(Const.STR0),
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post()
+                .url(Constants.GET_BRAND_LIST)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("memberid", TianyiApplication.appCommonBean.getId())
+                .addParams("brandId", brandId)
+                .addParams("rows", String.valueOf(rows))
+                .addParams("page", String.valueOf(pageNum))
+                .addParams("type", Const.STR0)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .addParams("timestamp", timestamp)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.tv_net_error));
+            }
+
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "-品牌商品: " + response);
+                if (response != null) {
+                    TrademarkShoppingBean trademarkBean = new Gson().fromJson(response, TrademarkShoppingBean.class);
+                    if (trademarkBean.getCode() == Const.INTEGER_1) {
+                        if (trademarkBean.getContent() != null) {
+                            shoppingNum = ConstUtils.getStringNoEmpty(trademarkBean.getContent().getCount());
+                            tlTrademark.getTabAt(0).setText(Const.REQ_QR_SHOPPING + shoppingNum + Const.REQ_QR_BRACKET);
+                        }
+                    } else {
+                        ToastUtils.show(getString(R.string.tv_net_error));
+                    }
+                } else {
+                    ToastUtils.show(getString(R.string.tv_net_error));
+                }
+            }
+        });
+    }
+
+    public static String getBrandId() {
+        return brandId;
+    }
+
+}

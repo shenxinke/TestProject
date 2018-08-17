@@ -1,0 +1,92 @@
+package com.yst.tianyimember.bean;
+
+/**
+ * 我的账户信息实体
+ *
+ * @author WangJingWei
+ * @version 4.0.0
+ * @date 2018/3/23.
+ */
+public class MyAccountBean {
+
+
+    /**
+     * code : 1
+     * msg : 查询成功
+     * content : {"score":9997.35,"isXyt":0,"xytBalance":0,"num":3}
+     */
+
+    private int code;
+    private String msg;
+    private ContentBean content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        /**
+         * score : 9997.35
+         * isXyt : 0
+         * xytBalance : 0
+         * num : 3
+         */
+
+        private double score;
+        private int isXyt;
+        private double xytBalance;
+        private int num;
+
+        public double getScore() {
+            return score;
+        }
+
+        public void setScore(double score) {
+            this.score = score;
+        }
+
+        public int getIsXyt() {
+            return isXyt;
+        }
+
+        public void setIsXyt(int isXyt) {
+            this.isXyt = isXyt;
+        }
+
+        public double getXytBalance() {
+            return xytBalance;
+        }
+
+        public void setXytBalance(double xytBalance) {
+            this.xytBalance = xytBalance;
+        }
+
+        public int getNum() {
+            return num;
+        }
+
+        public void setNum(int num) {
+            this.num = num;
+        }
+    }
+}

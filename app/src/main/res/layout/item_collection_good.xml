@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="@dimen/x5">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.yst.onecity.view.roundedimageview.RoundedImageView
+            android:id="@+id/rimg_collection_good"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/x150"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/head_2"
+            app:corner_radius="@dimen/margin_10dp"
+            app:oval="false" />
+
+        <ImageView
+            android:id="@+id/img_collection_check"
+            android:layout_width="@dimen/x30"
+            android:layout_height="@dimen/x30"
+            android:layout_alignParentRight="true"
+            android:layout_margin="@dimen/x10"
+            android:src="@drawable/collection_goods_all_n"
+            android:visibility="gone" />
+        <TextView
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_centerInParent="true"
+            android:id="@+id/txt_yixiajia_icon"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:background="@color/goodsmanager_listitem_xiajia_back"
+            android:paddingBottom="@dimen/x6"
+            android:paddingLeft="@dimen/x8"
+            android:paddingRight="@dimen/x8"
+            android:paddingTop="@dimen/x6"
+            android:text="@string/goodsmanager_listitem_xiajia"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_10" />
+    </RelativeLayout>
+
+</LinearLayout>

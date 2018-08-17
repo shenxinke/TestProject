@@ -1,0 +1,91 @@
+package com.yst.tianyimember.adapter;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.tencent.qcloud.ui.CircleImageView;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.bean.ServerMemberMessageBean;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.utils.ConstUtils;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * 服务专员列表adapter
+ *
+ * @author lixiangchao
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class ServerMemberListAdapter extends BaseAdapter {
+
+    private Context mContext;
+    private List<ServerMemberMessageBean.ContentBean> mdata;
+
+    public ServerMemberListAdapter(Context context, List<ServerMemberMessageBean.ContentBean> data) {
+        this.mContext = context;
+        this.mdata = data;
+    }
+
+    @Override
+    public int getCount() {
+        return mdata == null ? 0 : mdata.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return mdata.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
+        if (null == convertView) {
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_conversation, null);
+            holder = new ViewHolder(convertView);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+
+        ServerMemberMessageBean.ContentBean contentBean = mdata.get(position);
+
+        holder.lastMessage.setTextColor(Color.parseColor("#AFAFAF"));
+        holder.lastMessage.setText(contentBean.getServiceTime()==null?"暂未服务":ConstUtils.getDateToString(contentBean.getServiceTime())+"");
+        holder.name.setText(contentBean.getNickname()==null?"匿名用户":contentBean.getNickname());
+        Glide.with(mContext).load(Constants.URL_IMAGE_HEAD+contentBean.getLogoImg()).error(R.mipmap.head_2).into(holder.avatar);
+        return convertView;
+    }
+
+    class ViewHolder {
+        @BindView(R.id.avatar)
+        CircleImageView avatar;
+        @BindView(R.id.name)
+        TextView name;
+        @BindView(R.id.last_message)
+        TextView lastMessage;
+        @BindView(R.id.message_time)
+        TextView messageTime;
+        @BindView(R.id.unread_num)
+        TextView unreadNum;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.scwang.smartrefresh.layout.SmartRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/smartRefreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_f4f4f4"
+    app:srlAccentColor="@android:color/black"
+    app:srlEnablePreviewInEditMode="true"
+    app:srlPrimaryColor="@color/white">
+
+    <com.scwang.smartrefresh.layout.header.ClassicsHeader
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--<ListView-->
+            <!--android:id="@+id/lv_service_specialist_interaction"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:cacheColorHint="@color/white"-->
+            <!--android:divider="@null"-->
+            <!--android:fadingEdge="none"-->
+            <!--tools:listitem="@layout_item/item_consult_reply" />-->
+        <com.yst.onecity.view.slidingswipemenu.SwipeMenuListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:background="@color/white"
+            android:layout_height="match_parent">
+        </com.yst.onecity.view.slidingswipemenu.SwipeMenuListView>
+        <TextView
+            android:id="@+id/tv_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="暂无服务专员互动"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <com.scwang.smartrefresh.layout.footer.ClassicsFooter
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</com.scwang.smartrefresh.layout.SmartRefreshLayout>

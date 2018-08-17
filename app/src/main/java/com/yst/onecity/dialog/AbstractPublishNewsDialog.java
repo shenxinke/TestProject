@@ -1,0 +1,124 @@
+package com.yst.onecity.dialog;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
+
+import com.yst.onecity.R;
+import com.yst.onecity.utils.WindowUtils;
+
+/**
+ * 发布资讯的弹出框
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/9/21.
+ */
+public abstract class AbstractPublishNewsDialog {
+    protected Dialog dialog;
+    private TextView tvText;
+    private TextView tvImage;
+    private TextView tvCancle;
+    private TextView tvGoods;
+
+    public AbstractPublishNewsDialog(Activity activity, boolean isService) {
+        if (dialog == null) {
+            getDialog(activity, isService);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    protected Dialog getDialog(Activity activity, boolean isService) {
+        View view = activity.getLayoutInflater().inflate(R.layout.dialog_publish_news, null);
+        //默认样式
+        dialog = new Dialog(activity, R.style.transparentFrameWindowStyle);
+        dialog.setContentView(view, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        tvText = (TextView) view.findViewById(R.id.tv_text);
+        tvImage = (TextView) view.findViewById(R.id.tv_image);
+        tvGoods = (TextView) view.findViewById(R.id.tv_goods);
+        tvCancle = (TextView) view.findViewById(R.id.tv_cancle);
+        if (isService) {
+            tvGoods.setVisibility(View.VISIBLE);
+        } else {
+            tvGoods.setVisibility(View.GONE);
+        }
+        Window window = dialog.getWindow();
+        WindowManager.LayoutParams wl = window.getAttributes();
+        wl.x = 0;
+        wl.y = WindowUtils.getScreenHeight(activity);
+        // 以下这两句是为了保证按钮可以水平满屏
+        wl.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        wl.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        // 设置显示位置
+        dialog.onWindowAttributesChanged(wl);
+        // 设置点击外围解散
+        dialog.setCanceledOnTouchOutside(true);
+
+        tvText.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                onTextClick();
+            }
+        });
+        tvImage.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                onImageClick();
+            }
+        });
+        tvGoods.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                onProductClick();
+            }
+        });
+
+        tvCancle.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        return dialog;
+    }
+
+    /**
+     * 文本点击事件
+     */
+    public abstract void onTextClick();
+
+    /**
+     * 图片点击事件
+     */
+    public abstract void onImageClick();
+
+    /**
+     * 产品点击事件
+     */
+    public abstract void onProductClick();
+
+    public void showDialog() {
+        dialog.show();
+    }
+
+    public void dismissDialog() {
+        if (dialog != null) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+}

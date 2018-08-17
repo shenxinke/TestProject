@@ -1,0 +1,117 @@
+package com.yst.tianyimember.bean.mall;
+
+import java.util.List;
+
+/**
+ * 商品分类列表的bean
+ *
+ * @author wuxiaofang
+ * @version 3.1.0
+ * @date 2018/3/20
+ */
+
+public class ClassfityBean {
+
+    /**
+     * code : 1
+     * content : {"count":23,"productType":[{"classifyName":"手机测试","id":1},{"classifyName":"生活测试","id":2},{"classifyName":"服务测试","id":3},{"classifyName":"电器测试","id":4},{"classifyName":"居家用品测试","id":5},{"classifyName":"零食测试","id":6},{"classifyName":"机动车测试","id":7},{"classifyName":"图书音像测试","id":8},{"classifyName":"首饰","id":9},{"classifyName":"粮油测试","id":10},{"address":"","classifyName":"时尚美妆","id":12},{"classifyName":"手机测试","id":11},{"classifyName":"食品","id":13},{"classifyName":"植物","id":18},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171120/20171120152532374367999.png","classifyName":"食品分类","id":14},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171120/20171120154436254185765.png","classifyName":"美容洗护","id":15},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171124/20171124094732144513566.jpg","classifyName":"保健类","id":16},{"classifyName":"化妆品","id":17},{"classifyName":"后台测试","id":19},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20180110/20180110104404712624086.jpg","classifyName":"万达完","id":20},{"classifyName":"万万万","id":21},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20180110/20180110112429803385828.jpg","classifyName":"哦哦哦","id":22},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20180110/20180110113540283345923.jpg","classifyName":"哈哈","id":23}]}
+     * msg : 请求成功
+     */
+
+    private int code;
+    private ContentBean content;
+    private String msg;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public static class ContentBean {
+        /**
+         * count : 23
+         * productType : [{"classifyName":"手机测试","id":1},{"classifyName":"生活测试","id":2},{"classifyName":"服务测试","id":3},{"classifyName":"电器测试","id":4},{"classifyName":"居家用品测试","id":5},{"classifyName":"零食测试","id":6},{"classifyName":"机动车测试","id":7},{"classifyName":"图书音像测试","id":8},{"classifyName":"首饰","id":9},{"classifyName":"粮油测试","id":10},{"address":"","classifyName":"时尚美妆","id":12},{"classifyName":"手机测试","id":11},{"classifyName":"食品","id":13},{"classifyName":"植物","id":18},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171120/20171120152532374367999.png","classifyName":"食品分类","id":14},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171120/20171120154436254185765.png","classifyName":"美容洗护","id":15},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20171124/20171124094732144513566.jpg","classifyName":"保健类","id":16},{"classifyName":"化妆品","id":17},{"classifyName":"后台测试","id":19},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20180110/20180110104404712624086.jpg","classifyName":"万达完","id":20},{"classifyName":"万万万","id":21},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20180110/20180110112429803385828.jpg","classifyName":"哦哦哦","id":22},{"address":"https://ph-images.oss-cn-shenzhen.aliyuncs.com/classify/20180110/20180110113540283345923.jpg","classifyName":"哈哈","id":23}]
+         */
+
+        private String count;
+        private List<ProductTypeBean> productType;
+
+        public String getCount() {
+            return count;
+        }
+
+        public void setCount(String count) {
+            this.count = count;
+        }
+
+        public List<ProductTypeBean> getProductType() {
+            return productType;
+        }
+
+
+        public void setProductType(List<ProductTypeBean> productType) {
+            this.productType = productType;
+
+
+        }
+
+        public static class ProductTypeBean {
+            /**
+             * classifyName : 手机测试
+             * id : 1
+             * address :
+             */
+
+            private String classifyName;
+            private String id;
+            private String address;
+
+            public String getClassifyName() {
+                return classifyName;
+            }
+
+            public void setClassifyName(String classifyName) {
+                this.classifyName = classifyName;
+            }
+
+            public String getId() {
+                return id;
+            }
+
+            public void setId(String id) {
+                this.id = id;
+            }
+
+            public String getAddress() {
+                return address;
+            }
+
+            public void setAddress(String address) {
+                this.address = address;
+            }
+        }
+    }
+}
+
+
+
+

@@ -1,0 +1,23 @@
+package com.yst.onecity.callbacks;
+
+import com.google.gson.Gson;
+import com.yst.onecity.bean.PxVideoBean;
+import com.zhy.http.okhttp.callback.Callback;
+
+import okhttp3.Response;
+
+/**
+ * 品秀视频回调
+ *
+ * @author WangJingWei
+ * @version 4.2.0
+ * @date 2018/6/7
+ */
+public abstract class AbstractPxVideoCallback extends Callback<PxVideoBean>{
+    @Override
+    public PxVideoBean parseNetworkResponse(Response response, int id) throws Exception {
+        String string = response.body().string();
+        PxVideoBean liveVideoBean = new Gson().fromJson(string, PxVideoBean.class);
+        return liveVideoBean;
+    }
+}

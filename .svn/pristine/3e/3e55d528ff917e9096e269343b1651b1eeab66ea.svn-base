@@ -1,0 +1,635 @@
+package com.yst.onecity.activity.commissioner;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+import com.yst.onecity.R;
+import com.yst.onecity.TianyiApplication;
+import com.yst.onecity.activity.login.LoginActivity;
+import com.yst.onecity.activity.publish.EditShareActivity;
+import com.yst.onecity.activity.servermember.MoreServerMemberActivity;
+import com.yst.onecity.adapter.CommomFragmentPagerAdapter;
+import com.yst.onecity.base.BaseActivity;
+import com.yst.onecity.bean.CodeMsgBean;
+import com.yst.onecity.bean.ListCountBean;
+import com.yst.onecity.bean.TextViewBean;
+import com.yst.onecity.bean.commissioner.CommissionerBean;
+import com.yst.onecity.callbacks.AbstractCodeMsgCallback;
+import com.yst.onecity.config.Const;
+import com.yst.onecity.config.Constants;
+import com.yst.onecity.dialog.AbstractPublishDialog;
+import com.yst.onecity.fragment.commissoner.CommentFragment;
+import com.yst.onecity.fragment.commissoner.CustomerFragment;
+import com.yst.onecity.fragment.commissoner.GoodsFragment;
+import com.yst.onecity.fragment.commissoner.ShareFragment;
+import com.yst.onecity.fragment.popfragment.ShareCommonDialog;
+import com.yst.onecity.utils.ConstUtils;
+import com.yst.onecity.utils.JumpIntent;
+import com.yst.onecity.utils.MyLog;
+import com.yst.onecity.utils.SignUtils;
+import com.yst.onecity.utils.ToastUtils;
+import com.yst.onecity.utils.Utils;
+import com.yst.onecity.view.roundedimageview.RoundedImageView;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+
+/**
+ * 专员主页的页面
+ *
+ * @author wuxiaofang
+ * @version 4.2.0
+ * @date 2018/5/31
+ */
+
+public class CommissionerHomePageActivity extends BaseActivity implements ViewPager.OnPageChangeListener {
+
+    @BindView(R.id.iv_back)
+    ImageView ivBack;
+    @BindView(R.id.iv_edit)
+    ImageView ivEdit;
+    @BindView(R.id.iv_share)
+    ImageView ivShare;
+    @BindView(R.id.tv_title)
+    TextView tvTitle;
+    @BindView(R.id.tv_left)
+    TextView tvLeft;
+    @BindView(R.id.tv_right)
+    TextView tvRight;
+    @BindView(R.id.tv_commissioner_intro)
+    TextView tvCommissionerIntro;
+    @BindView(R.id.tv_xuxian)
+    ImageView tvXuxian;
+    @BindView(R.id.tv_setting_zhuanyuan)
+    TextView tvSettingZhuanyuan;
+    @BindView(R.id.iv_head)
+    RoundedImageView ivHead;
+    @BindView(R.id.tv_nick_name)
+    TextView tvNickName;
+    @BindView(R.id.iv_zhudian)
+    ImageView ivZhudian;
+    @BindView(R.id.tv_goods)
+    TextView tvGoods;
+    @BindView(R.id.tv_goods_count)
+    TextView tvGoodsCount;
+    @BindView(R.id.tv_share)
+    TextView tvShare;
+    @BindView(R.id.tv_share_count)
+    TextView tvShareCount;
+    @BindView(R.id.ll_share)
+    LinearLayout llShare;
+    @BindView(R.id.tv_customer)
+    TextView tvCustomer;
+    @BindView(R.id.tv_customer_count)
+    TextView tvCustomerCount;
+    @BindView(R.id.ll_customer)
+    LinearLayout llCustomer;
+    @BindView(R.id.tv_comment)
+    TextView tvComment;
+    @BindView(R.id.tv_comment_count)
+    TextView tvCommentCount;
+    @BindView(R.id.ll_comment)
+    LinearLayout llComment;
+    @BindView(R.id.ll_goods)
+    LinearLayout llGoods;
+    @BindView(R.id.viewpager)
+    ViewPager viewpager;
+    @BindView(R.id.vview)
+    View view;
+    private ArrayList<TextViewBean> textList;
+    private ShareCommonDialog shareDiaog;
+    private String logoAttachmentId;
+    private String nickname;
+    private String serviceDegest;
+    private String provinceId;
+    private String cityId;
+    private String countryId;
+    private String intro;
+    private String serviceArea;
+    private String phone = "";
+    private String signFlag;
+    private int type;
+    private int mCurrentIndex;
+    /**
+     * 0 从个人中心进入 1 从列表进入
+     */
+    private int state;
+    private String uuid;
+    private String sign;
+    private String hid;
+    private String from;
+    public static String hunterId;
+    private int bindStatus;
+    private AbstractPublishDialog dialog;
+    public static boolean isFirst;
+
+
+    /**
+     * 初始化数据
+     */
+    @Override
+    public void initData() {
+        phone = TianyiApplication.appCommonBean.getPhone();
+        Bundle bundle = getIntent().getExtras();
+        if (null != bundle) {
+            if (!bundle.containsKey(Const.CONS_STR_FROM)) {
+                return;
+            }
+            if (!bundle.containsKey(Const.CONS_HUNTERID)) {
+                return;
+            }
+            hid = bundle.getString(Const.CONS_HUNTERID);
+            from = getIntent().getExtras().getString(Const.CONS_STR_FROM);
+            switch (TextUtils.isEmpty(from) ? "" : from) {
+                //从个人中心进入
+                case Const.STR_FROM_PERSON:
+                    isFirst = true;
+                    tvSettingZhuanyuan.setText(Const.STR_CHANGE_COMMISSIONER);
+                    tvSettingZhuanyuan.setVisibility(View.GONE);
+                    signFlag = Const.STR1;
+                    type = Const.INTEGER_2;
+                    ivEdit.setVisibility(View.VISIBLE);
+                    Glide.with(TianyiApplication.getContext()).load(ConstUtils.matchingImageUrl(TianyiApplication.appCommonBean.getAddress())).error(R.mipmap.head_2).into(ivHead);
+                    break;
+                //从专员列表进入
+                case Const.STR_FROM_LOGINED:
+                    tvSettingZhuanyuan.setVisibility(View.VISIBLE);
+                    ivHead.setEnabled(false);
+                    tvNickName.setEnabled(false);
+                    tvTitle.setEnabled(false);
+                    tvLeft.setEnabled(false);
+                    ivEdit.setEnabled(false);
+                    Const.ISFIRST = 1;
+                    tvSettingZhuanyuan.setText(Const.STR_SETTING_COMMISSIONER);
+                    signFlag = Const.STR0;
+                    type = Const.INTEGER_1;
+                    ivEdit.setVisibility(View.GONE);
+                    break;
+                //从商城首页进入
+                case Const.STR_FROM_NOLOGIN:
+                    tvSettingZhuanyuan.setVisibility(View.VISIBLE);
+                    ivHead.setEnabled(false);
+                    tvNickName.setEnabled(false);
+                    tvTitle.setEnabled(false);
+                    tvLeft.setEnabled(false);
+                    ivEdit.setEnabled(false);
+                    Const.ISFIRST = 1;
+                    type = Const.INTEGER_0;
+                    signFlag = Const.STR0;
+                    tvSettingZhuanyuan.setText(Const.STR_SETTING_COMMISSIONER);
+                    state = Const.INTEGER_1;
+                    ivEdit.setVisibility(View.GONE);
+                    break;
+                //从品秀进入
+                case Const.CONS_STR_PX:
+                    tvSettingZhuanyuan.setVisibility(View.VISIBLE);
+                    ivHead.setEnabled(false);
+                    tvNickName.setEnabled(false);
+                    tvTitle.setEnabled(false);
+                    tvLeft.setEnabled(false);
+                    ivEdit.setEnabled(false);
+                    Const.ISFIRST = 1;
+                    type = Const.INTEGER_0;
+                    signFlag = Const.STR0;
+                    tvSettingZhuanyuan.setText(Const.STR_SETTING_COMMISSIONER);
+                    state = Const.INTEGER_1;
+                    ivEdit.setVisibility(View.GONE);
+                    break;
+                default:
+                    break;
+            }
+            MyLog.e("aaa", "hid____" + hid);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getCommissonerInfo();
+    }
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_commissioner_home_page;
+    }
+
+
+    /**
+     * 验证用户是否发布信息以及获取专员信息
+     */
+    private void getCommissonerInfo() {
+        MyLog.e("sss", "---01");
+        String timestamp = SignUtils.getTimeStamp();
+        if (type == Const.INTEGER_2) {
+            hunterId = "";
+            sign = Utils.getSign(
+                    "phone", phone,
+                    "isSign", signFlag,
+                    "timestamp", timestamp);
+        } else if (type == Const.INTEGER_1) {
+            hunterId = hid;
+            sign = Utils.getSign(
+                    "hunterId", hunterId,
+                    "phone", phone,
+                    "isSign", signFlag,
+                    "timestamp", timestamp);
+        } else if (type == Const.INTEGER_0) {
+            if (TianyiApplication.isLogin) {
+                hunterId = hid;
+                sign = Utils.getSign(
+                        "hunterId", hunterId,
+                        "phone", phone,
+                        "isSign", signFlag,
+                        "timestamp", timestamp);
+            } else {
+                phone = "";
+                hunterId = hid;
+                sign = Utils.getSign(
+                        "hunterId", hunterId,
+                        "isSign", signFlag,
+                        "timestamp", timestamp);
+            }
+        }
+
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+
+        OkHttpUtils.post().url(Constants.GET_COMMISSOR_INFO)
+                .addParams("phone", phone)
+                .addParams("hunterId", hunterId)
+                .addParams("timestamp", timestamp)
+                .addParams("isSign", signFlag)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.str_net_error_message));
+                MyLog.e("sss", "---error: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "--" + response);
+                if (null != response) {
+                    CommissionerBean bean = new Gson().fromJson(response, CommissionerBean.class);
+                    if (null != bean) {
+                        if (bean.getCode() == Const.INTEGER_1 && null != bean.getContent()) {
+                            if (bean.getMsg().equals(Const.CONS_STR_PUBLISH)) {
+                                showPublishDialog();
+                            }
+                            CommissionerBean.ContentBean content = bean.getContent();
+                            String memberId = String.valueOf(content.getMember_id());
+                            if (type == Const.INTEGER_2) {
+                                Glide.with(TianyiApplication.getContext()).load(ConstUtils.matchingImageUrl(TianyiApplication.appCommonBean.getAddress())).error(R.mipmap.head_2).into(ivHead);
+                            } else {
+                                Glide.with(TianyiApplication.getContext()).load(ConstUtils.matchingImageUrl(content.getAddress())).error(R.mipmap.head_2).into(ivHead);
+                            }
+                            logoAttachmentId = String.valueOf(content.getLogoAttachmentId());
+                            nickname = content.getNickname();
+                            provinceId = String.valueOf(content.getPh_province_id());
+                            cityId = String.valueOf(content.getPh_city_id());
+                            countryId = String.valueOf(content.getPh_county_id());
+                            intro = content.getDescription();
+                            if (type != Const.INTEGER_2) {
+                                bindStatus = content.getBindStatus();
+                             /*
+                             * phone 登录人绑定的专员是否是hunterId 1 是 0 不是
+                             */
+                                if (bindStatus == Const.INTEGER_0) {
+                                    tvSettingZhuanyuan.setText("设为我的专员");
+                                } else if (bindStatus == Const.INTEGER_1) {
+                                    tvSettingZhuanyuan.setText("更改专员");
+                                }
+                            } else {
+                                tvSettingZhuanyuan.setText("更改专员");
+                            }
+                            serviceArea = content.getService_area();
+                            /*
+                             * 是否驻店0不是 非0为驻店状态，并且是店铺的id
+                             */
+                            if (content.getMerchant_id() == Const.INTEGER_0) {
+                                ivZhudian.setVisibility(View.GONE);
+                            } else {
+                                ivZhudian.setVisibility(View.VISIBLE);
+                            }
+                            tvNickName.setText(content.getNickname());
+                            if (!TextUtils.isEmpty(content.getDescription())) {
+                                tvCommissionerIntro.setText(content.getDescription());
+                            }
+                            if (TextUtils.isEmpty(content.getService_area())) {
+                                tvLeft.setText("     ");
+                            } else {
+                                tvLeft.setText(content.getService_area());
+                            }
+                            if (!TextUtils.isEmpty(content.getService_digest())) {
+                                tvTitle.setText(content.getService_digest());
+                                serviceDegest = content.getService_digest();
+                            }
+                            tvRight.setText("分享收入:" + content.getProfit_money() + "元");
+                            getListCount(String.valueOf(content.getId()));
+                            initTab(String.valueOf(content.getId()), memberId);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 初始化fragment
+     */
+
+    private void initTab(String hid, String memberId) {
+        ArrayList<Fragment> fragList = new ArrayList<>();
+        textList = new ArrayList<>();
+        fragList.add(GoodsFragment.newInstance(hid, memberId));
+        fragList.add(ShareFragment.newInstance(hid, memberId));
+        fragList.add(CustomerFragment.newInstance(hid));
+        fragList.add(CommentFragment.newInstance(hid));
+        textList.add(new TextViewBean(tvGoods, tvGoodsCount));
+        textList.add(new TextViewBean(tvShare, tvShareCount));
+        textList.add(new TextViewBean(tvCustomer, tvCustomerCount));
+        textList.add(new TextViewBean(tvComment, tvCommentCount));
+        String[] titleStr = new String[]{"商品", "分享", "客户", "评价"};
+        CommomFragmentPagerAdapter adapter = new CommomFragmentPagerAdapter(getSupportFragmentManager(), fragList, titleStr);
+        viewpager.setAdapter(adapter);
+        viewpager.addOnPageChangeListener(this);
+        if (null != getIntent() && null != getIntent().getExtras()) {
+            MyLog.e("sss", "--TAG1: " + Const.TAG);
+            MyLog.e("sss", "--TAG2: " + Const.TAG2);
+            if (Const.TAG2 == Const.INTEGER_0 && getIntent().getExtras().containsKey(Const.STR_SHARE_INTENT)) {
+                mCurrentIndex = getIntent().getExtras().getInt(Const.STR_SHARE_INTENT);
+                MyLog.e("sss", "--mCurrentIndex: " + mCurrentIndex);
+                selectText(mCurrentIndex);
+                viewpager.setCurrentItem(mCurrentIndex);
+            } else if (type == Const.INTEGER_2 && Const.TAG == Const.INTEGER_6 && Const.TAG2 == Const.INTEGER_0) {
+                if (!isFirst) {
+                    selectText(Const.INTEGER_1);
+                    viewpager.setCurrentItem(Const.INTEGER_1);
+                } else {
+                    selectText(Const.INTEGER_0);
+                    viewpager.setCurrentItem(Const.INTEGER_0);
+                }
+            } else if (Const.TAG == Const.INTEGER_6 && Const.TAG2 == Const.INTEGER_0) {
+                selectText(Const.INTEGER_1);
+                viewpager.setCurrentItem(Const.INTEGER_1);
+                Const.TAG = Const.INTEGER_0;
+            } else if (Const.TAG == Const.INTEGER_0 && Const.TAG2 == Const.INTEGER_6) {
+                selectText(Const.INTEGER_0);
+                viewpager.setCurrentItem(Const.INTEGER_0);
+                Const.TAG2 = Const.INTEGER_0;
+            }
+        }
+    }
+
+    /**
+     * 获取商品列表条数
+     */
+    private void getListCount(String hId) {
+        hunterId = hId;
+        MyLog.e("sss", "---02--" + hId);
+        String timestamp = SignUtils.getTimeStamp();
+        if (type == Const.INTEGER_2) {
+            MyLog.e("sss", "---" + hId);
+            sign = Utils.getSign(
+                    "hunterId", hId,
+                    "timestamp", timestamp);
+        } else if (type == Const.INTEGER_1 || type == Const.INTEGER_0) {
+            hunterId = hid;
+            sign = Utils.getSign(
+                    "hunterId", hId,
+                    "timestamp", timestamp);
+        }
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.GET_COMMISSOR_LIST_NUM)
+                .addParams("hunterId", hId)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(e.getMessage());
+                MyLog.e("sss", "-error: " + e.toString());
+            }
+
+            @Override
+            public void onResponse(String response, int id) {
+                MyLog.e("sss", "--count: " + response);
+                if (null != response) {
+                    ListCountBean bean = new Gson().fromJson(response, ListCountBean.class);
+                    if (null != bean) {
+                        if (bean.getCode() == Const.INTEGER_1 && null != bean.getContent()) {
+                            ListCountBean.ContentBean content = bean.getContent();
+                            int consultationNum = content.getConsultationNum();
+                            int hunterCommentNum = content.getHunterCommentNum();
+                            int memberCount = content.getMemberCount();
+                            int productNum = content.getProductNum();
+                            tvGoodsCount.setText((String.valueOf(productNum)));
+                            tvShareCount.setText((String.valueOf(consultationNum)));
+                            tvCustomerCount.setText((String.valueOf(memberCount)));
+                            tvCommentCount.setText((String.valueOf(hunterCommentNum)));
+                        } else {
+                            ToastUtils.show(bean.getMsg());
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    /**
+     * 显示弹框
+     */
+    private void showPublishDialog() {
+        dialog = new AbstractPublishDialog(this) {
+            @Override
+            public void onPublish() {
+                JumpIntent.jump(CommissionerHomePageActivity.this, EditShareActivity.class);
+            }
+        };
+        dialog.show();
+    }
+
+    @OnClick({R.id.tv_setting_zhuanyuan, R.id.ll_goods, R.id.ll_share, R.id.ll_customer, R.id.ll_comment, R.id.iv_share, R.id.iv_edit, R.id.iv_back, R.id.iv_head, R.id.tv_nick_name, R.id.tv_title, R.id.tv_left})
+    public void onViewClick(View view) {
+        if (!Utils.isClickable()) {
+            return;
+        }
+        Bundle bundle = new Bundle();
+        switch (view.getId()) {
+            //商品
+            case R.id.ll_goods:
+                viewpager.setCurrentItem(Const.INTEGER_0);
+                selectText(Const.INTEGER_0);
+                break;
+            //分享
+            case R.id.ll_share:
+                viewpager.setCurrentItem(Const.INTEGER_1);
+                selectText(Const.INTEGER_1);
+                break;
+            //客户
+            case R.id.ll_customer:
+                viewpager.setCurrentItem(Const.INTEGER_2);
+                selectText(Const.INTEGER_2);
+                break;
+            //评论
+            case R.id.ll_comment:
+                viewpager.setCurrentItem(Const.INTEGER_3);
+                selectText(Const.INTEGER_3);
+                break;
+            //转发
+            case R.id.iv_share:
+                if (null == shareDiaog) {
+                    MyLog.e("sss", "00: " + TianyiApplication.appCommonBean.getHunter_id());
+                    String zhuanYuan = "http://123.207.157.207:10000/tymobile/html/homepageCom.html" + "?hunterId=" + TianyiApplication.appCommonBean.getHunter_id() + "&phone=" + TianyiApplication.appCommonBean.getPhone();
+                    shareDiaog = ShareCommonDialog.openShareDialog(this, "普济一城", "专员分享", zhuanYuan, "");
+                }
+                shareDiaog.show(getFragmentManager(), "");
+                break;
+            //头像
+            case R.id.iv_head:
+                //昵称
+            case R.id.tv_nick_name:
+                //简介
+            case R.id.tv_title:
+                //服务范围
+            case R.id.tv_left:
+                //编辑
+            case R.id.iv_edit:
+                bundle.putString("headId", logoAttachmentId);
+                bundle.putString("nickName", nickname);
+                bundle.putString("oneWorld", serviceDegest);
+                bundle.putString("simpleIntro", intro);
+                bundle.putString("provinceId", provinceId);
+                bundle.putString("hunterId", hunterId);
+                bundle.putString("cityId", cityId);
+                bundle.putString("districtId", countryId);
+                bundle.putString("serviceArea", serviceArea);
+                bundle.putInt("state", bindStatus);
+                JumpIntent.jump(this, BaseInfoAtivity.class, bundle);
+                break;
+            //返回
+            case R.id.iv_back:
+                finish();
+                break;
+            //设置专员
+            case R.id.tv_setting_zhuanyuan:
+                if (TianyiApplication.isLogin) {
+                    String s = tvSettingZhuanyuan.getText().toString();
+                    if (Const.STR_SETTING_COMMISSIONER.equals(s)) {
+                        settingZhuanYuan();
+                    } else if (Const.STR_CHANGE_COMMISSIONER.equals(s)) {
+
+                        JumpIntent.jump(this, MoreServerMemberActivity.class);
+                    }
+                } else {
+                    JumpIntent.jump(this, LoginActivity.class);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 设置专员
+     */
+    private void settingZhuanYuan() {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "hid", hunterId,
+                "timestamp", timestamp);
+        if (TextUtils.isEmpty(sign)) {
+            return;
+        }
+        OkHttpUtils.post().url(Constants.BIND_ZHUAN_YUAN)
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("hid", hunterId)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(e.getMessage());
+                MyLog.e("sss", "-error: " + e.toString());
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (null != response) {
+                    ToastUtils.show(response.getMsg());
+                    if (response.getCode() == Const.INTEGER_1) {
+                        tvSettingZhuanyuan.setText("更换专员");
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 为选中和未选中的标签设置颜色
+     *
+     * @param postion 当前页面的索引
+     */
+    public void selectText(int postion) {
+        for (int i = 0; i < textList.size(); i++) {
+            if (i == postion) {
+                textList.get(i).getTextView().setTextColor(ContextCompat.getColor(this, R.color.color_FFFF9100));
+                textList.get(i).getTextViewNuml().setTextColor(ContextCompat.getColor(this, R.color.color_FFFF9100));
+            } else {
+                textList.get(i).getTextView().setTextColor(ContextCompat.getColor(this, R.color.app_default_color));
+                textList.get(i).getTextViewNuml().setTextColor(ContextCompat.getColor(this, R.color.app_default_color));
+            }
+        }
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        selectText(position);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isFirst = false;
+        type = Const.INTEGER_0;
+        Const.TAG = Const.INTEGER_0;
+        Const.TAG2 = Const.INTEGER_0;
+    }
+}

@@ -1,0 +1,35 @@
+package com.yst.onecity.wechat;
+
+import android.content.Context;
+
+import com.tencent.mm.sdk.modelpay.PayReq;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.yst.onecity.config.Constants;
+
+/**
+ * 微信支付
+ *
+ * @author chenxiaowei
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class WeChatPay {
+    public void pay(Context context, WeChatOrderEntry weChatOrderEntry){
+        IWXAPI api = WXAPIFactory.createWXAPI(context, Constants.WECHAT_APP_ID);
+
+        api.registerApp(Constants.WECHAT_APP_ID);
+        PayReq req = new PayReq();
+        req.appId			= weChatOrderEntry.getAppid();
+        req.partnerId		= weChatOrderEntry.getPartid();
+        req.prepayId		= weChatOrderEntry.getPrepayid();
+        req.nonceStr		= weChatOrderEntry.getNoncestr();
+        req.timeStamp		= weChatOrderEntry.getTimestamp();
+        req.packageValue	= "Sign=WXPay";
+        req.sign			= weChatOrderEntry.getSign();
+        req.appId			= weChatOrderEntry.getAppid();
+///        Toast.makeText(context, "正常调起支付", Toast.LENGTH_SHORT).show();
+        // 在支付之前，如果应用没有注册到微信，应该先调用IWXMsg.registerApp将应用注册到微信
+        api.sendReq(req);
+    }
+}

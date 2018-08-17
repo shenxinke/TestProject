@@ -1,0 +1,321 @@
+package com.yst.onecity.bean.consult;
+
+import java.util.List;
+
+/**
+ * 评价列表实体
+ *
+ * @author luxuchang
+ * @version 3.2.1
+ * @date 2017/0/19
+ */
+public class ConsultListBean {
+
+    /**
+     * code : 1
+     * msg : 请求成功
+     * content : [{"commentNum":0,"headImg":"upload/memberheadimg/20170717100550711414593.png","fabulousNum":0,"name":"我是会员","createdTime":1506043307000,"id":9,"modelType":1,"userType":0,"title":"这是个有一张图的咨询","type":0,"userId":1,"info":[{"cover":1,"address":"upload/memberheadimg/20170717100550711414593.png","productId":null,"imgId":3289,"coverSortNum":1,"sortNum":1,"type":1,"content":""}]},{"commentNum":800,"headImg":"推广师头像","fabulousNum":332,"name":"我是商户1","createdTime":1505900866000,"id":4,"modelType":1,"userType":2,"title":"强烈推荐购买！！","type":0,"userId":1,"info":""},{"commentNum":900,"headImg":"upload/memberheadimg/20170717100550711414593.png","fabulousNum":233,"name":"我是会员","createdTime":1505900371000,"id":3,"modelType":0,"userType":0,"title":"看着很不错的啊","type":0,"userId":1,"info":""}]
+     */
+
+    private int code;
+    private String msg;
+    private ContentBean content;
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public ContentBean getContent() {
+        return content;
+    }
+
+    public void setContent(ContentBean content) {
+        this.content = content;
+    }
+
+    public static class ContentBean {
+        private List<ContentListBean> consultationInfoList;
+        private String count;
+
+        public List<ContentListBean> getConsultationInfoList() {
+            return consultationInfoList;
+        }
+
+        public void setConsultationInfoList(List<ContentListBean> consultationInfoList) {
+            this.consultationInfoList = consultationInfoList;
+        }
+
+        public String getCount() {
+            return count;
+        }
+
+        public void setCount(String count) {
+            this.count = count;
+        }
+
+
+        public static class ContentListBean {
+            /**
+             * commentNum : 0
+             * headImg : upload/memberheadimg/20170717100550711414593.png
+             * fabulousNum : 0
+             * name : 我是会员
+             * createdTime : 1506043307000
+             * id : 9
+             * modelType : 1
+             * userType : 0
+             * title : 这是个有一张图的咨询
+             * type : 0
+             * userId : 1
+             * info : [{"cover":1,"address":"upload/memberheadimg/20170717100550711414593.png","productId":null,"imgId":3289,"coverSortNum":1,"sortNum":1,"type":1,"content":""}]
+             */
+
+            private int commentNum;
+            private String headImg;
+            private String productId;
+            private int fabulousNum;
+            private String name;
+            private long createdTime;
+            private int id;
+            private int modelType;
+            private String userType;
+            private String title;
+            private String cover;
+            private String type;
+            private int userId;
+            private String readNum;
+            private String shareNum;
+            private List<InfoBean> info;
+
+            public String getProductId() {
+                return productId;
+            }
+
+            public void setProductId(String productId) {
+                this.productId = productId;
+            }
+
+            public String getCover() {
+                return cover;
+            }
+
+            public void setCover(String cover) {
+                this.cover = cover;
+            }
+
+            public String getReadNum() {
+                return readNum;
+            }
+
+            public void setReadNum(String readNum) {
+                this.readNum = readNum;
+            }
+
+            public String getShareNum() {
+                return shareNum;
+            }
+
+            public void setShareNum(String shareNum) {
+                this.shareNum = shareNum;
+            }
+
+            public int getCommentNum() {
+                return commentNum;
+            }
+
+            public void setCommentNum(int commentNum) {
+                this.commentNum = commentNum;
+            }
+
+            public String getHeadImg() {
+                return headImg;
+            }
+
+            public void setHeadImg(String headImg) {
+                this.headImg = headImg;
+            }
+
+            public int getFabulousNum() {
+                return fabulousNum;
+            }
+
+            public void setFabulousNum(int fabulousNum) {
+                this.fabulousNum = fabulousNum;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public long getCreatedTime() {
+                return createdTime;
+            }
+
+            public void setCreatedTime(long createdTime) {
+                this.createdTime = createdTime;
+            }
+
+            public int getId() {
+                return id;
+            }
+
+            public void setId(int id) {
+                this.id = id;
+            }
+
+            public int getModelType() {
+                return modelType;
+            }
+
+            public void setModelType(int modelType) {
+                this.modelType = modelType;
+            }
+
+            public String getUserType() {
+                return userType;
+            }
+
+            public void setUserType(String userType) {
+                this.userType = userType;
+            }
+
+            public String getTitle() {
+                return title;
+            }
+
+            public void setTitle(String title) {
+                this.title = title;
+            }
+
+            public String getType() {
+                return type;
+            }
+
+            public void setType(String type) {
+                this.type = type;
+            }
+
+            public int getUserId() {
+                return userId;
+            }
+
+            public void setUserId(int userId) {
+                this.userId = userId;
+            }
+
+            public List<InfoBean> getInfo() {
+                return info;
+            }
+
+            public void setInfo(List<InfoBean> info) {
+                this.info = info;
+            }
+
+            public static class InfoBean {
+                /**
+                 * cover : 1
+                 * address : upload/memberheadimg/20170717100550711414593.png
+                 * productId : null
+                 * imgId : 3289
+                 * coverSortNum : 1
+                 * sortNum : 1
+                 * type : 1
+                 * content :
+                 */
+
+                private int cover;
+                private String address;
+                private String productId;
+                private int imgId;
+                private int coverSortNum;
+                private int sortNum;
+                private int type;
+                private String content;
+
+                public int getCover() {
+                    return cover;
+                }
+
+                public void setCover(int cover) {
+                    this.cover = cover;
+                }
+
+                public String getAddress() {
+                    return address;
+                }
+
+                public void setAddress(String address) {
+                    this.address = address;
+                }
+
+                public String getProductId() {
+                    return productId;
+                }
+
+                public void setProductId(String productId) {
+                    this.productId = productId;
+                }
+
+                public int getImgId() {
+                    return imgId;
+                }
+
+                public void setImgId(int imgId) {
+                    this.imgId = imgId;
+                }
+
+                public int getCoverSortNum() {
+                    return coverSortNum;
+                }
+
+                public void setCoverSortNum(int coverSortNum) {
+                    this.coverSortNum = coverSortNum;
+                }
+
+                public int getSortNum() {
+                    return sortNum;
+                }
+
+                public void setSortNum(int sortNum) {
+                    this.sortNum = sortNum;
+                }
+
+                public int getType() {
+                    return type;
+                }
+
+                public void setType(int type) {
+                    this.type = type;
+                }
+
+                public String getContent() {
+                    return content;
+                }
+
+                public void setContent(String content) {
+                    this.content = content;
+                }
+            }
+        }
+
+
+    }
+
+
+}

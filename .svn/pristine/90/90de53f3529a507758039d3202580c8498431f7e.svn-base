@@ -1,0 +1,328 @@
+package com.yst.tianyimember.activity.member;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.yst.tianyimember.R;
+import com.yst.tianyimember.TianyiApplication;
+import com.yst.tianyimember.adapter.NewsAdapter;
+import com.yst.tianyimember.base.BaseActivity;
+import com.yst.tianyimember.bean.CodeMsgBean;
+import com.yst.tianyimember.bean.information.InformationBean;
+import com.yst.tianyimember.bean.information.InformationContentBean;
+import com.yst.tianyimember.callbacks.AbstractCodeMsgCallback;
+import com.yst.tianyimember.callbacks.AbstractMemberInformationCallBack;
+import com.yst.tianyimember.config.Const;
+import com.yst.tianyimember.config.Constants;
+import com.yst.tianyimember.dialog.AbstractDeleteDialog;
+import com.yst.tianyimember.utils.JumpIntent;
+import com.yst.tianyimember.utils.SignUtils;
+import com.yst.tianyimember.utils.ToastUtils;
+import com.yst.tianyimember.utils.Utils;
+import com.zhy.http.okhttp.OkHttpUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Request;
+
+/**
+ * 发布列表页面
+ *
+ * @author Chenxiaowei
+ * @version 3.2.1
+ * @date 2017/12/18
+ */
+public class PublishActivity extends BaseActivity implements NewsAdapter.OnDeleteListener, NewsAdapter.ShowStateListener, OnRefreshListener, OnLoadmoreListener {
+
+    @BindView(R.id.listView)
+    ListView listView;
+    @BindView(R.id.ll_emptyview)
+    LinearLayout llEmpty;
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
+    private List<InformationContentBean> data = new ArrayList<>();
+    private NewsAdapter adapter;
+    private int pageSize = 10, pageNum = 1;
+    private AbstractDeleteDialog deleteDialog;
+    private String newsId;
+
+    @Override
+    public int bindLayout() {
+        return R.layout.activity_publish;
+    }
+
+    @Override
+    public void initData() {
+        initTitleBar("发布");
+        initDialog();
+        smartRefreshLayout.setOnRefreshListener(this);
+        smartRefreshLayout.setOnLoadmoreListener(this);
+        smartRefreshLayout.setEnableRefresh(true);
+        smartRefreshLayout.setEnableLoadmore(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        requestPublishListNetWork(pageNum);
+    }
+
+    /**
+     * 初始化弹出框
+     */
+    private void initDialog() {
+        deleteDialog = new AbstractDeleteDialog(this) {
+            @Override
+            public void onSureClick() {
+                deleteInformation(newsId);
+            }
+        };
+        deleteDialog.setText("删除后无法恢复，确认删除？");
+    }
+
+    /**
+     * 获取发布列表
+     */
+    private void requestPublishListNetWork(final int page) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "page", String.valueOf(page),
+                "rows", String.valueOf(pageSize),
+                "flag", "1",
+                "userId", Constants.ISSERVER ? TianyiApplication.appCommonBean.getHunter_id() : TianyiApplication.appCommonBean.getId(),
+                "userType", Constants.ISSERVER ? "1" : "0",
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        //请求参数：当前页数、0 草稿箱 1发布列表、用户id、0普通会员 1推广师
+        OkHttpUtils.post().url(Constants.MY_NEWS_LIST)
+                .addParams("page", String.valueOf(page))
+                .addParams("rows", String.valueOf(pageSize))
+                .addParams("flag", "1")
+                .addParams("userId", Constants.ISSERVER ? TianyiApplication.appCommonBean.getHunter_id() : TianyiApplication.appCommonBean.getId())
+                .addParams("userType", Constants.ISSERVER ? "1" : "0")
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractMemberInformationCallBack() {
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                onLoad();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(InformationBean response, int id) {
+                if (response.getCode() == 1) {
+                    if (page == 1) {
+                        data = response.getContent();
+                    } else {
+                        data.addAll(response.getContent());
+                    }
+                } else {
+                    ToastUtils.show(response.getMsg());
+                }
+                flushOnLineListData();
+            }
+        });
+    }
+
+    /**
+     * 刷新适配器
+     */
+    private void flushOnLineListData() {
+        if (null == listView) {
+            return;
+        }
+        if (data == null || data.size() == 0) {
+            llEmpty.setVisibility(View.VISIBLE);
+        } else {
+            llEmpty.setVisibility(View.GONE);
+        }
+        if (adapter == null) {
+            adapter = new NewsAdapter(context, data, this, this);
+            listView.setAdapter(adapter);
+        } else {
+            adapter.setData(data);
+        }
+    }
+
+
+    @OnClick({R.id.iv_add_publish, R.id.tv_add_publish})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.iv_add_publish:
+                JumpIntent.jump(this, PublishInformationActivity.class);
+                break;
+            case R.id.tv_add_publish:
+                JumpIntent.jump(this, PublishInformationActivity.class);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 删除资讯
+     */
+    @Override
+    public void deleteClick(String id) {
+        newsId = id;
+        deleteDialog.showDialog();
+    }
+
+    /**
+     * 删除资讯
+     */
+    private void deleteInformation(String id) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "id", id,
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        //请求参数：uuid、手机号、资讯id
+        OkHttpUtils.post().url(Constants.DELETE_NEWS)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("id", id)
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    requestPublishListNetWork(pageNum);
+                } else {
+                    ToastUtils.show(response.getMsg());
+                }
+            }
+        });
+    }
+
+    /**
+     * 用来停止列表刷新的
+     **/
+    private void onLoad() {
+        smartRefreshLayout.finishRefresh(500);
+        smartRefreshLayout.finishLoadmore(500);
+    }
+
+    @Override
+    public void btnStateClick(int state, InformationContentBean bean) {
+        if (state == 1) {
+            Bundle bundle = new Bundle();
+            bundle.putString("flag", "查看");
+            bundle.putSerializable("bean", bean);
+            JumpIntent.jump(PublishActivity.this, PublishInformationActivity.class, bundle);
+            //不显示
+        } else if (state == Const.INTEGER_2) {
+            isShowInformation(bean.getId(), 4);
+            //编辑
+        } else if (state == Const.INTEGER_3) {
+            Bundle bundle = new Bundle();
+            bundle.putString("flag", "编辑");
+            bundle.putSerializable("bean", bean);
+            JumpIntent.jump(PublishActivity.this, PublishInformationActivity.class, bundle);
+            // 显示
+        } else if (state == Const.INTEGER_4) {
+            isShowInformation(bean.getId(), 2);
+        }
+    }
+
+    /**
+     * 显示/不显示资讯
+     */
+    private void isShowInformation(String id, final int status) {
+        String timestamp = SignUtils.getTimeStamp();
+        String sign = Utils.getSign(
+                "status", String.valueOf(status),
+                "id", id,
+                "phone", TianyiApplication.appCommonBean.getPhone(),
+                "uuid", TianyiApplication.appCommonBean.getUuid(),
+                "timestamp", timestamp);
+        //请求参数：4代表不显示 2代表显示、资讯id、uuid、手机号
+        //status 4代表不显示 2代表显示
+        OkHttpUtils.post().url(Constants.SHOW_NEWS)
+                .addParams("status", String.valueOf(status))
+                .addParams("id", id)
+                .addParams("uuid", TianyiApplication.appCommonBean.getUuid())
+                .addParams("phone", TianyiApplication.appCommonBean.getPhone())
+                .addParams("timestamp", timestamp)
+                .addParams("client_type", "A")
+                .addParams("sign", sign)
+                .build().execute(new AbstractCodeMsgCallback() {
+            @Override
+            public void onBefore(Request request, int id) {
+                super.onBefore(request, id);
+                showInfoProgressDialog();
+            }
+
+            @Override
+            public void onAfter(int id) {
+                super.onAfter(id);
+                dismissInfoProgressDialog();
+            }
+
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                ToastUtils.show(getString(R.string.app_on_request_error_msg));
+            }
+
+            @Override
+            public void onResponse(CodeMsgBean response, int id) {
+                if (response.getCode() == 1) {
+                    requestPublishListNetWork(pageNum);
+                }
+                ToastUtils.show(response.getMsg());
+            }
+        });
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        pageNum = 1;
+        requestPublishListNetWork(pageNum);
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        pageNum++;
+        requestPublishListNetWork(pageNum);
+    }
+}

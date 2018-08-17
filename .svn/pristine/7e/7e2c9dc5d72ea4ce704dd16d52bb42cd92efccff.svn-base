@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.yst.onecity.view.roundedimageview.RoundedImageView
+        android:id="@+id/iv_head"
+        android:layout_width="@dimen/x36"
+        android:layout_height="@dimen/x36"
+        android:layout_marginLeft="@dimen/x12"
+        android:layout_marginTop="@dimen/x8"
+        android:scaleType="fitXY"
+        android:src="@mipmap/head_2"
+        app:border_color="@color/color_dddddd"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x12"
+        android:text="MR-李"
+        android:singleLine="true"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/text_size_14"
+        app:layout_constraintLeft_toRightOf="@id/iv_head"
+        app:layout_constraintTop_toTopOf="@id/iv_head"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_head"
+         />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1px"
+        android:background="@color/color_445c5c5c"
+        app:layout_constraintTop_toBottomOf="@id/iv_head"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_name"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="@dimen/x8"
+        />
+
+</android.support.constraint.ConstraintLayout>
